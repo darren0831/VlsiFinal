@@ -20,6 +20,7 @@ public:
         } else {
             enabled = true;
             fout = fopen(filename.c_str(), "w");
+
             if (fout == nullptr) {
                 fprintf(stderr, "Error: %s\n", strerror(errno));
                 enabled = false;
@@ -45,6 +46,7 @@ public:
         if (!enabled) {
             return;
         }
+
         fprintf(fout, "[INFO] ");
         va_list args;
         va_start(args, fmt);
@@ -56,6 +58,7 @@ public:
         if (!enabled) {
             return;
         }
+
         fprintf(fout, "[WARN] ");
         va_list args;
         va_start(args, fmt);
@@ -67,6 +70,7 @@ public:
         if (!enabled) {
             return;
         }
+
         fprintf(fout, "[ERROR] ");
         va_list args;
         va_start(args, fmt);

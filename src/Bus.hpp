@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include "Bit.hpp"
-class Bus{
+class Bus {
 public:
-    Bus(std::string _name, const std::vector<int>& _bus_width, int numBits, int numPins){
+    Bus(std::string _name, const std::vector<int>& _bus_width, int numBits, int numPins) {
         name = _name;
         bus_width = _bus_width;
         bit_counts = numBits;
@@ -17,7 +17,7 @@ public:
     int bit_counts;
     int pin_counts;
     std::vector<int> bus_width;
-    void addBit(Bit b){
+    void addBit(Bit b) {
         bits.push_back(b);
     }
 

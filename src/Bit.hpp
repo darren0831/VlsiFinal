@@ -3,15 +3,14 @@
 #include <vector>
 #include <string>
 #include "Pin.hpp"
-class Bit
-{
+class Bit {
 public:
-    Bit(std::string _name){
-    	name = _name;
+    Bit(std::string _name) {
+        name = _name;
     }
     std::vector<Pin> pins;
-    std::string name; 
-    void addPin(Pin p){
+    std::string name;
+    void addPin(Pin p) {
         pins.push_back(p);
     }
 

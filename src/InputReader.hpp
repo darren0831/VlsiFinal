@@ -19,10 +19,12 @@ public:
     InputReader(std::string filename, Logger& logger) :
         logger(logger) {
         fin = fopen(filename.c_str(), "r");
+
         if (!fin) {
             fprintf(stderr, "Error: %s\n", strerror(errno));
             return;
         }
+
         logger.info("Start reading input file %s\n", filename.c_str());
         readInputFile();
     }
@@ -53,15 +55,17 @@ private:
     void readLayerInfo() {
         logger.info("Get layer info\n");
         fscanf(fin, " LAYERS %d", &numLayers);
+
         for (int i = 0; i < numLayers; ++i) {
             char layerName[256];
             char layerType[256];
             int spacing;
             fscanf(fin, "%s %s %d", layerName, layerType, &spacing);
-            Layer layer(layerName,spacing,layerType);
+            Layer layer(layerName, spacing, layerType);
             layers.push_back(layer);
-            layer_encode[layerName]=i;
+            layer_encode[layerName] = i;
         }
+
         fscanf(fin, " ENDLAYERS");
         logger.info("%d layers read\n", numLayers);
     }
@@ -69,6 +73,7 @@ private:
     void readTrackInfo() {
         logger.info("Get track info\n");
         fscanf(fin, " TRACKS %d", &numTracks);
+
         for (int i = 0; i < numTracks; ++i) {
             char trackLayer[256];
             int width;
@@ -76,9 +81,10 @@ private:
             auto ptA = readPoint();
             auto ptB = readPoint();
             fscanf(fin, "%d", &width);
-            Track track(ptA.first, ptA.second,ptB.first, ptB.second,width,layer_encode[trackLayer]);
+            Track track(ptA.first, ptA.second, ptB.first, ptB.second, width, layer_encode[trackLayer]);
             tracks.push_back(track);
         }
+
         fscanf(fin, " ENDTRACKS");
         logger.info("%d tracks read\n", numTracks);
     }
@@ -86,6 +92,7 @@ private:
     void readBusInfo() {
         logger.info("Get bus info\n");
         fscanf(fin, " BUSES %d", &numBuses);
+
         for (int i = 0; i < numBuses; ++i) {
             char busName[256];
             int numBits;
@@ -95,17 +102,21 @@ private:
             int numWidth;
             std::vector<int> widths;
             fscanf(fin, " WIDTH %d", &numWidth);
+
             for (int j = 0; j < numWidth; ++j) {
                 int value;
                 fscanf(fin, "%d", &value);
                 widths.push_back(value);
             }
+
             fscanf(fin, " ENDWIDTH");
             Bus bus(busName, widths, numBits, numPins);
+
             for (int j = 0; j < numBits; ++j) {
                 char bitId[256];
                 fscanf(fin, " BIT %s", bitId);
                 Bit bit(bitId);
+
                 for (int k = 0; k < numPins; ++k) {
                     char layerId[256];
                     fscanf(fin, "%s", layerId);
@@ -114,12 +125,15 @@ private:
                     Pin pin(layer_encode[layerId], ptA.first, ptA.second, ptB.first, ptB.second);
                     bit.addPin(pin);
                 }
+
                 fscanf(fin, " ENDBIT");
                 bus.addBit(bit);
             }
+
             fscanf(fin, " ENDBUS");
             buses.push_back(bus);
         }
+
         fscanf(fin, " ENDBUSES");
         logger.info("%d buses read\n", numBuses);
     }
@@ -127,6 +141,7 @@ private:
     void readObstacleInfo() {
         logger.info("Get obstacle info\n");
         fscanf(fin, " OBSTACLES %d", &numObstacles);
+
         for (int i = 0; i < numObstacles; ++i) {
             char layerId[256];
             fscanf(fin, "%s", layerId);
@@ -135,6 +150,7 @@ private:
             Rectangle rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
             obstacles.push_back(rectangle);
         }
+
         fscanf(fin, " ENDOBSTACLES");
         logger.info("%d obstacles read\n", numObstacles);
     }
