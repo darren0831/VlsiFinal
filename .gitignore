@@ -1,3 +1,9 @@
 # Object files
 *.o
 *.gch
+
+# Executable files
+place
+
+# vscode
+*.json
