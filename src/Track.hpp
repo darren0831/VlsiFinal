@@ -1,6 +1,5 @@
 #ifndef VLSI_FIANL_PROJECT_TRACK_HPP_
 #define VLSI_FIANL_PROJECT_TRACK_HPP_
-#include <string>
 #include "Rectangle.hpp"
 
 class Track
