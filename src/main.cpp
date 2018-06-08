@@ -3,5 +3,5 @@
 int main(int argc, char** argv)
 {
     Logger logger("STDOUT");
-    logger.info("test");
+    logger.info("test\n");
 }
