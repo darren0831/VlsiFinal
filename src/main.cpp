@@ -1,7 +1,8 @@
-#include "Vertex.hpp"
+#include "InputReader.hpp"
 #include "Logger.hpp"
-int main(int argc, char** argv)
-{
+#include "Vertex.hpp"
+
+int main(int argc, char** argv) {
     Logger logger("STDOUT");
-    logger.info("test");
+    InputReader inputReader("example_1.input", logger);
 }
