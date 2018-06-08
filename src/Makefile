@@ -17,4 +17,4 @@ all: main.cpp
 	$(CC) $(CXXFLAGS) $(LDFLAGS) -o $(BIN) $<
 
 clean:
-	-rm *.o $(BIN)
+	-rm -rf *.o $(BIN)
