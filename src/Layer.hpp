@@ -1,27 +1,21 @@
 #ifndef VLSI_FIANL_PROJECT_LAYER_HPP_
 #define VLSI_FIANL_PROJECT_LAYER_HPP_
 #include <string>
-#include <map>
+
 class Layer{
 public:
-    Layer(){
-        all_layer.clear();
-        cur_layer_count=0;
+    Layer(){}
+    Layer(std::string _name, int _spacing, std::string _direction){
+        name = _name;
+        spacing = _spacing;
+        direction = dir_str2char(_direction);
     }
-    int cur_layer_count;
-    map<string,int> all_layer;
-    void addLayer(std::string s)
-    {
-        all_layer[string]=cur_layer_count;
-        cur_layer_count++;
-    }
-    int getLayerID(std::string s)
-    {
-        return all_layer[s];
-    }
-    void cleanAll()
-    {
-        all_layer.clear();
+    std::string name;
+    int spacing;
+    char direction;
+    char dir_str2char(std::string s){
+        if(s=="horizontal") return 'H';
+        if(s=="vertical") return 'V';
     }
 
 };

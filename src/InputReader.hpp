@@ -5,8 +5,14 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 #include "Logger.hpp"
 #include "Rectangle.hpp"
+#include "Layer.hpp"
+#include "Track.hpp"
+#include "Bus.hpp"
+#include "Bit.hpp"
+#include "Pin.hpp"
 
 class InputReader {
 public:
@@ -52,7 +58,9 @@ private:
             char layerType[256];
             int spacing;
             fscanf(fin, "%s %s %d", layerName, layerType, &spacing);
-            // TODO record this infomation
+            Layer layer(layerName,spacing,layerType);
+            layers.push_back(layer);
+            layer_encode[layerName]=i;
         }
         fscanf(fin, " ENDLAYERS");
         logger.info("%d layers read\n", numLayers);
@@ -68,8 +76,8 @@ private:
             auto ptA = readPoint();
             auto ptB = readPoint();
             fscanf(fin, "%d", &width);
-            Point a(ptA.first, ptA.second);
-            Point b(ptB.first, ptB.second);
+            Track track(ptA.first, ptA.second,ptB.first, ptB.second,width,layer_encode[trackLayer]);
+            tracks.push_back(track);
         }
         fscanf(fin, " ENDTRACKS");
         logger.info("%d tracks read\n", numTracks);
@@ -93,18 +101,24 @@ private:
                 widths.push_back(value);
             }
             fscanf(fin, " ENDWIDTH");
+            Bus bus(busName, widths, numBits, numPins);
             for (int j = 0; j < numBits; ++j) {
-                int bitId;
-                fscanf(fin, " BIT %d", &bitId);
+                char bitId[256];
+                fscanf(fin, " BIT %s", bitId);
+                Bit bit(bitId);
                 for (int k = 0; k < numPins; ++k) {
                     char layerId[256];
                     fscanf(fin, "%s", layerId);
                     auto ptA = readPoint();
                     auto ptB = readPoint();
+                    Pin pin(layer_encode[layerId], ptA.first, ptA.second, ptB.first, ptB.second);
+                    bit.addPin(pin);
                 }
                 fscanf(fin, " ENDBIT");
+                bus.addBit(bit);
             }
             fscanf(fin, " ENDBUS");
+            buses.push_back(bus);
         }
         fscanf(fin, " ENDBUSES");
         logger.info("%d buses read\n", numBuses);
@@ -118,6 +132,8 @@ private:
             fscanf(fin, "%s", layerId);
             auto ptA = readPoint();
             auto ptB = readPoint();
+            Rectangle rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
+            obstacles.push_back(rectangle);
         }
         fscanf(fin, " ENDOBSTACLES");
         logger.info("%d obstacles read\n", numObstacles);
@@ -140,15 +156,20 @@ public:
 
 public:
     int numLayers;
+    std::vector<Layer> layers;
+    std::map<std::string, int> layer_encode;
 
 public:
     int numTracks;
+    std::vector<Track> tracks;
 
 public:
     int numBuses;
+    std::vector<Bus> buses;
 
 public:
     int numObstacles;
+    std::vector<Rectangle> obstacles;
 
 private:
     Logger& logger;
