@@ -1,6 +1,7 @@
 #ifndef VLSI_FIANL_PROJECT_PIN_HPP_
 #define VLSI_FIANL_PROJECT_PIN_HPP_
 #include "Rectangle.hpp"
+#include <string>
 class Pin {
 public:
     Pin() {}
@@ -10,5 +11,12 @@ public:
     }
     int layer;
     Rectangle r;
+    std::string print()
+    {
+    	std::string s;
+    	s = r.print() + " , " + std::to_string(layer);
+    	return s;
+    }
+
 };
 #endif

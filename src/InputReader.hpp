@@ -36,6 +36,7 @@ private:
         readTrackInfo();
         readBusInfo();
         readObstacleInfo();
+        printInput();
     }
 
     void readGeneralInfo() {
@@ -159,6 +160,24 @@ private:
         int x, y;
         fscanf(fin, " (%d %d)", &x, &y);
         return std::make_pair(x, y);
+    }
+
+    void printInput() {
+        logger.info("Layers:\n");
+        for(unsigned i=0;i<layers.size();i++)
+        {
+            logger.info("%d : %s\n",i,layers[i].print().c_str());
+        }
+        logger.info("Tracks:\n");
+        for(unsigned i=0;i<tracks.size();i++)
+        {
+            logger.info("%d : %s\n",i,tracks[i].print().c_str());
+        }
+        logger.info("Buses:\n");
+        for(unsigned i=0;i<buses.size();i++)
+        {
+            logger.info("%d : %s\n",i,buses[i].print().c_str());
+        }
     }
 
 public:

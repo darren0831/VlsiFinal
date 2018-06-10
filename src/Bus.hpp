@@ -20,6 +20,22 @@ public:
     void addBit(Bit b) {
         bits.push_back(b);
     }
+    std::string print()
+    {
+        std::string s="";
+        s+=name+std::string("\n");
+        s+=std::string("WIDTH: \n");
+        for(unsigned i=0;i<bus_width.size();i++)
+        {
+            s+=std::string("\t") + std::string("layer: ") + std::to_string(i) + " = " + std::to_string(bus_width[i]) + "\n";
+        }
+        s+=std::string("BITS: \n");
+        for(unsigned i=0;i<bits.size();i++)
+        {
+            s+=std::string("\t")+bits[i].print()+std::string("\n");
+        }
+        return s;
+    }
 
 };
 #endif

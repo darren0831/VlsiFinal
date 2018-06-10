@@ -1,6 +1,7 @@
 #ifndef VLSI_FIANL_PROJECT_RECTANGLE_HPP_
 #define VLSI_FIANL_PROJECT_RECTANGLE_HPP_
 #include "Point.hpp"
+#include <string>
 class Rectangle {
 public:
     Rectangle() {}
@@ -9,6 +10,12 @@ public:
         upper_right = Point(ur_x, ur_y);
     }
     Point lower_left, upper_right;
+    std::string print()
+    {
+    	std::string s;
+    	s = lower_left.print()+" "+upper_right.print();
+    	return s;
+    }
 };
 
 #endif

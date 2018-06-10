@@ -1,7 +1,6 @@
 #ifndef VLSI_FIANL_PROJECT_LAYER_HPP_
 #define VLSI_FIANL_PROJECT_LAYER_HPP_
 #include <string>
-
 class Layer {
 public:
     Layer() {}
@@ -17,6 +16,15 @@ public:
         if (s == "horizontal") return 'H';
 
         if (s == "vertical") return 'V';
+
+        return NULL;
+    }
+
+    std::string print()
+    {
+        std::string s="";
+        s = name + " , " + std::to_string(spacing) + " , " + direction;
+        return s;
     }
 
 };
