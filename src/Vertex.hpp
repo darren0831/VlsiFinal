@@ -1,5 +1,5 @@
-#ifndef VLSI_FIANL_PROJECT_VERTEX_HPP_
-#define VLSI_FIANL_PROJECT_VERTEX_HPP_
+#ifndef VLSI_FINAL_PROJECT_VERTEX_HPP_
+#define VLSI_FINAL_PROJECT_VERTEX_HPP_
 
 class Vertex {
 public:
@@ -10,4 +10,4 @@ public:
     int id;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_VERTEX_HPP_
