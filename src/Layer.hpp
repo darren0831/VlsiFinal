@@ -16,8 +16,7 @@ public:
         if (s == "horizontal") return 'H';
 
         if (s == "vertical") return 'V';
-
-        return NULL;
+        return ' ';
     }
 
     std::string print()

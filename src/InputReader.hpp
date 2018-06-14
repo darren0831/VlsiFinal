@@ -13,6 +13,7 @@
 #include "Bus.hpp"
 #include "Bit.hpp"
 #include "Pin.hpp"
+#include "Obstacle.hpp"
 
 class InputReader {
 public:
@@ -148,8 +149,8 @@ private:
             fscanf(fin, "%s", layerId);
             auto ptA = readPoint();
             auto ptB = readPoint();
-            Rectangle rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
-            obstacles.push_back(rectangle);
+            Obstacle obstacle(layer_encode[layerId], ptA.first, ptA.second, ptB.first, ptB.second);
+            obstacles.push_back(obstacle);
         }
 
         fscanf(fin, " ENDOBSTACLES");
@@ -208,7 +209,7 @@ public:
 
 public:
     int numObstacles;
-    std::vector<Rectangle> obstacles;
+    std::vector<Obstacle> obstacles;
 
 private:
     Logger& logger;
