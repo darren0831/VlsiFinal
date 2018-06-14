@@ -9,7 +9,13 @@ public:
         lower_left = Point(lf_x, lf_y);
         upper_right = Point(ur_x, ur_y);
     }
+
     Point lower_left, upper_right;
+
+    Rectangle overlapWith(const Rectangle& that) {
+        return Rectangle(0, 0, 0, 0);
+    }
+
     std::string print()
     {
     	std::string s;
