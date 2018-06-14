@@ -17,7 +17,7 @@ public:
 
     void initialize() {
         logger.info("Graph constructor initialize\n");
-        std::vector<std::vector<Track>> layerTracks(layers.size());
+        std::vector<Track> all_tracks;
         for (const auto& t : tracks) {
             std::stack<Track> stack;
             stack.push(t);
@@ -36,21 +36,85 @@ public:
                     }
                 }
                 if (!hasOverlap) {
-                    layerTracks[t.layer].push_back(t);
+                    all_tracks.push_back(t);
                 }
             }
         }
-        for (int i = 0; i < (int) layerTracks.size(); ++i) {
-            for (const auto& track : layerTracks[i]) {
-                for (const auto& track2 : layerTracks[i+1]) {
-                    Rectangle overlap = track.rect.overlapWith(track2.rect);
-                    if(!overlap.isZero())
+        int vertextId=0;
+        for(unsigned i=0;i<all_tracks.size();i++)
+        {
+            for(unsigned j=i+1;j<all_tracks.size();j++)
+            {
+                Rectangle overlap = all_tracks[i].rect.overlapWith(all_tracks[j].rect);
+                if(!overlap.isZero())   //two track overlap
+                {
+                    int t1_layer = all_tracks[i].layer;
+                    int t2_layer = all_tracks[j].layer;
+                    if(t1_layer.direction==t2_layer.direction)
                     {
-
+                        if(all_tracks[i].width>all_tracks[j].width)
+                        {
+                            Rectangle large_overlap = largeOverlap(overlap,all_tracks[i].width,t1_layer.direction);
+                            Vertex vertex1(vertextId++,large_overlap.lower_left.x,large_overlap.lower_left.y,large_overlap.upper_right.x,large_overlap.upper_right.y,t1_layer);
+                            vertexes.push_back(vertex1);
+                            if(t1_layer!=t2_layer)
+                            {
+                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);    
+                                vertexes.push_back(vertex2);
+                            }
+                            
+                        }else if(all_tracks[i].width<all_tracks[j].width)
+                        {
+                            Rectangle large_overlap = largeOverlap(overlap,all_tracks[j].width,t1_layer.direction);
+                            Vertex vertex1(vertextId++,large_overlap.lower_left.x,large_overlap.lower_left.y,large_overlap.upper_right.x,large_overlap.upper_right.y,t2_layer);
+                            vertexes.push_back(vertex1);
+                            if(t1_layer!=t2_layer)
+                            {
+                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);    
+                                vertexes.push_back(vertex2);
+                            }
+                        }else
+                        {
+                            if(t1_layer==t2_layer)
+                            {
+                                Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
+                                vertexes.push_back(vertex1);
+                            }else
+                            {
+                                Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
+                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);
+                                vertexes.push_back(vertex1);
+                                vertexes.push_back(vertex2);
+                            }
+                        }
+                    }else
+                    {
+                        Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
+                        Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);
+                        vertexes.push_back(vertex1);
+                        vertexes.push_back(vertex2); 
                     }
+                    
                 }
             }
         }
+    }
+    Rectangle largeOverlap(Rectangle& overlap, double width, char direction)
+    {
+        Rectangle out;
+        double a,b,c,d;
+        a = overlap.lower_left.x;
+        b = overlap.lower_left.y;
+        c = overlap.upper_right.x;
+        d = overlap.upper_right.y;
+        if(direction=='H')
+        {
+            out = Rectangle(a,(b+d)/2-width/2,c,(b+d)/2+width/2);
+        }else if(direction=='V')
+        {
+            out = Rectangle((a+c)/2-width/2,b,(a+c)/2-width/2,d);
+        }
+        return out;
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
@@ -115,7 +179,7 @@ public:
     std::vector<Track>& tracks;
     std::vector<Bus>& buses;
     std::vector<Obstacle>& obstacles;
-    std::vector<Vertex>& 
+    std::vector<Vertex>& vertexes;
 private:
     Logger& logger;
 };
