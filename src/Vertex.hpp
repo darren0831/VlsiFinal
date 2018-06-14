@@ -8,11 +8,6 @@ public:
     int x, y;
     int layer;
     int id;
-    int connect_id;
-    void setConnenctId(int _id) {
-        connect_id = _id;
-    }
-
 };
 
 #endif
