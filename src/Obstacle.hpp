@@ -10,6 +10,7 @@ public:
         layer = _layer;
     }
     Rectangle area;
+    int layer;
     std::string print()
     {
     	std::string s;
