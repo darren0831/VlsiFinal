@@ -16,6 +16,10 @@ public:
         return Rectangle(0, 0, 0, 0);
     }
 
+    bool isZero() {
+        return lower_left.x == 0 && lower_left.y == 0 && upper_right.x == 0 && upper_right.y == 0;
+    }
+
     std::string print()
     {
     	std::string s;
