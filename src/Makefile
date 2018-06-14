@@ -3,7 +3,7 @@
 
 CC := g++
 
-CXXFLAGS := -std=c++14 -O3 -Wall -Wextra
+CXXFLAGS := -std=c++14 -O3 -Wno-unused-result
 
 LDFLAGS :=
 
