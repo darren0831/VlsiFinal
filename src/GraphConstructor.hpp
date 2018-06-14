@@ -11,7 +11,7 @@ public:
         std::vector<Bus>& buses,
         std::vector<Rectangle>& obstacles,
         Logger& logger) :
-        layers(layers), tracks(tracks), buses(buses), obstacles(obstacles) {
+    layers(layers), tracks(tracks), buses(buses), obstacles(obstacles) {
         initialize();
     }
 
@@ -48,7 +48,61 @@ public:
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
+        Layer layer = layers[t.layer];
+        int a,b,c,d,e,f,g,h;
+        a = t.rect.lower_left.x;
+        b = t.rect.lower_left.y;
+        c = t.rect.upper_right.x;
+        d = t.rect.upper_right.y;
+        e = overlap.lower_left.x;
+        f = overlap.lower_left.y;
+        g = overlap.upper_right.x;
+        h = overlap.upper_right.y;
+        if(layer.direction=='H'){
+            if(a!=e)
+            {
+                Track t1(a,(b+d)/2,e,(b+d)/2,t.width,t.layer);
+                stack.push(t1);
+            }
+            if(c!=g)
+            {
+                Track t2(g,(b+d)/2,c,(b+d)/2,t.width,t.layer);
+                stack.push(t2);
+            }
+            if(b!=f)
+            {
+                Track t3(e,(b+f)/2,g,(b+f)/2,(double)(f-b),t.layer);
+                stack.push(t3);
+            }
+            if(d!=h)
+            {
+                Track t4(e,(h+d)/2,g,(h+d)/2,(double)(d-h),t.layer);
+                stack.push(t4);
+            }
 
+        }else if(layer.direction=='V')
+        {
+            if(b!=f)
+            {
+                Track t1((a+c)/2,b,(a+c)/2,f,t.width,t.layer);
+                stack.push(t1);
+            }
+            if(d!=h)
+            {
+                Track t2((a+c)/2,h,(a+c)/2,d,t.width,t.layer);
+                stack.push(t2);
+            }
+            if(a!=e)
+            {
+                Track t3((a+e)/2,f,(a+e)/2,h,(double)(e-a),t.layer);
+                stack.push(t3);
+            }
+            if(c!=g)
+            {
+                Track t4((g+c)/2,f,(g+c)/2,h,(double)(c-g),t.layer);
+                stack.push(t4);
+            }
+        }
     }
 
     std::vector<Layer>& layers;
