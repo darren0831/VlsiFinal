@@ -178,6 +178,10 @@ private:
         {
             logger.info("%d : %s\n",i,buses[i].print().c_str());
         }
+        logger.info("Obstacles:\n");
+        for (unsigned i = 0; i < obstacles.size(); ++i) {
+            logger.info("%d : %s\n", i, obstacles[i].print().c_str());
+        }
     }
 
 public:
