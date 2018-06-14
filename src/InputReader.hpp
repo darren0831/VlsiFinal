@@ -164,24 +164,25 @@ private:
     }
 
     void printInput() {
-        logger.info("Layers:\n");
+        Logger input_logger("InputInfo");
+        input_logger.info("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
         {
-            logger.info("%d : %s\n",i,layers[i].print().c_str());
+            input_logger.info("%d : %s\n",i,layers[i].print().c_str());
         }
-        logger.info("Tracks:\n");
+        input_logger.info("Tracks:\n");
         for(unsigned i=0;i<tracks.size();i++)
         {
-            logger.info("%d : %s\n",i,tracks[i].print().c_str());
+            input_logger.info("%d : %s\n",i,tracks[i].print().c_str());
         }
-        logger.info("Buses:\n");
+        input_logger.info("Buses:\n");
         for(unsigned i=0;i<buses.size();i++)
         {
-            logger.info("%d : %s\n",i,buses[i].print().c_str());
+            input_logger.info("%d : %s\n",i,buses[i].print().c_str());
         }
-        logger.info("Obstacles:\n");
+        input_logger.info("Obstacles:\n");
         for (unsigned i = 0; i < obstacles.size(); ++i) {
-            logger.info("%d : %s\n", i, obstacles[i].print().c_str());
+            input_logger.info("%d : %s\n", i, obstacles[i].print().c_str());
         }
     }
 

@@ -4,8 +4,11 @@
 class Vertex {
 public:
     Vertex() {}
-    Vertex(int _id, int _x, int _y, int _layer) : x(_x), y(_y), layer(_layer), id(_id) {}
-    int x, y;
+    Vertex(int _id, double _lx, double _ly, double _rx, double _ry, int _layer) : layer(_layer), id(_id)
+    {
+    	coordinate = Rectangle(_lx,_ly,_rx,_ry);
+    }
+    Rectangle coordinate;
     int layer;
     int id;
 };

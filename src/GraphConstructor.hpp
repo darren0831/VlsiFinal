@@ -42,14 +42,20 @@ public:
         }
         for (int i = 0; i < (int) layerTracks.size(); ++i) {
             for (const auto& track : layerTracks[i]) {
+                for (const auto& track2 : layerTracks[i+1]) {
+                    Rectangle overlap = track.rect.overlapWith(track2.rect);
+                    if(!overlap.isZero())
+                    {
 
+                    }
+                }
             }
         }
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
         Layer layer = layers[t.layer];
-        int a,b,c,d,e,f,g,h;
+        double a,b,c,d,e,f,g,h;
         a = t.rect.lower_left.x;
         b = t.rect.lower_left.y;
         c = t.rect.upper_right.x;
@@ -109,7 +115,7 @@ public:
     std::vector<Track>& tracks;
     std::vector<Bus>& buses;
     std::vector<Obstacle>& obstacles;
-
+    std::vector<Vertex>& 
 private:
     Logger& logger;
 };

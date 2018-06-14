@@ -3,11 +3,11 @@
 #include "Vertex.hpp"
 
 int main(int argc, char** argv) {
-    Logger logger("InputInfo");
-    InputReader inputReader("example_2.input", logger);
+    Logger stdout_logger("STDOUT");
+    InputReader inputReader("example_2.input", stdout_logger);
     auto layers = inputReader.layers;
     auto tracks = inputReader.tracks;
     auto buses = inputReader.buses;
     auto obstacles = inputReader.obstacles;
-    // GraphConstructor graphConstructor(layer, tracks, buses, obstacles);
+    // GraphConstructor graphConstructor(layer, tracks, buses, obstacles, stdout_logger);
 }

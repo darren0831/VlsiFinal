@@ -2,11 +2,12 @@
 #define VLSI_FIANL_PROJECT_RECTANGLE_HPP_
 #include "Point.hpp"
 #include <string>
+#include <cmath>
 
 class Rectangle {
 public:
     Rectangle() {}
-    Rectangle(int lf_x, int lf_y, int ur_x, int ur_y) {
+    Rectangle(double lf_x, double lf_y, double ur_x, double ur_y) {
         lower_left = Point(lf_x, lf_y);
         upper_right = Point(ur_x, ur_y);
     }
@@ -32,7 +33,7 @@ public:
     }
 
     bool isZero() {
-        return lower_left.x == 0 && lower_left.y == 0 && upper_right.x == 0 && upper_right.y == 0;
+        return std::fpclassify(lower_left.x) == FP_ZERO && std::fpclassify(lower_left.y) == FP_ZERO && std::fpclassify(upper_right.x) == FP_ZERO && std::fpclassify(upper_right.y) == FP_ZERO;
     }
 
     std::string print()

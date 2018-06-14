@@ -4,8 +4,8 @@
 class Point {
 public:
     Point(): x(0), y(0) {}
-    Point (int _x, int _y): x(_x), y(_y) {}
-    int x, y;
+    Point (double _x, double _y): x(_x), y(_y) {}
+    double x, y;
     std::string print()
     {
     	std::string s;
