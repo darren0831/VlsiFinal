@@ -61,22 +61,22 @@ public:
         if(layer.direction=='H'){
             if(a!=e)
             {
-                Track t1(a,(b+d)/2,e,(b+d)/2,t.width,t.layer);
+                Track t1(a,(b+d)/2,e,(b+d)/2,t.width,t.layer); //(a,b,e,d)
                 stack.push(t1);
             }
             if(c!=g)
             {
-                Track t2(g,(b+d)/2,c,(b+d)/2,t.width,t.layer);
+                Track t2(g,(b+d)/2,c,(b+d)/2,t.width,t.layer); //(g,b,c,d)
                 stack.push(t2);
             }
             if(b!=f)
             {
-                Track t3(e,(b+f)/2,g,(b+f)/2,(double)(f-b),t.layer);
+                Track t3(e,(b+f)/2,g,(b+f)/2,(double)(f-b),t.layer); //(e,b,g,f)
                 stack.push(t3);
             }
             if(d!=h)
             {
-                Track t4(e,(h+d)/2,g,(h+d)/2,(double)(d-h),t.layer);
+                Track t4(e,(h+d)/2,g,(h+d)/2,(double)(d-h),t.layer); //(e,h,g,d)
                 stack.push(t4);
             }
 
@@ -84,22 +84,22 @@ public:
         {
             if(b!=f)
             {
-                Track t1((a+c)/2,b,(a+c)/2,f,t.width,t.layer);
+                Track t1((a+c)/2,b,(a+c)/2,f,t.width,t.layer); //(a,b,c,f)
                 stack.push(t1);
             }
             if(d!=h)
             {
-                Track t2((a+c)/2,h,(a+c)/2,d,t.width,t.layer);
+                Track t2((a+c)/2,h,(a+c)/2,d,t.width,t.layer); //(a,h,c,d)
                 stack.push(t2);
             }
             if(a!=e)
             {
-                Track t3((a+e)/2,f,(a+e)/2,h,(double)(e-a),t.layer);
+                Track t3((a+e)/2,f,(a+e)/2,h,(double)(e-a),t.layer); //(a,f,e,h)
                 stack.push(t3);
             }
             if(c!=g)
             {
-                Track t4((g+c)/2,f,(g+c)/2,h,(double)(c-g),t.layer);
+                Track t4((g+c)/2,f,(g+c)/2,h,(double)(c-g),t.layer); //(g,f,c,h)
                 stack.push(t4);
             }
         }
