@@ -148,8 +148,8 @@ private:
             fscanf(fin, "%s", layerId);
             auto ptA = readPoint();
             auto ptB = readPoint();
-            Rectangle rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
-            obstacles.push_back(rectangle);
+            Obstacles obstacle(layerId,ptA.first, ptA.second, ptB.first, ptB.second);
+            obstacles.push_back(obstacle);
         }
 
         fscanf(fin, " ENDOBSTACLES");
