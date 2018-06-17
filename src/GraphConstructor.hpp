@@ -1,104 +1,148 @@
 #ifndef VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_
 #define VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_
 
+#include <algorithm>
 #include <vector>
 #include <stack>
+#include "Bit.hpp"
+#include "Bus.hpp"
+#include "Edge.hpp"
+#include "GraphConstructor.hpp"
+#include "InputReader.hpp"
+#include "Layer.hpp"
+#include "Logger.hpp"
+#include "Obstacle.hpp"
+#include "Pin.hpp"
+#include "Point.hpp"
+#include "Rectangle.hpp"
+#include "Track.hpp"
+#include "Vertex.hpp"
 
 class GraphConstructor {
 public:
     GraphConstructor(std::vector<Layer>& layers,
         std::vector<Track>& tracks,
         std::vector<Bus>& buses,
-        std::vector<Rectangle>& obstacles,
+        std::vector<Obstacle>& obstacles,
         Logger& logger) :
-    layers(layers), tracks(tracks), buses(buses), obstacles(obstacles) {
+        layers(layers), tracks(tracks), buses(buses), obstacles(obstacles), logger(logger) {
         initialize();
     }
 
     void initialize() {
         logger.info("Graph constructor initialize\n");
+        logger.info("Split track\n");
+        std::vector<std::vector<Obstacle>> layerObstacles(layers.size());
+        for (const auto& o : obstacles) {
+            layerObstacles[o.layer].push_back(o);
+        }
+        for (int i = 0; i < (int) layers.size(); ++i) {
+            std::sort(layerObstacles[i].begin(), layerObstacles[i].end(), [](Obstacle a, Obstacle b) {
+                const Rectangle& ra = a.area;
+                const Rectangle& rb = b.area;
+                return ra.lower_left.x < rb.lower_left.x;
+            });
+        }
         std::vector<Track> all_tracks;
-        for (const auto& t : tracks) {
-            std::stack<Track> stack;
-            stack.push(t);
-            while (!stack.empty()) {
-                Track t = stack.top();
-                stack.pop();
-                bool hasOverlap = false;
-                for (const auto& o : obstacles) {
-                    if (t.layer != o.layer) {
-                        continue;
-                    }
-                    Rectangle overlap = t.rect.overlapWith(o.area);
-                    if (!overlap.isZero()) {
-                        hasOverlap = true;
-                        splitTrack(t, overlap, stack);
-                    }
-                }
-                if (!hasOverlap) {
-                    all_tracks.push_back(t);
-                }
-            }
+        // int c = 0;
+        // for (const auto& t : tracks) {
+        //     printf("\r %d / %lu", c, tracks.size());
+        //     fflush(stdout);
+        //     std::stack<Track> stack;
+        //     stack.push(t);
+        //     while (!stack.empty()) {
+        //         Track t = stack.top();
+        //         stack.pop();
+        //         bool hasOverlap = false;
+        //         for (const auto& o : layerObstacles[t.layer]) {
+        //             if (o.area.lower_left.x > t.rect.upper_right.x) {
+        //                 break;
+        //             }
+        //             Rectangle overlap = t.rect.overlapWith(o.area);
+        //             if (!overlap.isZero()) {
+        //                 hasOverlap = true;
+        //                 splitTrack(t, overlap, stack);
+        //             }
+        //         }
+        //         if (!hasOverlap) {
+        //             all_tracks.push_back(t);
+        //         }
+        //     }
+        // }
+        all_tracks = tracks;
+        std::vector<std::vector<Track>> layerTracks(layers.size());
+        for (const auto& t : all_tracks) {
+            layerTracks[t.layer].push_back(t);
         }
-        int vertextId=0;
-        for(unsigned i=0;i<all_tracks.size();i++)
-        {
-            for(unsigned j=i+1;j<all_tracks.size();j++)
-            {
-                Rectangle overlap = all_tracks[i].rect.overlapWith(all_tracks[j].rect);
-                if(!overlap.isZero())   //two track overlap
-                {
-                    int t1_layer = all_tracks[i].layer;
-                    int t2_layer = all_tracks[j].layer;
-                    if(t1_layer.direction==t2_layer.direction)
-                    {
-                        if(all_tracks[i].width>all_tracks[j].width)
-                        {
-                            Rectangle large_overlap = largeOverlap(overlap,all_tracks[i].width,t1_layer.direction);
-                            Vertex vertex1(vertextId++,large_overlap.lower_left.x,large_overlap.lower_left.y,large_overlap.upper_right.x,large_overlap.upper_right.y,t1_layer);
-                            vertexes.push_back(vertex1);
-                            if(t1_layer!=t2_layer)
-                            {
-                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);    
-                                vertexes.push_back(vertex2);
-                            }
-                            
-                        }else if(all_tracks[i].width<all_tracks[j].width)
-                        {
-                            Rectangle large_overlap = largeOverlap(overlap,all_tracks[j].width,t1_layer.direction);
-                            Vertex vertex1(vertextId++,large_overlap.lower_left.x,large_overlap.lower_left.y,large_overlap.upper_right.x,large_overlap.upper_right.y,t2_layer);
-                            vertexes.push_back(vertex1);
-                            if(t1_layer!=t2_layer)
-                            {
-                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);    
-                                vertexes.push_back(vertex2);
-                            }
-                        }else
-                        {
-                            if(t1_layer==t2_layer)
-                            {
-                                Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
-                                vertexes.push_back(vertex1);
-                            }else
-                            {
-                                Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
-                                Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);
-                                vertexes.push_back(vertex1);
-                                vertexes.push_back(vertex2);
-                            }
+        logger.info("Track info\n");
+        for (int i = 0; i < (int) layers.size(); ++i) {
+            logger.info("Layer %d: %d tracks\n", i, layerTracks[i].size());
+        }
+        logger.info("Generate vertices and edges\n");
+        int vertexId = 0;
+        for (unsigned i = 0; i < layers.size(); ++i) {
+            for (unsigned j = i + 1; j < layers.size(); ++j) {
+                for (const Track& ta : layerTracks[i]) {
+                    for (const Track& tb : layerTracks[j]) {
+                        if (ta.rect.hasOverlapWith(tb.rect)) {
+                            ++vertexId;
                         }
-                    }else
-                    {
-                        Vertex vertex1(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t1_layer);
-                        Vertex vertex2(vertextId++,overlap.lower_left.x,overlap.lower_left.y,overlap.upper_right.x,overlap.upper_right.y,t2_layer);
-                        vertexes.push_back(vertex1);
-                        vertexes.push_back(vertex2); 
                     }
-                    
                 }
             }
         }
+        // int vertextId=0;
+        // for(unsigned i=0;i<all_tracks.size();i++)
+        // {
+        //     for(unsigned j=i+1;j<all_tracks.size();j++)
+        //     {
+        //         Rectangle overlap = all_tracks[i].rect.overlapWith(all_tracks[j].rect);
+        //         if(!overlap.isZero())   //two track overlap
+        //         {
+        //             int t1_layer_id = all_tracks[i].layer;
+        //             int t2_layer_id = all_tracks[j].layer;
+        //             const Layer& t1_layer = layers[t1_layer_id];
+        //             const Layer& t2_layer = layers[t2_layer_id];
+        //             if(t1_layer.direction==t2_layer.direction)
+        //             {
+        //                 if(all_tracks[i].width>all_tracks[j].width)
+        //                 {
+        //                     Rectangle large_overlap = largeOverlap(overlap,all_tracks[i].width,t1_layer.direction);
+        //                     ++vertextId;
+        //                     if(t1_layer_id!=t2_layer_id)
+        //                     {
+        //                         ++vertextId;
+        //                     }
+
+        //                 }else if(all_tracks[i].width<all_tracks[j].width)
+        //                 {
+        //                     Rectangle large_overlap = largeOverlap(overlap,all_tracks[j].width,t1_layer.direction);
+        //                     ++vertextId;
+        //                     if(t1_layer_id!=t2_layer_id)
+        //                     {
+        //                         ++vertextId;
+        //                     }
+        //                 }else
+        //                 {
+        //                     if(t1_layer_id==t2_layer_id)
+        //                     {
+        //                         ++vertextId;
+        //                     }else
+        //                     {
+        //                         vertextId += 2;
+        //                     }
+        //                 }
+        //             }else
+        //             {
+        //                 vertextId += 2;
+        //             }
+
+        //         }
+        //     }
+        // }
+        logger.info("%d vertices generated\n", vertexId);
     }
+
     Rectangle largeOverlap(Rectangle& overlap, double width, char direction)
     {
         Rectangle out;
@@ -175,11 +219,15 @@ public:
         }
     }
 
+public:
     std::vector<Layer>& layers;
     std::vector<Track>& tracks;
     std::vector<Bus>& buses;
     std::vector<Obstacle>& obstacles;
-    std::vector<Vertex>& vertexes;
+
+public:
+    std::vector<Vertex> vertices;
+
 private:
     Logger& logger;
 };

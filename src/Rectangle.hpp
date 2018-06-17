@@ -1,8 +1,9 @@
-#ifndef VLSI_FIANL_PROJECT_RECTANGLE_HPP_
-#define VLSI_FIANL_PROJECT_RECTANGLE_HPP_
-#include "Point.hpp"
-#include <string>
+#ifndef VLSI_FINAL_PROJECT_RECTANGLE_HPP_
+#define VLSI_FINAL_PROJECT_RECTANGLE_HPP_
+
 #include <cmath>
+#include <string>
+#include "Point.hpp"
 
 class Rectangle {
 public:
@@ -14,7 +15,7 @@ public:
 
     Point lower_left, upper_right;
 
-    Rectangle overlapWith(const Rectangle& that) {
+    Rectangle overlapWith(const Rectangle& that) const {
         Point ll = Point(0, 0), ur = Point(0, 0);
 
         if(lower_left.x<that.upper_right.x&&upper_right.x>that.lower_left.x){
@@ -32,8 +33,15 @@ public:
         return Rectangle(ll.x, ll.y, ur.x, ur.y);
     }
 
-    bool isZero() {
-        return std::fpclassify(lower_left.x) == FP_ZERO && std::fpclassify(lower_left.y) == FP_ZERO && std::fpclassify(upper_right.x) == FP_ZERO && std::fpclassify(upper_right.y) == FP_ZERO;
+    bool hasOverlapWith(const Rectangle& that) const {
+        return !overlapWith(that).isZero();
+    }
+
+    bool isZero() const {
+        return std::fpclassify(lower_left.x) == FP_ZERO &&
+            std::fpclassify(lower_left.y) == FP_ZERO &&
+            std::fpclassify(upper_right.x) == FP_ZERO &&
+            std::fpclassify(upper_right.y) == FP_ZERO;
     }
 
     std::string print()

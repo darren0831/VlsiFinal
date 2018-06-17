@@ -1,5 +1,5 @@
-#ifndef VLSI_FIANL_PROJECT_BUS_HPP_
-#define VLSI_FIANL_PROJECT_BUS_HPP_
+#ifndef VLSI_FINAL_PROJECT_BUS_HPP_
+#define VLSI_FINAL_PROJECT_BUS_HPP_
 #include <map>
 #include <vector>
 #include <string>

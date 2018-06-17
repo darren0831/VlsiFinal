@@ -1,5 +1,5 @@
-#ifndef VLSI_FIANL_PROJECT_BIT_HPP_
-#define VLSI_FIANL_PROJECT_BIT_HPP_
+#ifndef VLSI_FINAL_PROJECT_BIT_HPP_
+#define VLSI_FINAL_PROJECT_BIT_HPP_
 #include <vector>
 #include <string>
 #include "Pin.hpp"

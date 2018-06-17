@@ -1,5 +1,5 @@
-#ifndef VLSI_FIANL_PROJECT_POINT_HPP_
-#define VLSI_FIANL_PROJECT_POINT_HPP_
+#ifndef VLSI_FINAL_PROJECT_POINT_HPP_
+#define VLSI_FINAL_PROJECT_POINT_HPP_
 #include <string>
 class Point {
 public:
