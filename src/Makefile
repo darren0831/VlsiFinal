@@ -3,9 +3,9 @@
 
 CC := g++
 
-CXXFLAGS := -std=c++14 -O3 -Wno-unused-result
+CXXFLAGS := -std=c++14 -O3 -Wall -Wextra -Wno-unused-result
 
-LDFLAGS :=
+LDFLAGS := -lm
 
 BIN := route
 
