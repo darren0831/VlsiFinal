@@ -8,21 +8,30 @@
 #include <cerrno>
 #include <string>
 
+/**
+ * Simple logger implementation.
+ *
+ * Logger() for a logger that print to stdout
+ * Logger(filename) for a logger that print to specific file
+ * Logger(nullptr) for a disabled logger (for minimized code modification to disable message output)
+ */
 class Logger {
 public:
-    Logger(std::string filename) {
-        if (filename == "") {
+    Logger() {
+        enabled = true;
+        fout = stdout;
+    }
+
+    Logger(const char* filename) {
+        if (filename == nullptr) {
             enabled = false;
             fout = nullptr;
-        } else if (filename == "STDOUT") {
-            enabled = true;
-            fout = stdout;
         } else {
             enabled = true;
-            fout = fopen(filename.c_str(), "w");
+            fout = fopen(filename, "w");
 
             if (fout == nullptr) {
-                fprintf(stderr, "Error: %s\n", strerror(errno));
+                fprintf(stderr, "Error: %s: %s\n", filename, strerror(errno));
                 enabled = false;
             }
         }

@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::string inputfile = argv[1];
-    Logger stdLogger("STDOUT");
+    Logger stdLogger;
     Logger inputLogger("input.log");
     Logger graphLogger("graph.log");
     InputReader inputReader(inputfile, stdLogger);
