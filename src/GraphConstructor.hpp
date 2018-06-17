@@ -44,32 +44,31 @@ public:
             });
         }
         std::vector<Track> all_tracks;
-        // int c = 0;
-        // for (const auto& t : tracks) {
-        //     printf("\r %d / %lu", c, tracks.size());
-        //     fflush(stdout);
-        //     std::stack<Track> stack;
-        //     stack.push(t);
-        //     while (!stack.empty()) {
-        //         Track t = stack.top();
-        //         stack.pop();
-        //         bool hasOverlap = false;
-        //         for (const auto& o : layerObstacles[t.layer]) {
-        //             if (o.area.lower_left.x > t.rect.upper_right.x) {
-        //                 break;
-        //             }
-        //             Rectangle overlap = t.rect.overlapWith(o.area);
-        //             if (!overlap.isZero()) {
-        //                 hasOverlap = true;
-        //                 splitTrack(t, overlap, stack);
-        //             }
-        //         }
-        //         if (!hasOverlap) {
-        //             all_tracks.push_back(t);
-        //         }
-        //     }
-        // }
-        all_tracks = tracks;
+        int c = 0;
+        for (const auto& t : tracks) {
+            printf("\r %d / %lu", ++c, tracks.size());
+            fflush(stdout);
+            std::stack<Track> stack;
+            stack.push(t);
+            while (!stack.empty()) {
+                Track t = stack.top();
+                stack.pop();
+                bool hasOverlap = false;
+                for (const auto& o : layerObstacles[t.layer]) {
+                    if (o.area.lower_left.x > t.rect.upper_right.x) {
+                        break;
+                    }
+                    Rectangle overlap = t.rect.overlapWith(o.area);
+                    if (!overlap.isZero()) {
+                        hasOverlap = true;
+                        splitTrack(t, overlap, stack);
+                    }
+                }
+                if (!hasOverlap) {
+                    all_tracks.push_back(t);
+                }
+            }
+        }
         std::vector<std::vector<Track>> layerTracks(layers.size());
         for (const auto& t : all_tracks) {
             layerTracks[t.layer].push_back(t);
