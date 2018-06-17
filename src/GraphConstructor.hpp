@@ -44,10 +44,10 @@ public:
             });
         }
         std::vector<Track> all_tracks;
-        int c = 0;
+        // int c = 0;
         for (const auto& t : tracks) {
-            printf("\r %d / %lu", ++c, tracks.size());
-            fflush(stdout);
+            // printf("\r%d / %lu", ++c, tracks.size());
+            // fflush(stdout);
             std::stack<Track> stack;
             stack.push(t);
             while (!stack.empty()) {
@@ -62,6 +62,7 @@ public:
                     if (!overlap.isZero()) {
                         hasOverlap = true;
                         splitTrack(t, overlap, stack);
+                        break;
                     }
                 }
                 if (!hasOverlap) {
@@ -69,6 +70,7 @@ public:
                 }
             }
         }
+        logger.info("Track count(after split): %d\n",all_tracks.size());
         std::vector<std::vector<Track>> layerTracks(layers.size());
         for (const auto& t : all_tracks) {
             layerTracks[t.layer].push_back(t);
