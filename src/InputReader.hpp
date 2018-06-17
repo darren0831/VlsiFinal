@@ -22,7 +22,7 @@ public:
         fin = fopen(filename.c_str(), "r");
 
         if (!fin) {
-            fprintf(stderr, "Error: %s\n", strerror(errno));
+            fprintf(stderr, "Error: %s: %s\n", filename.c_str(), strerror(errno));
             return;
         }
 
@@ -164,7 +164,7 @@ private:
     }
 
     void printInput() {
-        Logger input_logger("InputInfo");
+        Logger input_logger("InputInfo.log");
         input_logger.info("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
         {

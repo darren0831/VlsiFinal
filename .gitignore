@@ -3,7 +3,11 @@
 *.gch
 
 # Executable files
-place
+route
 
 # vscode
 *.json
+
+# log
+log
+*.log
