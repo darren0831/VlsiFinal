@@ -116,18 +116,26 @@ public:
                 map[2] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
             }
             scanOutVertices(v, layer, map[0], outVertices);
-            for (int l = layer - 1; l >= 0; --l) {
-                scanOutVertices(v, l, map[1], outVertices);
+            if (layer - 1 >= 0) {
+                scanOutVertices(v, layer - 1, map[1], outVertices);
             }
-            for (int l = layer + 1; l < (int) layers.size(); ++l) {
-                scanOutVertices(v, l, map[2], outVertices);
+            if (layer + 1 < (int) layers.size()) {
+                scanOutVertices(v, layer + 1, map[2], outVertices);
             }
+            // for (int l = layer - 1; l >= std::max(layer - 2, 0); --l) {
+            //     scanOutVertices(v, l, map[1], outVertices);
+            // }
+            // for (int l = layer + 1; l < std::min((int) layers.size(), layer + 2); ++l) {
+            //     scanOutVertices(v, l, map[2], outVertices);
+            // }
         }
         int edgeCount = 0;
+        double avgEdgeCount = 0;
         for (const auto& v : routingGraph) {
             edgeCount += (int) v.size();
         }
-        logger.info("%d edges generated\n", edgeCount);
+        avgEdgeCount = ((double) edgeCount) / routingGraph.size();
+        logger.info("%d edges generated, average %f edge for each vertex\n", edgeCount, avgEdgeCount);
     }
 
     Rectangle largeOverlap(Rectangle& overlap, double width, char direction)
