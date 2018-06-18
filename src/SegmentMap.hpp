@@ -36,8 +36,7 @@ public:
         bool overlapped = false;
         for (const auto& p : list) {
             // TODO bug
-            overlapped = (upper >= p.first && upper <= p.second) ||
-                         (lower >= p.first && lower <= p.second) ||
+            overlapped = !((p.first<lower&&p.second<lower)||(p.first>upper&&p.second>upper))||
                          overlapped;
             if (overlapped) {
                 return true;
