@@ -18,6 +18,14 @@ public:
     	return s;
     }
 
+    bool operator==(const Obstacle& that) const {
+        return layer == that.layer && area == that.area;
+    }
+
+    bool operator!=(const Obstacle& that) const {
+        return !(*this == that);
+    }
+
 public:
     Rectangle area;
     int layer;

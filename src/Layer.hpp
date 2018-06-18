@@ -18,6 +18,14 @@ public:
         return ' ';
     }
 
+    bool isHorizontal() const {
+        return direction == 'H';
+    }
+
+    bool isVertical() const {
+        return direction == 'V';
+    }
+
     std::string print()
     {
         std::string s="";

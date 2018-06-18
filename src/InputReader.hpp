@@ -41,7 +41,7 @@ private:
     }
 
     void readGeneralInfo() {
-        logger.info("Get general info\n");
+        logger.info("Get general information\n");
         fscanf(fin, " RUNTIME %d", &runtime);
         fscanf(fin, " ALPHA %d", &alpha);
         fscanf(fin, " BETA %d", &beta);
@@ -52,10 +52,12 @@ private:
         auto ptA = readPoint();
         auto ptB = readPoint();
         boundary = Rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
+        logger.info("Runtime: %d sec.\n", runtime);
+        logger.info("Design Boundary: %s\n", boundary.print().c_str());
     }
 
     void readLayerInfo() {
-        logger.info("Get layer info\n");
+        logger.info("Get layer information\n");
         fscanf(fin, " LAYERS %d", &numLayers);
 
         for (int i = 0; i < numLayers; ++i) {
@@ -73,7 +75,7 @@ private:
     }
 
     void readTrackInfo() {
-        logger.info("Get track info\n");
+        logger.info("Get track information\n");
         fscanf(fin, " TRACKS %d", &numTracks);
 
         for (int i = 0; i < numTracks; ++i) {
@@ -92,7 +94,7 @@ private:
     }
 
     void readBusInfo() {
-        logger.info("Get bus info\n");
+        logger.info("Get bus information\n");
         fscanf(fin, " BUSES %d", &numBuses);
 
         for (int i = 0; i < numBuses; ++i) {
@@ -141,7 +143,7 @@ private:
     }
 
     void readObstacleInfo() {
-        logger.info("Get obstacle info\n");
+        logger.info("Get obstacle information\n");
         fscanf(fin, " OBSTACLES %d", &numObstacles);
 
         for (int i = 0; i < numObstacles; ++i) {

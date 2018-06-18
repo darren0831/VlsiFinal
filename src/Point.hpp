@@ -14,6 +14,16 @@ public:
     	return s;
     }
 
+    bool operator==(const Point& that) const {
+        double dx = fabs(x - that.x);
+        double dy = fabs(y - that.y);
+        return dx < 1e-6 && dy < 1e-6;
+    }
+
+    bool operator!=(const Point& that) const {
+        return !(*this == that);
+    }
+
 public:
     double x;
     double y;

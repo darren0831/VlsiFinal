@@ -50,6 +50,14 @@ public:
     	return s;
     }
 
+    bool operator==(const Rectangle& that) const {
+        return lower_left == that.lower_left && upper_right == that.upper_right;
+    }
+
+    bool operator!=(const Rectangle& that) const {
+        return !(*this == that);
+    }
+
 public:
     Point lower_left;
     Point upper_right;

@@ -18,6 +18,14 @@ public:
     	return s;
     }
 
+    bool operator==(const Pin& that) const {
+        return layer == that.layer && r == that.r;
+    }
+
+    bool operator!=(const Pin& that) const {
+        return !(*this == that);
+    }
+
 public:
     int layer;
     Rectangle r;

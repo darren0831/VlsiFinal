@@ -2,6 +2,7 @@
 #define VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_
 
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 #include <stack>
 #include "Bit.hpp"
@@ -15,6 +16,7 @@
 #include "Pin.hpp"
 #include "Point.hpp"
 #include "Rectangle.hpp"
+#include "SegmentMap.hpp"
 #include "Track.hpp"
 #include "Vertex.hpp"
 
@@ -68,7 +70,8 @@ public:
             }
         }
         logger.info("Track count(after split): %d\n",all_tracks.size());
-        std::vector<std::vector<Track>> layerTracks(layers.size());
+        layerTracks = std::vector<std::vector<Track>>(layers.size());
+        layerVertices = std::vector<std::vector<Vertex>>(layers.size());
         for (const auto& t : all_tracks) {
             layerTracks[t.layer].push_back(t);
         }
@@ -77,23 +80,50 @@ public:
             logger.info("Layer %d: %d tracks\n", i, layerTracks[i].size());
         }
         logger.info("Generate vertices and edges\n");
-        logger.info("Generate vertices based on tacks splited\n");
+        logger.info("Generate vertices based on tracks split\n");
         int vertexId = 0;
-        for (unsigned i = 0; i < layers.size(); ++i) {
-
-        }
-        for (unsigned i = 0; i < layers.size(); ++i) {
-            for (unsigned j = i + 1; j < layers.size(); ++j) {
-                for (const Track& ta : layerTracks[i]) {
-                    for (const Track& tb : layerTracks[j]) {
-                        if (ta.rect.hasOverlapWith(tb.rect)) {
-                            ++vertexId;
-                        }
-                    }
-                }
+        for (int i = 0; i < (int) layerTracks.size(); ++i) {
+            if (layers[i].isHorizontal()) {
+                std::sort(layerTracks[i].begin(), layerTracks[i].end(), [](Track a, Track b) {
+                    return a.rect.lower_left.x < b.rect.lower_left.x;
+                });
+            } else {
+                std::sort(layerTracks[i].begin(), layerTracks[i].end(), [](Track a, Track b) {
+                    return a.rect.lower_left.y < b.rect.lower_left.y;
+                });
+            }
+            for (const Track& t : layerTracks[i]) {
+                vertexMap[vertexId] = Vertex(t, vertexId);
+                vertices.push_back(Vertex(t, vertexId));
+                layerVertices[t.layer].push_back(Vertex(t, vertexId));
+                ++vertexId;
             }
         }
         logger.info("%d vertices generated\n", vertexId);
+        logger.info("Generate edges based on routing region\n");
+        routingGraph = std::vector<std::vector<Vertex>>(vertices.size());
+        for (const Vertex& v : vertices) {
+            int layer = v.track.layer;
+            std::vector<Vertex>& outVertices = routingGraph[v.id];
+            SegmentMap map;
+            if (layers[v.track.layer].isHorizontal()) {
+                map = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
+            } else {
+                map = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
+            }
+            scanOutVertices(v, layer, map, outVertices);
+            for (int l = layer - 1; l >= 0; --l) {
+                scanOutVertices(v, l, map, outVertices);
+            }
+            for (int l = layer + 1; l < (int) layers.size(); ++l) {
+                scanOutVertices(v, l, map, outVertices);
+            }
+        }
+        int edgeCount = 0;
+        for (const auto& v : routingGraph) {
+            edgeCount += (int) v.size();
+        }
+        logger.info("%d edges generated\n", edgeCount);
     }
 
     Rectangle largeOverlap(Rectangle& overlap, double width, char direction)
@@ -172,6 +202,27 @@ public:
         }
     }
 
+    void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Vertex>& out) {
+        for (const Vertex& u : layerVertices[targetLayer]) {
+            if (v != u && v.hasOverlapWith(u)) {
+                Rectangle r = v.overlapWith(u);
+                if (layers[v.track.layer].isHorizontal()) {
+                    double lower = r.lower_left.x;
+                    double upper = r.upper_right.x;
+                    if (map.insert(lower, upper)) {
+                        out.push_back(v);
+                    }
+                } else {
+                    double lower = r.lower_left.y;
+                    double upper = r.upper_right.y;
+                    if (map.insert(lower, upper)) {
+                        out.push_back(v);
+                    }
+                }
+            }
+        }
+    }
+
     bool doubleEqual(double a, double b) {
         return fabs(a - b) < 1e-6;
     }
@@ -183,7 +234,13 @@ public:
     std::vector<Obstacle>& obstacles;
 
 public:
+    std::vector<std::vector<Track>> layerTracks;
+    std::vector<std::vector<Vertex>> layerVertices;
     std::vector<Vertex> vertices;
+
+public:
+    std::unordered_map<int, Vertex> vertexMap;
+    std::vector<std::vector<Vertex>> routingGraph;
 
 private:
     Logger& logger;

@@ -17,10 +17,33 @@ public:
         layer = _layer;
     }
 
+    Rectangle overlapWith(const Track& that) const {
+        return rect.overlapWith(that.rect);
+    }
+
+    bool hasOverlapWith(const Track& that) const {
+        return rect.hasOverlapWith(that.rect);
+    }
+
     std::string print() {
         std::string s;
         s = rect.print() + " , " + std::to_string(width) + " , " + std::to_string(layer);
         return s;
+    }
+
+    bool operator==(const Track& that) const {
+        if (terminal[0] != that.terminal[0]) {
+            return false;
+        }
+        if (terminal[1] != that.terminal[1]) {
+            return false;
+        }
+        double dw = fabs(width - that.width);
+        return rect == that.rect && dw < 1e-6 && layer == that.layer;
+    }
+
+    bool operator!=(const Track& that) const {
+        return !(*this == that);
     }
 
 public:
