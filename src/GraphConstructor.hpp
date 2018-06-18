@@ -105,18 +105,22 @@ public:
         for (const Vertex& v : vertices) {
             int layer = v.track.layer;
             std::vector<Vertex>& outVertices = routingGraph[v.id];
-            SegmentMap map;
+            SegmentMap map[3];
             if (layers[v.track.layer].isHorizontal()) {
-                map = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
+                map[0] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
+                map[1] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
+                map[2] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
             } else {
-                map = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
+                map[0] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
+                map[1] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
+                map[2] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
             }
-            scanOutVertices(v, layer, map, outVertices);
+            scanOutVertices(v, layer, map[0], outVertices);
             for (int l = layer - 1; l >= 0; --l) {
-                scanOutVertices(v, l, map, outVertices);
+                scanOutVertices(v, l, map[1], outVertices);
             }
             for (int l = layer + 1; l < (int) layers.size(); ++l) {
-                scanOutVertices(v, l, map, outVertices);
+                scanOutVertices(v, l, map[2], outVertices);
             }
         }
         int edgeCount = 0;
@@ -209,12 +213,18 @@ public:
                 if (layers[v.track.layer].isHorizontal()) {
                     double lower = r.lower_left.x;
                     double upper = r.upper_right.x;
+                    if (lower > v.track.rect.upper_right.x) {
+                        break;
+                    }
                     if (map.insert(lower, upper)) {
                         out.push_back(v);
                     }
                 } else {
                     double lower = r.lower_left.y;
                     double upper = r.upper_right.y;
+                    if (lower > v.track.rect.upper_right.y) {
+                        break;
+                    }
                     if (map.insert(lower, upper)) {
                         out.push_back(v);
                     }
