@@ -44,10 +44,7 @@ public:
             });
         }
         std::vector<Track> all_tracks;
-        // int c = 0;
         for (const auto& t : tracks) {
-            // printf("\r%d / %lu", ++c, tracks.size());
-            // fflush(stdout);
             std::stack<Track> stack;
             stack.push(t);
             while (!stack.empty()) {
@@ -80,7 +77,11 @@ public:
             logger.info("Layer %d: %d tracks\n", i, layerTracks[i].size());
         }
         logger.info("Generate vertices and edges\n");
+        logger.info("Generate vertices based on tacks splited\n");
         int vertexId = 0;
+        for (unsigned i = 0; i < layers.size(); ++i) {
+
+        }
         for (unsigned i = 0; i < layers.size(); ++i) {
             for (unsigned j = i + 1; j < layers.size(); ++j) {
                 for (const Track& ta : layerTracks[i]) {
@@ -92,55 +93,6 @@ public:
                 }
             }
         }
-        // int vertextId=0;
-        // for(unsigned i=0;i<all_tracks.size();i++)
-        // {
-        //     for(unsigned j=i+1;j<all_tracks.size();j++)
-        //     {
-        //         Rectangle overlap = all_tracks[i].rect.overlapWith(all_tracks[j].rect);
-        //         if(!overlap.isZero())   //two track overlap
-        //         {
-        //             int t1_layer_id = all_tracks[i].layer;
-        //             int t2_layer_id = all_tracks[j].layer;
-        //             const Layer& t1_layer = layers[t1_layer_id];
-        //             const Layer& t2_layer = layers[t2_layer_id];
-        //             if(t1_layer.direction==t2_layer.direction)
-        //             {
-        //                 if(all_tracks[i].width>all_tracks[j].width)
-        //                 {
-        //                     Rectangle large_overlap = largeOverlap(overlap,all_tracks[i].width,t1_layer.direction);
-        //                     ++vertextId;
-        //                     if(t1_layer_id!=t2_layer_id)
-        //                     {
-        //                         ++vertextId;
-        //                     }
-
-        //                 }else if(all_tracks[i].width<all_tracks[j].width)
-        //                 {
-        //                     Rectangle large_overlap = largeOverlap(overlap,all_tracks[j].width,t1_layer.direction);
-        //                     ++vertextId;
-        //                     if(t1_layer_id!=t2_layer_id)
-        //                     {
-        //                         ++vertextId;
-        //                     }
-        //                 }else
-        //                 {
-        //                     if(t1_layer_id==t2_layer_id)
-        //                     {
-        //                         ++vertextId;
-        //                     }else
-        //                     {
-        //                         vertextId += 2;
-        //                     }
-        //                 }
-        //             }else
-        //             {
-        //                 vertextId += 2;
-        //             }
-
-        //         }
-        //     }
-        // }
         logger.info("%d vertices generated\n", vertexId);
     }
 

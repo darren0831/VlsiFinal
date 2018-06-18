@@ -8,12 +8,11 @@
 class Rectangle {
 public:
     Rectangle() {}
+
     Rectangle(double lf_x, double lf_y, double ur_x, double ur_y) {
         lower_left = Point(lf_x, lf_y);
         upper_right = Point(ur_x, ur_y);
     }
-
-    Point lower_left, upper_right;
 
     Rectangle overlapWith(const Rectangle& that) const {
         Point ll = Point(0, 0), ur = Point(0, 0);
@@ -50,6 +49,10 @@ public:
     	s = lower_left.print()+" "+upper_right.print();
     	return s;
     }
+
+public:
+    Point lower_left;
+    Point upper_right;
 };
 
 #endif

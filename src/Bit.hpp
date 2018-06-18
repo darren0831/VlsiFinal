@@ -8,11 +8,11 @@ public:
 	Bit(std::string _name) {
 		name = _name;
 	}
-	std::vector<Pin> pins;
-	std::string name;
+
 	void addPin(Pin p) {
 		pins.push_back(p);
 	}
+
 	std::string print()
 	{
 		std::string s="";
@@ -24,6 +24,9 @@ public:
 		return s;
 	}
 
+public:
+	std::vector<Pin> pins;
+	std::string name;
 };
 
 #endif

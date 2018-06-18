@@ -4,14 +4,13 @@
 class Layer {
 public:
     Layer() {}
+
     Layer(std::string _name, int _spacing, std::string _direction) {
         name = _name;
         spacing = _spacing;
         direction = dir_str2char(_direction);
     }
-    std::string name;
-    int spacing;
-    char direction;
+
     char dir_str2char(std::string s) {
         if (s == "horizontal") return 'H';
 
@@ -26,5 +25,9 @@ public:
         return s;
     }
 
+public:
+    std::string name;
+    int spacing;
+    char direction;
 };
 #endif

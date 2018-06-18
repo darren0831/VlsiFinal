@@ -5,12 +5,12 @@
 class Pin {
 public:
     Pin() {}
+
     Pin(int _layer, int lf_x, int lf_y, int ur_x, int ur_y) {
         layer = _layer;
         r = Rectangle(lf_x, lf_y, ur_x, ur_y);
     }
-    int layer;
-    Rectangle r;
+
     std::string print()
     {
     	std::string s;
@@ -18,5 +18,8 @@ public:
     	return s;
     }
 
+public:
+    int layer;
+    Rectangle r;
 };
 #endif

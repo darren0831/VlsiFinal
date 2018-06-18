@@ -12,14 +12,11 @@ public:
         bit_counts = numBits;
         pin_counts = numPins;
     }
-    std::vector<Bit> bits;
-    std::string name;
-    int bit_counts;
-    int pin_counts;
-    std::vector<int> bus_width;
+
     void addBit(Bit b) {
         bits.push_back(b);
     }
+
     std::string print()
     {
         std::string s="";
@@ -37,5 +34,11 @@ public:
         return s;
     }
 
+public:
+    std::vector<Bit> bits;
+    std::vector<int> bus_width;
+    std::string name;
+    int bit_counts;
+    int pin_counts;
 };
 #endif

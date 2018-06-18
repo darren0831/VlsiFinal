@@ -16,16 +16,18 @@ public:
         width = _w;
         layer = _layer;
     }
-    Point terminal[2];
-    Rectangle rect;
-    double width;
-    int layer;
 
     std::string print() {
         std::string s;
         s = rect.print() + " , " + std::to_string(width) + " , " + std::to_string(layer);
         return s;
     }
+
+public:
+    Point terminal[2];
+    Rectangle rect;
+    double width;
+    int layer;
 };
 
 #endif

@@ -8,6 +8,7 @@ public:
     Edge(int src, int tgt) :
         src(src), tgt(tgt) {}
 
+public:
     int src;
     int tgt;
     int trackWidth;
