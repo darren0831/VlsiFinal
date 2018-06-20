@@ -51,6 +51,17 @@ public:
 
     Logger& operator=(Logger&& that) = delete;
 
+    void show(const char* fmt, ...) {
+        if (!enabled) {
+            return;
+        }
+
+        va_list args;
+        va_start(args, fmt);
+        vfprintf(fout, fmt, args);
+        va_end(args);
+    }
+
     void info(const char* fmt, ...) {
         if (!enabled) {
             return;

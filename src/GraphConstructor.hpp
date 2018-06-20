@@ -29,8 +29,16 @@ public:
         std::vector<Obstacle>& obstacles,
         Logger& logger) :
     layers(layers), tracks(tracks), buses(buses), obstacles(obstacles), logger(logger) {
+        outputlogger = Logger("output.log");
         preCalculate();
         initialize();
+        verify();
+    }
+    void verify() {
+        for(int i=0;i<(int)vertices.size();++i)
+        {
+            outputlogger.show("%s\n",vertices[i].toString().c_str());
+        }
     }
 
     void preCalculate() {
@@ -265,6 +273,7 @@ public:
     std::vector<int> min_bus_width;
 private:
     Logger& logger;
+    Logger outputlogger;
 };
 
 #endif // VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_

@@ -13,7 +13,7 @@ public:
         layer = _layer;
     }
 
-    std::string print()
+    std::string toString()
     {
     	std::string s;
     	s = rect.toString()+ " , " + std::to_string(layer);

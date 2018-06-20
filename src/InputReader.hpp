@@ -184,7 +184,7 @@ private:
         }
         input_logger.info("Obstacles:\n");
         for (unsigned i = 0; i < obstacles.size(); ++i) {
-            input_logger.info("%d : %s\n", i, obstacles[i].print().c_str());
+            input_logger.info("%d : %s\n", i, obstacles[i].toString().c_str());
         }
     }
 
