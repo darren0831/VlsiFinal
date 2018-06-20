@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
     auto tracks = inputReader.tracks;
     auto buses = inputReader.buses;
     auto obstacles = inputReader.obstacles;
+    Preprocess Preprocess(layers,obstacles);
     GraphConstructor graphConstructor(layers, tracks, buses, obstacles, stdLogger);
     return 0;
 }
