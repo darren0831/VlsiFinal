@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <vector>
+#include <queue>
 #include "Vertex.hpp"
 
 class GlobalRouter {
@@ -14,12 +15,31 @@ public:
         vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), logger(logger) {}
 
     void globalRoute() {
-
+        printf("%d\n", bfs(0, 5));
     }
 
 private:
     void initialize() {
 
+    }
+
+    bool bfs(int src, int tgt){
+        std::queue<int> vertexQueue;
+        bool isvisited[vertices.size()];
+        for(bool& it : isvisited) it = false;
+        vertexQueue.push(src);
+        while(!vertexQueue.empty()){
+            int cur = vertexQueue.front();
+            vertexQueue.pop();
+            if(cur==tgt) return true;
+            for(Vertex &neighbor : routingGraph[cur]){
+                if(isvisited[neighbor.id]==false){
+                    isvisited[neighbor.id]=true;
+                    vertexQueue.push(neighbor.id);
+                }
+            }
+        }
+        return false;
     }
 
 private:
