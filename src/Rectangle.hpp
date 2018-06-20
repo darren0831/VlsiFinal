@@ -37,6 +37,13 @@ public:
         return !overlap(that).isZero();
     }
 
+    bool isCoveredBy(const Rectangle& that) const {
+        return that.lower_left.x <= lower_left.x &&
+               that.lower_left.y <= lower_left.y &&
+               that.upper_right.x >= upper_right.x &&
+               that.upper_right.y >= upper_right.y;
+    }
+
     bool isZero() const {
         return std::fpclassify(lower_left.x) == FP_ZERO &&
             std::fpclassify(lower_left.y) == FP_ZERO &&

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include "Rectangle.hpp"
 
 /**
  * NOTE: This class is currently implemented by a simple method.
@@ -12,46 +13,37 @@
  */
 class SegmentMap {
 public:
-    SegmentMap() :
-        lowerBound(0), upperBound(0) {}
+    SegmentMap(const Rectangle& rect) :
+        bound(rect) {}
 
-    SegmentMap(double lowerBound, double upperBound) :
-        lowerBound(lowerBound), upperBound(upperBound) {}
-
-    bool insert(double lower, double upper) {
-        bool overlapped = overlapWith(lower, upper);
+    bool insert(const Rectangle& rect) {
+        bool overlapped = overlapWith(rect);
         if (!overlapped) {
-            insertIntoList(lower, upper);
+            insertIntoList(rect);
         }
         return !overlapped;
     }
 
-    bool overlapWith(double lower, double upper) {
-        if (lower > upperBound || upper < lowerBound) {
+    bool overlapWith(const Rectangle& rect) {
+        if (!rect.hasOverlap(bound)) {
             return false;
         }
-        lower = std::max(lower, lowerBound);
-        upper = std::min(upper, upperBound);
-        bool overlapped = false;
         for (const auto& p : list) {
-            overlapped = !((p.first<lower&&p.second<lower)||(p.first>upper&&p.second>upper))||
-                         overlapped;
-            if (overlapped) {
+            if (rect.isCoveredBy(p)) {
                 return true;
             }
         }
-        return overlapped;
+        return false;
     }
 
 private:
-    void insertIntoList(double lower, double upper) {
-        list.emplace_back(lower, upper);
+    void insertIntoList(const Rectangle& rect) {
+        list.emplace_back(rect);
     }
 
 private:
-    std::vector<std::pair<double, double>> list;
-    double lowerBound;
-    double upperBound;
+    std::vector<Rectangle> list;
+    Rectangle bound;
 };
 
 #endif // VLSI_FINAL_PROJECT_SEGMENT_MAP_HPP_

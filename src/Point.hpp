@@ -9,6 +9,10 @@ public:
 
     Point (double _x, double _y): x(_x), y(_y) {}
 
+    double axis(int a) {
+        return (a == 1) ? x : y;
+    }
+
     std::string toString()
     {
     	std::string s;
