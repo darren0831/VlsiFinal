@@ -35,10 +35,19 @@ public:
         verify();
     }
     void verify() {
-        for(int i=0;i<(int)vertices.size();++i)
-        {
-            outputlogger.show("%s\n",vertices[i].toString().c_str());
-        }
+        // for(int i=0;i<(int)vertices.size();++i)
+        // {
+        //     outputlogger.show("%s\n",vertices[i].toString().c_str());
+        // }
+        // for(int i=0;i<(int)vertices.size();++i)
+        // {
+        //     outputlogger.show("%d: <",i);
+        //     for(int j=0;j<(int)routingGraph[i].size();++j)
+        //     {
+        //         outputlogger.show("%d ",routingGraph[i][j].id);
+        //     }
+        //     outputlogger.show(">\n");
+        // }
     }
 
     void preCalculate() {

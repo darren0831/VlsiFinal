@@ -167,24 +167,24 @@ private:
 
     void printInput() {
         Logger input_logger("InputInfo.log");
-        input_logger.info("Layers:\n");
+        input_logger.show("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
         {
-            input_logger.info("%d : %s\n",i, layers[i].toString().c_str());
+            input_logger.show("%d : %s\n",i, layers[i].toString().c_str());
         }
-        input_logger.info("Tracks:\n");
+        input_logger.show("Tracks:\n");
         for(unsigned i=0;i<tracks.size();i++)
         {
-            input_logger.info("%d : %s\n",i, tracks[i].toString().c_str());
+            input_logger.show("%d : %s\n",i, tracks[i].toString().c_str());
         }
-        input_logger.info("Buses:\n");
+        input_logger.show("Buses:\n");
         for(unsigned i=0;i<buses.size();i++)
         {
-            input_logger.info("%d : %s\n",i, buses[i].toString().c_str());
+            input_logger.show("%d : %s\n",i, buses[i].toString().c_str());
         }
-        input_logger.info("Obstacles:\n");
+        input_logger.show("Obstacles:\n");
         for (unsigned i = 0; i < obstacles.size(); ++i) {
-            input_logger.info("%d : %s\n", i, obstacles[i].toString().c_str());
+            input_logger.show("%d : %s\n", i, obstacles[i].toString().c_str());
         }
     }
 
