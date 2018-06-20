@@ -59,6 +59,7 @@ public:
             enabled = that.enabled;
             that.fout = nullptr;
         }
+        return *this;
     }
 
     void info(const char* fmt, ...) {
