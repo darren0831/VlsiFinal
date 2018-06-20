@@ -1,5 +1,6 @@
 #include <string>
 #include "GraphConstructor.hpp"
+#include "GlobalRouter.hpp"
 #include "Preprocess.hpp"
 
 int main(int argc, char** argv) {
@@ -11,6 +12,7 @@ int main(int argc, char** argv) {
     Logger stdLogger;
     Logger inputLogger("input.log");
     Logger graphLogger("graph.log");
+    Logger globalRoutingLogger("global.log");
     InputReader inputReader(inputfile, stdLogger);
     auto layers = inputReader.layers;
     auto tracks = inputReader.tracks;
@@ -21,6 +23,6 @@ int main(int argc, char** argv) {
     auto vertices = graphConstructor.vertices;
     auto vertexMap = graphConstructor.vertexMap;
     auto routingGraph = graphConstructor.routingGraph;
-
+    GlobalRouter globalRouter(vertices, vertexMap, routingGraph, globalRoutingLogger);
     return 0;
 }
