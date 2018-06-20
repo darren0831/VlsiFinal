@@ -15,7 +15,7 @@ public:
         upper_right = Point(ur_x, ur_y);
     }
 
-    Rectangle overlap(const Rectangle& that, bool const lineOverlap==false) const {
+    Rectangle overlap(const Rectangle& that, bool const lineOverlap=false) const {
         Point ll = Point(0, 0), ur = Point(0, 0);
         if(lineOverlap){
             if(lower_left.x<=that.upper_right.x&&upper_right.x>=that.lower_left.x){
