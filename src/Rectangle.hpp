@@ -13,9 +13,11 @@ public:
     Rectangle(double lf_x, double lf_y, double ur_x, double ur_y) {
         lower_left = Point(lf_x, lf_y);
         upper_right = Point(ur_x, ur_y);
+        width = upper_right.x - lower_left.x;
+        height = upper_right.y - lower_left.y;
     }
 
-    Rectangle overlap(const Rectangle& that, bool const lineOverlap=false) const {
+    Rectangle overlap(const Rectangle& that, bool const lineOverlap = false) const {
         Point ll = Point(0, 0), ur = Point(0, 0);
         if(lineOverlap){
             if(lower_left.x<=that.upper_right.x&&upper_right.x>=that.lower_left.x){
@@ -48,7 +50,7 @@ public:
         return {ll.x, ll.y, ur.x, ur.y};
     }
 
-    bool hasOverlap(const Rectangle& that,bool lineOverlap) const {
+    bool hasOverlap(const Rectangle& that,bool lineOverlap = false) const {
         return !overlap(that,lineOverlap).isZero();
     }
 
@@ -84,6 +86,8 @@ public:
 public:
     Point lower_left;
     Point upper_right;
+    double width;
+    double height;
 };
 
 #endif

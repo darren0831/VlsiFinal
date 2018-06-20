@@ -2,6 +2,7 @@
 #define VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_
 
 #include <algorithm>
+#include <limits>
 #include <unordered_map>
 #include <vector>
 #include <stack>
@@ -31,11 +32,12 @@ public:
         preCalculate();
         initialize();
     }
+
     void preCalculate() {
 
         for(int i=0;i<(int)layers.size();i++)
         {
-            int width=0x7FFFFFFF;
+            int width = std::numeric_limits<int>::max();
             for(int j=0;j<(int)buses.size();j++)
             {
                 width = std::min(buses[j].bus_width[i],width);
@@ -118,16 +120,15 @@ public:
         for (const Vertex& v : vertices) {
             int layer = v.track.layer;
             std::vector<Vertex>& outVertices = routingGraph[v.id];
-            SegmentMap map[3];
+            SegmentMap map[2];
             map[0] = SegmentMap(v.track.rect);
             map[1] = SegmentMap(v.track.rect);
-            map[2] = SegmentMap(v.track.rect);
-            scanOutVertices(v, layer, map[0], outVertices);
+            scanOutVertices(v, layer, outVertices);
             for (int l = layer - 1; l >= 0; --l) {
-                scanOutVertices(v, l, map[1], outVertices);
+                scanOutVertices(v, l, map[0], outVertices);
             }
             for (int l = layer + 1; l < (int) layers.size(); ++l) {
-                scanOutVertices(v, l, map[2], outVertices);
+                scanOutVertices(v, l, map[1], outVertices);
             }
         }
         int edgeCount = 0;
@@ -197,6 +198,22 @@ public:
                 Track t4((g+c)/2,f,(g+c)/2,h,(c-g),t.layer); //(g,f,c,h)
                 if((c-g)>=min_bus_width[t.layer]+layer.spacing/2)
                     stack.push(t4);
+            }
+        }
+    }
+
+    void scanOutVertices(const Vertex& v, int targetLayer, std::vector<Vertex>& out) {
+        const Layer& layer = layers[targetLayer];
+        const double threshold = min_bus_width[targetLayer];
+        for (const Vertex& u : layerVertices[targetLayer]) {
+            if (v != u && v.hasOverlap(u, true)) {
+                Rectangle r = v.overlap(u, true);
+                if (layer.isHorizontal() && r.height > threshold) {
+                    out.push_back(v);
+                }
+                if (layer.isVertical() && r.width > threshold) {
+                    out.push_back(v);
+                }
             }
         }
     }

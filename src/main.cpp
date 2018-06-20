@@ -1,9 +1,6 @@
 #include <string>
 #include "GraphConstructor.hpp"
-#include "InputReader.hpp"
-#include "Logger.hpp"
 #include "Preprocess.hpp"
-#include "Vertex.hpp"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -19,7 +16,11 @@ int main(int argc, char** argv) {
     auto tracks = inputReader.tracks;
     auto buses = inputReader.buses;
     auto obstacles = inputReader.obstacles;
-    Preprocess Preprocess(layers,obstacles);
+    Preprocess(layers,obstacles);
     GraphConstructor graphConstructor(layers, tracks, buses, obstacles, stdLogger);
+    auto vertices = graphConstructor.vertices;
+    auto vertexMap = graphConstructor.vertexMap;
+    auto routingGraph = graphConstructor.routingGraph;
+
     return 0;
 }

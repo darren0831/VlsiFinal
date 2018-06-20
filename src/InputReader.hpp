@@ -52,7 +52,7 @@ private:
         auto ptA = readPoint();
         auto ptB = readPoint();
         boundary = Rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
-        logger.info("Runtime: %d sec.\n", runtime);
+        logger.info("Runtime: %d minutes\n", runtime);
         logger.info("Design Boundary: %s\n", boundary.toString().c_str());
     }
 
