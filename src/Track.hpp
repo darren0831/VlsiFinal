@@ -19,6 +19,25 @@ public:
         layer = _layer;
     }
 
+    Rectangle largeOverlap(Track& that)
+    {
+        Rectangle overlap_area = overlap(that);
+        Rectangle out;
+        double a,b,c,d;
+        a = overlap_area.lower_left.x;
+        b = overlap_area.lower_left.y;
+        c = overlap_area.upper_right.x;
+        d = overlap_area.upper_right.y;
+        if(direction=='H')
+        {
+            out = Rectangle(a,(b+d)/2-width/2,c,(b+d)/2+width/2);
+        }else if(direction=='V')
+        {
+            out = Rectangle((a+c)/2-width/2,b,(a+c)/2-width/2,d);
+        }
+        return out;
+    }
+
     Rectangle overlap(const Track& that) const {
         return rect.overlap(that.rect);
     }

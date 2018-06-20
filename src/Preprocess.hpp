@@ -3,17 +3,21 @@
 
 #include <vector>
 #include "Layer.hpp"
+#include "Track.hpp"
 #include "Obstacle.hpp"
-
+/**
+ * NOTE: This class is use for preprocess beofer construct graph
+ * 		 1. make obstacle bigger to fit spacing problem
+ */
 class Preprocess{
 public:
 	Preprocess(std::vector<Layer>& layers, std::vector<Obstacle>& obstacles):
 	    layers(layers),obstacles(obstacles)
 	{
-		process();
+		obstaclePreprocess();
 	}
 
-	void process()
+	void obstaclePreprocess()
 	{
 		for(int i=0;i<(int) obstacles.size();i++)
 		{
