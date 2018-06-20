@@ -6,18 +6,12 @@
 #include "Vertex.hpp"
 
 class GlobalRouter {
-private:
-    class CombinedVector {
-    public:
-    private:
-        std::unordered_set<int> vertexSet;
-    };
-
 public:
     GlobalRouter(std::vector<Vertex>& vertices,
                  std::unordered_map<int, Vertex>& vertexMap,
-                 std::vector<std::vector<Vertex>>& routingMap) :
-        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph) {}
+                 std::vector<std::vector<Vertex>>& routingGraph,
+                 Logger& logger) :
+        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), logger(logger) {}
 
     void globalRoute() {
 
@@ -34,7 +28,7 @@ private:
     std::vector<std::vector<Vertex>>& routingGraph;
 
 private:
-
+    Logger& logger;
 };
 
 #endif //VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_

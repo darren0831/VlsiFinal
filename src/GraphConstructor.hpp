@@ -28,7 +28,7 @@ public:
         std::vector<Bus>& buses,
         std::vector<Obstacle>& obstacles,
         Logger& logger) :
-    layers(layers), tracks(tracks), buses(buses), obstacles(obstacles), logger(logger) {
+        layers(layers), tracks(tracks), buses(buses), obstacles(obstacles), logger(logger) {
         preCalculate();
         initialize();
     }
