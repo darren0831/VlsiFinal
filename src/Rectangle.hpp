@@ -48,8 +48,8 @@ public:
         return {ll.x, ll.y, ur.x, ur.y};
     }
 
-    bool hasOverlap(const Rectangle& that) const {
-        return !overlap(that).isZero();
+    bool hasOverlap(const Rectangle& that,bool lineOverlap) const {
+        return !overlap(that,lineOverlap).isZero();
     }
 
     bool isCoveredBy(const Rectangle& that) const {

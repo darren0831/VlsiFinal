@@ -9,12 +9,12 @@ public:
     Vertex(const Track& track, int id) :
         track(track), id(id) {}
 
-    Rectangle overlap(const Vertex& that) const {
-        return track.rect.overlap(that.track.rect);
+    Rectangle overlap(const Vertex& that, bool lineOverlap) const {
+        return track.rect.overlap(that.track.rect, lineOverlap);
     }
 
-    bool hasOverlap(const Vertex& that) const {
-        return track.rect.hasOverlap(that.track.rect);
+    bool hasOverlap(const Vertex& that, bool lineOverlap) const {
+        return track.rect.hasOverlap(that.track.rect, lineOverlap);
     }
 
     bool operator==(const Vertex& that) const {

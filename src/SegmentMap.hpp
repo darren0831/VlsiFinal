@@ -27,7 +27,7 @@ public:
     }
 
     bool overlapWith(const Rectangle& rect) {
-        if (!rect.hasOverlap(bound)) {
+        if (!rect.hasOverlap(bound,false)) {
             return false;
         }
         for (const auto& p : list) {

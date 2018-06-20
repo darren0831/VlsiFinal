@@ -35,12 +35,12 @@ public:
 
         for(int i=0;i<(int)layers.size();i++)
         {
-            int width=0;
+            int width=0x7FFFFFFF;
             for(int j=0;j<(int)buses.size();j++)
             {
-                width = std::max(buses[j].bus_width[i],width);
+                width = std::min(buses[j].bus_width[i],width);
             }
-            max_bus_width.emplace_back(width);
+            min_bus_width.emplace_back(width);
         }
     }
 
@@ -70,7 +70,7 @@ public:
                     if (o.rect.lower_left.x > t.rect.upper_right.x) {
                         break;
                     }
-                    Rectangle overlap = t.rect.overlap(o.rect);
+                    Rectangle overlap = t.rect.overlap(o.rect,false);
                     if (!overlap.isZero()) {
                         hasOverlap = true;
                         splitTrack(t, overlap, stack);
@@ -140,7 +140,7 @@ public:
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
-        Layer layer = layers[];
+        Layer layer = layers[t.layer];
         double a,b,c,d,e,f,g,h;
         a = t.rect.lower_left.x;
         b = t.rect.lower_left.y;
@@ -164,13 +164,13 @@ public:
             if (!doubleEqual(b, f))
             {
                 Track t3(e,(b+f)/2,g,(b+f)/2,(f-b),t.layer); //(e,b,g,f)
-                if((f-b)>=max_bus_width[t.layer]+layer.spacing/2)
+                if((f-b)>=min_bus_width[t.layer]+layer.spacing/2)
                     stack.push(t3);
             }
             if (!doubleEqual(d, h))
             {
                 Track t4(e,(h+d)/2,g,(h+d)/2,(d-h),t.layer); //(e,h,g,d)
-                if((d-h)>=max_bus_width[t.layer]+layer.spacing/2)
+                if((d-h)>=min_bus_width[t.layer]+layer.spacing/2)
                     stack.push(t4);
             }
 
@@ -189,13 +189,13 @@ public:
             if (!doubleEqual(a, e))
             {
                 Track t3((a+e)/2,f,(a+e)/2,h,(e-a),t.layer); //(a,f,e,h)
-                if((e-a)>=max_bus_width[t.layer]+layer.spacing/2)
+                if((e-a)>=min_bus_width[t.layer]+layer.spacing/2)
                     stack.push(t3);
             }
             if (!doubleEqual(c, g))
             {
                 Track t4((g+c)/2,f,(g+c)/2,h,(c-g),t.layer); //(g,f,c,h)
-                if((c-g)>=max_bus_width[t.layer]+layer.spacing/2)
+                if((c-g)>=min_bus_width[t.layer]+layer.spacing/2)
                     stack.push(t4);
             }
         }
@@ -203,8 +203,8 @@ public:
 
     void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Vertex>& out) {
         for (const Vertex& u : layerVertices[targetLayer]) {
-            if (v != u && v.hasOverlap(u)) {
-                Rectangle r = v.overlap(u);
+            if (v != u && v.hasOverlap(u,true)) {
+                Rectangle r = v.overlap(u,true);
                 if (map.insert(r)) {
                     out.push_back(v);
                 }
@@ -231,7 +231,7 @@ public:
     std::unordered_map<int, Vertex> vertexMap;
     std::vector<std::vector<Vertex>> routingGraph;
 public:
-    std::vector<int> max_bus_width;
+    std::vector<int> min_bus_width;
 private:
     Logger& logger;
 };
