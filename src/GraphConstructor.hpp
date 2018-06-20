@@ -49,7 +49,7 @@ public:
     void initialize() {
         logger.info("Graph constructor initialize\n");
         logger.info("Split track\n");
-        std::vector<std::vector<Obstacle>> layerObstacles(layers.size());
+        layerObstacles = std::vector<std::vector<Obstacle>>(layers.size());
         for (const auto& o : obstacles) {
             layerObstacles[o.layer].push_back(o);
         }
@@ -209,24 +209,37 @@ public:
             if (v != u && v.hasOverlap(u, true)) {
                 Rectangle r = v.overlap(u, true);
                 if (layer.isHorizontal() && r.height > threshold) {
-                    out.push_back(v);
+                    out.push_back(u);
                 }
                 if (layer.isVertical() && r.width > threshold) {
-                    out.push_back(v);
+                    out.push_back(u);
                 }
             }
         }
     }
 
     void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Vertex>& out) {
+        int beginLayer = std::min(v.track.layer, targetLayer);
+        int endLayer = std::max(v.track.layer, targetLayer);
         for (const Vertex& u : layerVertices[targetLayer]) {
             if (v != u && v.hasOverlap(u,true)) {
                 Rectangle r = v.overlap(u,true);
-                if (map.insert(r)) {
-                    out.push_back(v);
+                if (map.insert(r) && isValidEdge(r, beginLayer, endLayer)) {
+                    out.push_back(u);
                 }
             }
         }
+    }
+
+    bool isValidEdge(const Rectangle& r, int src, int tgt) {
+        for (int layer = src + 1; layer < tgt; ++layer) {
+            for (const auto& o : layerObstacles[layer]) {
+                if (o.rect.hasOverlap(r)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     bool doubleEqual(double a, double b) {
@@ -240,6 +253,7 @@ public:
     std::vector<Obstacle>& obstacles;
 
 public:
+    std::vector<std::vector<Obstacle>> layerObstacles;
     std::vector<std::vector<Track>> layerTracks;
     std::vector<std::vector<Vertex>> layerVertices;
     std::vector<Vertex> vertices;

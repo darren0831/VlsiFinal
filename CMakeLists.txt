@@ -19,6 +19,6 @@ set(SOURCE_FILES
         src/Rectangle.hpp
         src/SegmentMap.hpp
         src/Track.hpp
-        src/Vertex.hpp)
+        src/Vertex.hpp src/GlobalRouter.hpp)
 
 add_executable(route ${SOURCE_FILES})
