@@ -13,6 +13,8 @@
  */
 class SegmentMap {
 public:
+    SegmentMap() = default;
+
     SegmentMap(const Rectangle& rect) :
         bound(rect) {}
 
