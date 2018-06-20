@@ -69,8 +69,10 @@ public:
     }
 
     bool isZero() const {
-        return fabs(upper_right.x - lower_left.x) < 1e-6 &&
-               fabs(upper_right.y - lower_left.y) < 1e-6;
+        double dx = upper_right.x - lower_left.x;
+        double dy = upper_right.y - lower_left.y;
+        double area = dx * dy;
+        return fabs(area) < 1e-6;
     }
 
     std::string toString() {
