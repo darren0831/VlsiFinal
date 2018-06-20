@@ -15,7 +15,7 @@ public:
         vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), logger(logger) {}
 
     void globalRoute() {
-
+        printf("%d\n", bfs(0, 5));
     }
 
 private:
@@ -26,7 +26,7 @@ private:
     bool bfs(int src, int tgt){
         std::queue<int> vertexQueue;
         bool isvisited[vertices.size()];
-        for(bool it : isvisited) isvisited = false;
+        for(bool& it : isvisited) it = false;
         vertexQueue.push(src);
         while(!vertexQueue.empty()){
             int cur = vertexQueue.front();
@@ -39,6 +39,7 @@ private:
                 }
             }
         }
+        return false;
     }
 
 private:

@@ -13,6 +13,7 @@
 #include "InputReader.hpp"
 #include "Layer.hpp"
 #include "Logger.hpp"
+#include "Net.hpp"
 #include "Obstacle.hpp"
 #include "Pin.hpp"
 #include "Point.hpp"
@@ -31,6 +32,7 @@ public:
         layers(layers), tracks(tracks), buses(buses), obstacles(obstacles), logger(logger) {
         preCalculate();
         initialize();
+        initializeNets();
     }
 
     void preCalculate() {
@@ -138,6 +140,32 @@ public:
         }
         avgEdgeCount = ((double) edgeCount) / routingGraph.size();
         logger.info("%d edges generated, average %f edge for each vertex\n", edgeCount, avgEdgeCount);
+    }
+
+    void initializeNets() {
+        logger.info("Initialize nets\n");
+        for (const auto& bus : buses) {
+            Net net(bus.pin_counts);
+            for (const Bit& bit : bus.bits) {
+                for (int i = 0; i < (int) bit.pins.size(); ++i) {
+                    const Pin& pin = bit.pins[i];
+                    int layer = pin.layer;
+                    const Rectangle& location = pin.rect;
+                    int c = 0;
+                    for (const Vertex& v : layerVertices[layer]) {
+                        if (v.track.rect.hasOverlap(location)) {
+                            net.addTerminal(i, v.id);
+                            ++c;
+                        }
+                    }
+                    if (c != 1) {
+                        logger.warning("Pin overlaps with %d vertices\n", c);
+                    }
+                }
+            }
+            nets.emplace_back(net);
+        }
+        logger.info("%d nets generated\n", (int) nets.size());
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
@@ -257,12 +285,15 @@ public:
     std::vector<std::vector<Track>> layerTracks;
     std::vector<std::vector<Vertex>> layerVertices;
     std::vector<Vertex> vertices;
+    std::vector<Net> nets;
 
 public:
     std::unordered_map<int, Vertex> vertexMap;
     std::vector<std::vector<Vertex>> routingGraph;
+
 public:
     std::vector<int> min_bus_width;
+
 private:
     Logger& logger;
 };
