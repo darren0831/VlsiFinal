@@ -1,8 +1,40 @@
-//
-// Created by 小野瀬ひなた on 2018/06/20.
-//
+#ifndef VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
+#define VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 
-#ifndef VLSIFINALPROJECT_GLOBALROUTER_HPP
-#define VLSIFINALPROJECT_GLOBALROUTER_HPP
+#include <unordered_map>
+#include <vector>
+#include "Vertex.hpp"
 
-#endif //VLSIFINALPROJECT_GLOBALROUTER_HPP
+class GlobalRouter {
+private:
+    class CombinedVector {
+    public:
+    private:
+        std::unordered_set<int> vertexSet;
+    };
+
+public:
+    GlobalRouter(std::vector<Vertex>& vertices,
+                 std::unordered_map<int, Vertex>& vertexMap,
+                 std::vector<std::vector<Vertex>>& routingMap) :
+        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph) {}
+
+    void globalRoute() {
+
+    }
+
+private:
+    void initialize() {
+
+    }
+
+private:
+    std::vector<Vertex>& vertices;
+    std::unordered_map<int, Vertex>& vertexMap;
+    std::vector<std::vector<Vertex>>& routingGraph;
+
+private:
+
+};
+
+#endif //VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
