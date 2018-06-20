@@ -1,25 +1,29 @@
 #ifndef VLSI_FINAL_PROJECT_BUS_HPP_
 #define VLSI_FINAL_PROJECT_BUS_HPP_
+
+#include <algorithm>
 #include <map>
+#include <utility>
 #include <vector>
 #include <string>
 #include "Bit.hpp"
+
 class Bus {
 public:
     Bus(std::string _name, const std::vector<int>& _bus_width, int numBits, int numPins) {
-        name = _name;
+        name = std::move(_name);
         bus_width = _bus_width;
         bit_counts = numBits;
         pin_counts = numPins;
     }
 
-    void addBit(Bit b) {
+    void addBit(const Bit& b) {
         bits.push_back(b);
     }
 
-    std::string print()
+    std::string toString()
     {
-        std::string s="";
+        std::string s;
         s+=name+std::string("\n");
         s+=std::string("WIDTH: \n");
         for(unsigned i=0;i<bus_width.size();i++)
@@ -29,7 +33,7 @@ public:
         s+=std::string("BITS: \n");
         for(unsigned i=0;i<bits.size();i++)
         {
-            s+=std::string("\t")+bits[i].print()+std::string("\n");
+            s+=std::string("\t")+ bits[i].toString()+std::string("\n");
         }
         return s;
     }

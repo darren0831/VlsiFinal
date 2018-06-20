@@ -53,7 +53,7 @@ private:
         auto ptB = readPoint();
         boundary = Rectangle(ptA.first, ptA.second, ptB.first, ptB.second);
         logger.info("Runtime: %d sec.\n", runtime);
-        logger.info("Design Boundary: %s\n", boundary.print().c_str());
+        logger.info("Design Boundary: %s\n", boundary.toString().c_str());
     }
 
     void readLayerInfo() {
@@ -170,17 +170,17 @@ private:
         input_logger.info("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
         {
-            input_logger.info("%d : %s\n",i,layers[i].print().c_str());
+            input_logger.info("%d : %s\n",i, layers[i].toString().c_str());
         }
         input_logger.info("Tracks:\n");
         for(unsigned i=0;i<tracks.size();i++)
         {
-            input_logger.info("%d : %s\n",i,tracks[i].print().c_str());
+            input_logger.info("%d : %s\n",i, tracks[i].toString().c_str());
         }
         input_logger.info("Buses:\n");
         for(unsigned i=0;i<buses.size();i++)
         {
-            input_logger.info("%d : %s\n",i,buses[i].print().c_str());
+            input_logger.info("%d : %s\n",i, buses[i].toString().c_str());
         }
         input_logger.info("Obstacles:\n");
         for (unsigned i = 0; i < obstacles.size(); ++i) {

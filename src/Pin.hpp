@@ -1,25 +1,27 @@
 #ifndef VLSI_FINAL_PROJECT_PIN_HPP_
 #define VLSI_FINAL_PROJECT_PIN_HPP_
-#include "Rectangle.hpp"
+
 #include <string>
+#include "Rectangle.hpp"
+
 class Pin {
 public:
-    Pin() {}
+    Pin() = default;
 
     Pin(int _layer, int lf_x, int lf_y, int ur_x, int ur_y) {
         layer = _layer;
-        r = Rectangle(lf_x, lf_y, ur_x, ur_y);
+        rect = Rectangle(lf_x, lf_y, ur_x, ur_y);
     }
 
-    std::string print()
+    std::string toString()
     {
     	std::string s;
-    	s = r.print() + " , " + std::to_string(layer);
+    	s = rect.toString() + " , " + std::to_string(layer);
     	return s;
     }
 
     bool operator==(const Pin& that) const {
-        return layer == that.layer && r == that.r;
+        return layer == that.layer && rect == that.rect;
     }
 
     bool operator!=(const Pin& that) const {
@@ -28,6 +30,6 @@ public:
 
 public:
     int layer;
-    Rectangle r;
+    Rectangle rect;
 };
 #endif

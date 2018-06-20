@@ -1,7 +1,9 @@
 #ifndef VLSI_FINAL_PROJECT_TRACK_HPP_
 #define VLSI_FINAL_PROJECT_TRACK_HPP_
-#include "Rectangle.hpp"
+
 #include <string>
+#include "Rectangle.hpp"
+
 class Track {
 public:
     Track(double _lx, double _ly, double _rx, double _ry, double _w, int _layer) {
@@ -17,17 +19,17 @@ public:
         layer = _layer;
     }
 
-    Rectangle overlapWith(const Track& that) const {
-        return rect.overlapWith(that.rect);
+    Rectangle overlap(const Track& that) const {
+        return rect.overlap(that.rect);
     }
 
-    bool hasOverlapWith(const Track& that) const {
-        return rect.hasOverlapWith(that.rect);
+    bool hasOverlap(const Track& that) const {
+        return rect.hasOverlap(that.rect);
     }
 
-    std::string print() {
+    std::string toString() {
         std::string s;
-        s = rect.print() + " , " + std::to_string(width) + " , " + std::to_string(layer);
+        s = rect.toString() + " , " + std::to_string(width) + " , " + std::to_string(layer);
         return s;
     }
 

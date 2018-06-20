@@ -11,3 +11,10 @@ route
 # log
 log
 *.log
+
+# JetBrains
+*.xml
+.idea/
+
+# cmake
+cmake-build-debug/

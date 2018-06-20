@@ -2,7 +2,6 @@
 #define VLSI_FINAL_PROJECT_SEGMENT_MAP_HPP_
 
 #include <algorithm>
-#include <list>
 #include <utility>
 #include <vector>
 
@@ -35,7 +34,6 @@ public:
         upper = std::min(upper, upperBound);
         bool overlapped = false;
         for (const auto& p : list) {
-            // TODO bug
             overlapped = !((p.first<lower&&p.second<lower)||(p.first>upper&&p.second>upper))||
                          overlapped;
             if (overlapped) {
@@ -47,19 +45,11 @@ public:
 
 private:
     void insertIntoList(double lower, double upper) {
-        // auto v = std::make_pair(lower, upper);
-        // auto it = list.begin();
-        // while (it != list.end()) {
-        //     if (it->first > lower) {
-        //         list.insert(it, v);
-        //         return;
-        //     }
-        // }
-        list.push_back(std::make_pair(lower, upper));
+        list.emplace_back(lower, upper);
     }
 
 private:
-    std::list<std::pair<double, double>> list;
+    std::vector<std::pair<double, double>> list;
     double lowerBound;
     double upperBound;
 };

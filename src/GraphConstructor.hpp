@@ -40,8 +40,8 @@ public:
         }
         for (int i = 0; i < (int) layers.size(); ++i) {
             std::sort(layerObstacles[i].begin(), layerObstacles[i].end(), [](Obstacle a, Obstacle b) {
-                const Rectangle& ra = a.area;
-                const Rectangle& rb = b.area;
+                const Rectangle& ra = a.rect;
+                const Rectangle& rb = b.rect;
                 return ra.lower_left.x < rb.lower_left.x;
             });
         }
@@ -54,10 +54,10 @@ public:
                 stack.pop();
                 bool hasOverlap = false;
                 for (const auto& o : layerObstacles[t.layer]) {
-                    if (o.area.lower_left.x > t.rect.upper_right.x) {
+                    if (o.rect.lower_left.x > t.rect.upper_right.x) {
                         break;
                     }
-                    Rectangle overlap = t.rect.overlapWith(o.area);
+                    Rectangle overlap = t.rect.overlap(o.rect);
                     if (!overlap.isZero()) {
                         hasOverlap = true;
                         splitTrack(t, overlap, stack);

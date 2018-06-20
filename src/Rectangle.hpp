@@ -2,19 +2,20 @@
 #define VLSI_FINAL_PROJECT_RECTANGLE_HPP_
 
 #include <cmath>
+#include <initializer_list>
 #include <string>
 #include "Point.hpp"
 
 class Rectangle {
 public:
-    Rectangle() {}
+    Rectangle() = default;
 
     Rectangle(double lf_x, double lf_y, double ur_x, double ur_y) {
         lower_left = Point(lf_x, lf_y);
         upper_right = Point(ur_x, ur_y);
     }
 
-    Rectangle overlapWith(const Rectangle& that) const {
+    Rectangle overlap(const Rectangle& that) const {
         Point ll = Point(0, 0), ur = Point(0, 0);
 
         if(lower_left.x<that.upper_right.x&&upper_right.x>that.lower_left.x){
@@ -29,11 +30,11 @@ public:
                 else ur.y = that.upper_right.y;
             }
         }
-        return Rectangle(ll.x, ll.y, ur.x, ur.y);
+        return {ll.x, ll.y, ur.x, ur.y};
     }
 
-    bool hasOverlapWith(const Rectangle& that) const {
-        return !overlapWith(that).isZero();
+    bool hasOverlap(const Rectangle& that) const {
+        return !overlap(that).isZero();
     }
 
     bool isZero() const {
@@ -43,10 +44,10 @@ public:
             std::fpclassify(upper_right.y) == FP_ZERO;
     }
 
-    std::string print()
+    std::string toString()
     {
     	std::string s;
-    	s = lower_left.print()+" "+upper_right.print();
+    	s = lower_left.toString()+" "+ upper_right.toString();
     	return s;
     }
 

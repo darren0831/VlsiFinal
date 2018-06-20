@@ -10,11 +10,11 @@ public:
         track(track), id(id) {}
 
     Rectangle overlapWith(const Vertex& that) const {
-        return track.rect.overlapWith(that.track.rect);
+        return track.rect.overlap(that.track.rect);
     }
 
     bool hasOverlapWith(const Vertex& that) const {
-        return track.rect.hasOverlapWith(that.track.rect);
+        return track.rect.hasOverlap(that.track.rect);
     }
 
     bool operator==(const Vertex& that) const {

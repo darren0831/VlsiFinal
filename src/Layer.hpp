@@ -1,17 +1,20 @@
 #ifndef VLSI_FINAL_PROJECT_LAYER_HPP_
 #define VLSI_FINAL_PROJECT_LAYER_HPP_
+
 #include <string>
+#include <utility>
+
 class Layer {
 public:
-    Layer() {}
+    Layer() = default;
 
     Layer(std::string _name, int _spacing, std::string _direction) {
-        name = _name;
+        name = std::move(_name);
         spacing = _spacing;
         direction = dir_str2char(_direction);
     }
 
-    char dir_str2char(std::string s) {
+    char dir_str2char(const std::string& s) {
         if (s == "horizontal") return 'H';
 
         if (s == "vertical") return 'V';
@@ -26,9 +29,9 @@ public:
         return direction == 'V';
     }
 
-    std::string print()
+    std::string toString()
     {
-        std::string s="";
+        std::string s;
         s = name + " , " + std::to_string(spacing) + " , " + direction;
         return s;
     }
