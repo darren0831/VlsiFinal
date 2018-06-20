@@ -2,6 +2,7 @@
 #include "GraphConstructor.hpp"
 #include "InputReader.hpp"
 #include "Logger.hpp"
+#include "Preprocess.hpp"
 #include "Vertex.hpp"
 
 int main(int argc, char** argv) {

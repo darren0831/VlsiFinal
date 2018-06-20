@@ -9,11 +9,11 @@ public:
     Vertex(const Track& track, int id) :
         track(track), id(id) {}
 
-    Rectangle overlapWith(const Vertex& that) const {
+    Rectangle overlap(const Vertex& that) const {
         return track.rect.overlap(that.track.rect);
     }
 
-    bool hasOverlapWith(const Vertex& that) const {
+    bool hasOverlap(const Vertex& that) const {
         return track.rect.hasOverlap(that.track.rect);
     }
 

@@ -210,8 +210,8 @@ public:
 
     void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Vertex>& out) {
         for (const Vertex& u : layerVertices[targetLayer]) {
-            if (v != u && v.hasOverlapWith(u)) {
-                Rectangle r = v.overlapWith(u);
+            if (v != u && v.hasOverlap(u)) {
+                Rectangle r = v.overlap(u);
                 if (layers[v.track.layer].isHorizontal()) {
                     double lower = r.lower_left.x;
                     double upper = r.upper_right.x;
