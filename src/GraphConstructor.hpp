@@ -106,20 +106,14 @@ public:
             int layer = v.track.layer;
             std::vector<Vertex>& outVertices = routingGraph[v.id];
             SegmentMap map[3];
-            if (layers[v.track.layer].isHorizontal()) {
-                map[0] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
-                map[1] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
-                map[2] = SegmentMap(v.track.rect.lower_left.x, v.track.rect.upper_right.x);
-            } else {
-                map[0] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
-                map[1] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
-                map[2] = SegmentMap(v.track.rect.lower_left.y, v.track.rect.upper_right.y);
-            }
+            map[0] = SegmentMap(v.track.rect);
+            map[1] = SegmentMap(v.track.rect);
+            map[2] = SegmentMap(v.track.rect);
             scanOutVertices(v, layer, map[0], outVertices);
-            for (int l = layer - 1; l >= std::max(layer - 2, 0); --l) {
+            for (int l = layer - 1; l >= 0; --l) {
                 scanOutVertices(v, l, map[1], outVertices);
             }
-            for (int l = layer + 1; l < std::min((int) layers.size(), layer + 2); ++l) {
+            for (int l = layer + 1; l < (int) layers.size(); ++l) {
                 scanOutVertices(v, l, map[2], outVertices);
             }
         }
@@ -212,24 +206,8 @@ public:
         for (const Vertex& u : layerVertices[targetLayer]) {
             if (v != u && v.hasOverlap(u)) {
                 Rectangle r = v.overlap(u);
-                if (layers[v.track.layer].isHorizontal()) {
-                    double lower = r.lower_left.x;
-                    double upper = r.upper_right.x;
-                    if (lower > v.track.rect.upper_right.x) {
-                        break;
-                    }
-                    if (map.insert(lower, upper)) {
-                        out.push_back(v);
-                    }
-                } else {
-                    double lower = r.lower_left.y;
-                    double upper = r.upper_right.y;
-                    if (lower > v.track.rect.upper_right.y) {
-                        break;
-                    }
-                    if (map.insert(lower, upper)) {
-                        out.push_back(v);
-                    }
+                if (map.insert(r)) {
+                    out.push_back(v);
                 }
             }
         }
