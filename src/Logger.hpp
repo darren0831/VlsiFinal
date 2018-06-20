@@ -39,7 +39,11 @@ public:
 
     Logger(const Logger& that) = delete;
 
-    Logger(Logger&& that) = delete;
+    Logger(Logger&& that) {
+        fout = that.fout;
+        enabled = that.enabled;
+        that.fout = nullptr;
+    }
 
     ~Logger() {
         if (fout != nullptr && fout != stdout) {
@@ -49,7 +53,13 @@ public:
 
     Logger& operator=(const Logger& that) = delete;
 
-    Logger& operator=(Logger&& that) = delete;
+    Logger& operator=(Logger&& that) {
+        if (this != &that) {
+            fout = that.fout;
+            enabled = that.enabled;
+            that.fout = nullptr;
+        }
+    }
 
     void show(const char* fmt, ...) {
         if (!enabled) {
