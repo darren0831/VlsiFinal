@@ -1,6 +1,8 @@
 #ifndef VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 #define VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 
+#include <algorithm>
+#include <limits>
 #include <unordered_map>
 #include <vector>
 #include <queue>
@@ -15,7 +17,6 @@ private:
         GlobalEdge(int id,int src,int tgt):id(id),src(src),tgt(tgt) {
             cost = 0;
             historical_cost = 0;
-            direction = 0;
             maxWidth = 0;
         }
         double getCost() {return cost;}
@@ -30,11 +31,11 @@ private:
 
         }
         int edgeCount(double querywidth) {
-            if(layer==-1) return
+            if(layer==-1) return std::numeric_limits<int>::max();
         }
         void addVertexToEdge(Vertex v) {
-            vertices[v.id] = ceil(v.track.width);
-            maxWidth = std::max(v.track.width,maxWidth);
+            vertices[v.id] = (int) ceil(v.track.width);
+            maxWidth = std::max((int) v.track.width,maxWidth);
         }
     public:
         int src;
@@ -178,18 +179,18 @@ private:
             if(layers[layer].isHorizontal()) {
                 for(int j=fromGridID;j<toGridID;j++){
                     for(int k=0;k<(int)globalGraph[j].size();k++){
-                        if(getDirection(globalEdge[globalGraph[j][i]].src,globalEdge[globalGraph[j][i]].tgt)==vertexDir){
-                            globalEdge[globalGraph[j][i]].addVertexToEdge(vertices[i]);
-                            globalEdge[globalGraph[j+1][i]].addVertexToEdge(vertices[i]);
+                        if(getDirection(globalEdges[globalGraph[j][i]].src, layer,globalEdges[globalGraph[j][i]].tgt, layer)==vertexDir){
+                            globalEdges[globalGraph[j][i]].addVertexToEdge(vertices[i]);
+                            globalEdges[globalGraph[j+1][i]].addVertexToEdge(vertices[i]);
                         }
                     }
                 }
             }else if(layers[layer].isVertical()){
                 for(int j=0;j<(toGridID-fromGridID)/xGridCount;j++){
                     for(int k=0;k<(int)globalGraph[j].size();k++){
-                        if(getDirection(globalEdge[globalGraph[j*xGridCount+fromGridID][i]].src,globalEdge[globalGraph[j*xGridCount+fromGridID][i]].tgt)==vertexDir){
-                            globalEdge[globalGraph[j*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
-                            globalEdge[globalGraph[(j+1)*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
+                        if(getDirection(globalEdges[globalGraph[j*xGridCount+fromGridID][i]].src,layer, globalEdges[globalGraph[j*xGridCount+fromGridID][i]].tgt, layer)==vertexDir){
+                            globalEdges[globalGraph[j*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
+                            globalEdges[globalGraph[(j+1)*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
                         }
                     }
                 }
