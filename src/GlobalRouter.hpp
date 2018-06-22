@@ -11,8 +11,9 @@ public:
     GlobalRouter(std::vector<Vertex>& vertices,
                  std::unordered_map<int, Vertex>& vertexMap,
                  std::vector<std::vector<Vertex>>& routingGraph,
+                 std::vector<Net>& nets,
                  Logger& logger) :
-        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), logger(logger) {}
+        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger) {}
 
     void globalRoute() {
         printf("%d\n", bfs(0, 5));
@@ -46,6 +47,7 @@ private:
     std::vector<Vertex>& vertices;
     std::unordered_map<int, Vertex>& vertexMap;
     std::vector<std::vector<Vertex>>& routingGraph;
+    std::vector<Net>& nets;
 
 private:
     Logger& logger;

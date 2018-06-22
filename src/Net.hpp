@@ -5,9 +5,9 @@
 
 class Net {
 public:
-    Net(int numBins) :
-        numBins(numBins) {
-        net = std::vector<std::vector<int>>((unsigned long) numBins);
+    Net(int numBits) :
+        numBits(numBits) {
+        net = std::vector<std::vector<int>>((unsigned long) numBits);
     }
 
     void addTerminal(int binId, int terminalVertexId) {
@@ -16,6 +16,7 @@ public:
 
 public:
     std::vector<std::vector<int>> net;
-    int numBins;
+    int numBits;
 };
+
 #endif // VLSI_FINAL_PROJECT_NET_HPP_
