@@ -203,7 +203,7 @@ private:
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
             int src = net[i];
-            auto result = routeSinglePath(src, tgt, widths);
+            auto result = routeSinglePath(src, tgt, widths, 1);
             if (!result.empty()) {
                 for (int v : result) {
                     tgt.emplace_back(v);
@@ -217,12 +217,14 @@ private:
     }
 
 
-    std::vector<int> routeSinglePath(const int src, std::vector<int>& target,std::vector<int>& width,int bitCount) {
+    std::vector<int> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
         std::vector<int> vertexCandidates;
         std::vector<bool> visited(globalGraph.size());
         std::vector<int> perdecessor(globalGraph.size());
         std::vector<int> gridCost(globalGraph.size());
-        for(bool &i: visited) i = false;
+        for (int i = 0; i < (int) globalGraph.size(); ++i) {
+            visited[i] = false;
+        }
         vertexCandidates.emplace_back(src);
         visited[src] = true;
         gridCost[src] = 0;
@@ -252,7 +254,7 @@ private:
                 visited[nextId] = true;
             }
 
-            for(int &i: target){
+            for(const int &i: target){
                 if(i==nextId){
                     foundTarget = true;
                     break;
