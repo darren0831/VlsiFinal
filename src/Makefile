@@ -5,7 +5,7 @@ CC := g++
 
 CXXFLAGS := -std=c++14 -O3 -Wall -Wextra -Wno-unused-result
 
-LDFLAGS := -lm
+LDFLAGS := -lm -pthread
 
 DEFFLAGS := -DVLSI_FINAL_PROJECT_DEBUG_FLAG
 

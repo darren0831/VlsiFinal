@@ -7,13 +7,21 @@
 #include "Vertex.hpp"
 
 class GlobalRouter {
+private:
+    class GlobalGrid {
+    public:
+        GlobalGrid(int width,std::vector<int>& vertices):width(width),vertices(vertices) {}
+        int width;
+        std::vector<int> vertices;
+    };
 public:
     GlobalRouter(std::vector<Vertex>& vertices,
                  std::unordered_map<int, Vertex>& vertexMap,
                  std::vector<std::vector<Vertex>>& routingGraph,
                  std::vector<Net>& nets,
+                 std::vector<Bus>& buses,
                  Logger& logger) :
-        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger) {}
+        vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), buses(buses), logger(logger) {}
 
     void globalRoute() {
         printf("%d\n", bfs(0, 5));
@@ -22,6 +30,16 @@ public:
 private:
     void initialize() {
 
+    }
+    int calGridWidth() {
+        std::vector<int> medians;
+        for(int i=0;i<(int)buses.size();i++){
+            std::vector<int> s = buses[i].widths;
+            std::sort(s.begin(),s.end());
+            medians.emplace_back(buses[i].widths[buses[i].widths.size()/2]);
+        }
+        std::sort(medians.begin(),medians.end());
+        return medians[medians.size()/2];
     }
 
     bool bfs(int src, int tgt){
@@ -48,6 +66,7 @@ private:
     std::unordered_map<int, Vertex>& vertexMap;
     std::vector<std::vector<Vertex>>& routingGraph;
     std::vector<Net>& nets;
+    std::vector<Bus>& buses;
 
 private:
     Logger& logger;
