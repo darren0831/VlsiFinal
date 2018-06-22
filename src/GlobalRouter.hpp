@@ -20,9 +20,8 @@ private:
     private:
         double cost;
         double historical_cost;
-
-        
     };
+
 public:
     GlobalRouter(std::vector<Vertex>& vertices,
                  std::unordered_map<int, Vertex>& vertexMap,
@@ -33,27 +32,21 @@ public:
         vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), buses(buses), logger(logger) {}
 
     void globalRoute() {
-        printf("%d\n", bfs(0, 5));
-        for(Net &curNet:nets){
-            for(int i=0;i<curNet.numBits;i++){
-
-                for(int m=0;m<curNet.net[i].size()-1;m++){
-                    for(int n=m+1;n<curNet.net[i].size();n++){
-                        bool found = bfs(m,n);
-                        if(!found){
-                            logger.warning("connect bits by bfs fail\n");
-                        }
-                    }
-                }
-            }
-
-        }
+        initialize();
+        doRouting();
     }
 
 private:
     void initialize() {
 
     }
+
+    void doRouting() {
+        for (const Net& net : nets) {
+            routeSingleNet(net);
+        }
+    }
+
     int calGridWidth() {
         std::vector<int> medians;
         for(int i=0;i<(int)buses.size();i++){
@@ -64,6 +57,7 @@ private:
         std::sort(medians.begin(),medians.end());
         return medians[medians.size()/2];
     }
+
     void implementGlobalGrid() {
         int gridWidth = calGridWidth();
         for(int i=0;i<(int)vertices.size();i++){
@@ -71,23 +65,13 @@ private:
         }
     }
 
-    bool bfs(int src, int tgt){
-        std::queue<int> vertexQueue;
-        bool isvisited[vertices.size()];
-        for(bool& it : isvisited) it = false;
-        vertexQueue.push(src);
-        while(!vertexQueue.empty()){
-            int cur = vertexQueue.front();
-            vertexQueue.pop();
-            if(cur==tgt) return true;
-            for(Vertex &neighbor : routingGraph[cur]){
-                if(isvisited[neighbor.id]==false){
-                    isvisited[neighbor.id]=true;
-                    vertexQueue.push(neighbor.id);
-                }
-            }
-        }
-        return false;
+    bool routeSingleNet(const Net& net) {
+        std::vector<int> srcs;
+        srcs.emplace_back(net.net[0]);
+    }
+
+    bool routeSinglePath(const std::vector<int>& src, int target) {
+
     }
 
 private:
@@ -96,6 +80,8 @@ private:
     std::vector<std::vector<Vertex>>& routingGraph;
     std::vector<Net>& nets;
     std::vector<Bus>& buses;
+
+private:
     std::vector<std::vector<int>> globalGraph;
     std::vector<GlobalEdge> globalEdges;
 
