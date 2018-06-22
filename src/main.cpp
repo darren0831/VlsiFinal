@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     auto& buses = inputReader.buses;
     auto& obstacles = inputReader.obstacles;
     auto& boundary = inputReader.boundary;
-    Preprocess(layers, obstacles);
+    Preprocess(layers, obstacles, boundary);
     GraphConstructor graphConstructor(layers, tracks, buses, obstacles, stdLogger);
     auto& vertices = graphConstructor.vertices;
     auto& vertexMap = graphConstructor.vertexMap;

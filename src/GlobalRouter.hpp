@@ -166,11 +166,12 @@ private:
     }
 
     void constructGlobalEdge() {
-        gridWidth = calGridWidth();
+        gridWidth = calGridWidth() * 100;
         xGridCount = (int) ceil(boundary.ur.x/gridWidth);
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
         globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
+        logger.info("gridWidth: %lf\n", gridWidth);
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
         for(int k=0;k<(int)layers.size();k++) {
             for(int i=0;i<yGridCount;i++) {
@@ -218,6 +219,7 @@ private:
             Point to = v.track.terminal[1];
             int fromGridId = coordToGridId(from, layer);
             int toGridId = coordToGridId(to, layer);
+            // logger.show("%s:%d - %d\n",v.toString().c_str(),fromGridId,toGridId);
             char vertexDir = getDirection(fromGridId, layer, toGridId, layer);
             if (layers[layer].isHorizontal()) {
                 for (int i = fromGridId; i < toGridId; ++i) {
@@ -331,9 +333,9 @@ private:
     }
 
     int coordToGridId(Point p, int layer) {
-        int x = ceil(p.x / gridWidth);
-        int y = ceil(p.y / gridWidth);
-        return (x * xGridCount + y) + layer * xGridCount * yGridCount;
+        int x = floor(p.x / gridWidth);
+        int y = floor(p.y / gridWidth);
+        return (y * xGridCount + x) + layer * xGridCount * yGridCount;
     }
 
     char getDirection(int AgridID, int Alayer, int BgridID, int Blayer) {
