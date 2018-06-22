@@ -10,16 +10,32 @@ class GlobalRouter {
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id):id(id) {}
+        GlobalEdge(int id,int src,int tgt):id(id),src(src),tgt(tgt) {}
         double getCost() {return cost;}
         void setCost(double cost) {this->cost = cost;}
+        double getHistoricalCost() {return historical_cost;}
+        void setHistoricalCost(double historical_cost) {this->historical_cost = historical_cost;}
         int src;
         int tgt;
         int id;
+        int capacity;
+        int edgeRequest(int count, double width) {
+
+        }
+        void edgeRecover(int operId) {
+
+        }
+        int edgeCount(double querywidth) {
+
+        }
+        void addtracks(Vertex v) {
+            vertices[v.id] = v.track.width;
+        }
 
     private:
         double cost;
         double historical_cost;
+        std::unordered_map<int,double> vertices;
 
         
     };
@@ -67,7 +83,9 @@ private:
     void implementGlobalGrid() {
         int gridWidth = calGridWidth();
         for(int i=0;i<(int)vertices.size();i++){
-
+            Layer layer = vertices[i].track.layer;
+            Point from = vertices[i].track.rect.ll;
+            Point from = vertices[i].track.rect.ur;
         }
     }
 
