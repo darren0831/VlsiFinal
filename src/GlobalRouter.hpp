@@ -92,8 +92,18 @@ private:
         constructGlobalEdge();
         logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
+        printGlobalEdge();
     }
-
+    void printGlobalEdge(){
+        Logger logs("GlobalGraph.log");
+        for(int i=0;i<(int)globalGraph.size();i++){
+            logs.show("%d: <",i);
+            for(int j=0;j<(int)globalGraph[i].size();i++){
+                logs.show("%d ",globalGraph[i][j]);
+            }
+            logs.show(">\n");
+        }
+    }
     void prepareNets() {
         globalNets = std::vector<std::vector<int>>();
         globalNetWidths = std::vector<std::vector<int>>();
@@ -156,13 +166,12 @@ private:
     }
 
     void constructGlobalEdge() {
-        gridWidth = calGridWidth()*100;
+        gridWidth = calGridWidth();
         xGridCount = (int) ceil(boundary.ur.x/gridWidth);
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
         globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
-        logger.info("globalGraph init size: %ld\n",xGridCount*yGridCount*(int)layers.size());
         for(int k=0;k<(int)layers.size();k++) {
             for(int i=0;i<yGridCount;i++) {
                 for(int j=0;j<xGridCount;j++) {
@@ -324,7 +333,7 @@ private:
     int coordToGridId(Point p, int layer) {
         int x = ceil(p.x / gridWidth);
         int y = ceil(p.y / gridWidth);
-        return (x * xGridCount + y) * layer;
+        return (x * xGridCount + y) + layer * xGridCount * yGridCount;
     }
 
     char getDirection(int AgridID, int Alayer, int BgridID, int Blayer) {
