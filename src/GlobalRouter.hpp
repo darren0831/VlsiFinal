@@ -80,7 +80,7 @@ public:
         initialize();
         logger.info("Prepare nets\n");
         prepareNets();
-        logger.info("Do global Route\n");
+        logger.info("Do global route\n");
         doRouting();
     }
 
@@ -98,7 +98,6 @@ private:
         globalNets = std::vector<std::vector<int>>();
         globalNetWidths = std::vector<std::vector<int>>();
         for (const Bus& bus : buses) {
-            std::vector<int> net;
             std::vector<int> width;
             for (int i = 0; i < (int) bus.widths.size(); ++i) {
                 width.emplace_back(bus.widths[i] * bus.numBits);
@@ -126,13 +125,14 @@ private:
                 }
                 grids.emplace_back(maxid);
             }
-            globalNets.emplace_back(std::move(net));
+            globalNets.emplace_back(std::move(grids));
             globalNetWidths.emplace_back(std::move(width));
         }
     }
 
     void doRouting() {
         for (int i = 0; i < (int) globalNets.size(); ++i) {
+            logger.info("Routing bus %s\n", buses[i].name.c_str());
             routeSingleNet(globalNets[i], globalNetWidths[i], buses[i].numBits);
         }
     }
@@ -157,8 +157,8 @@ private:
 
     void constructGlobalEdge() {
         gridWidth = calGridWidth()*100;
-        xGridCount = ceil(boundary.ur.x/gridWidth);
-        yGridCount = ceil(boundary.ur.y/gridWidth);
+        xGridCount = (int) ceil(boundary.ur.x/gridWidth);
+        yGridCount = (int) ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
         globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
@@ -246,6 +246,9 @@ private:
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
             int src = net[i];
+            if (std::count(tgt.begin(), tgt.end(), src) > 0) {
+                continue;
+            }
             auto result = routeSinglePath(src, tgt, widths, numBits);
             if (!result.empty()) {
                 for (int v : result) {
@@ -260,8 +263,7 @@ private:
     }
 
 
-    std::vector<int>
-    routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
+    std::vector<int> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
         std::vector<int> vertexCandidates;
         std::vector<bool> visited(globalGraph.size());
         std::vector<int> perdecessor(globalGraph.size());
@@ -275,14 +277,14 @@ private:
         perdecessor[src] = src;
 
         int nextId;
-        double lowestCost = -1;
         bool foundTarget = false;
         while (!foundTarget) {
+            double lowestCost = -1;
             for (int& cur : vertexCandidates) {
-                for (int& next: globalGraph[cur]) {
-                    int nextVertex = globalEdges[next].tgt;
+                for (int& next : globalGraph[cur]) {
+                    int nextVertex = (cur == globalEdges[next].tgt) ? globalEdges[next].src : globalEdges[next].tgt;
                     if (visited[nextVertex] == true) { continue; }
-                    if (globalEdges[next].edgeCount(width[globalEdges[next].layer]) < bitCount) { continue; }
+                    if (globalEdges[next].edgeCount(width[globalEdges[next].layer]) < 1) { continue; }
                     if (gridCost[cur] + globalEdges[next].getCost() < lowestCost || lowestCost == -1) {
                         nextId = nextVertex;
                         perdecessor[nextVertex] = cur;
@@ -296,6 +298,8 @@ private:
                 vertexCandidates.emplace_back(nextId);
                 gridCost[nextId] = lowestCost;
                 visited[nextId] = true;
+            } else {
+                return std::vector<int>();
             }
 
             for (const int& i: target) {
