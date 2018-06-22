@@ -127,8 +127,8 @@ private:
     }
     void constructGlobalEdge() {
         gridWidth = calGridWidth();
-        xGridCount = ceil(boundary.up.x/gridWidth);
-        yGridCount = ceil(boundary.up.y/gridWidth);
+        xGridCount = ceil(boundary.ur.x/gridWidth);
+        yGridCount = ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
         globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
         for(auto& v: globalGraph){
@@ -229,6 +229,7 @@ private:
             return AgridID > BgridID ? 'U' : 'D';
         }
         else {
+            int layer = Alayer;
             if(layers[layer].isHorizontal()) {
                 return AgridID > BgridID ? 'L' : 'R';
             }else if(layers[layer].isVertical()){
@@ -239,6 +240,7 @@ private:
     }
 
 private:
+    std::vector<Layer>& layers;
     std::vector<Vertex>& vertices;
     std::unordered_map<int, Vertex>& vertexMap;
     std::vector<std::vector<Vertex>>& routingGraph;
