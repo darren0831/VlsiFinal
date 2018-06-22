@@ -112,7 +112,7 @@ private:
 
     void doRouting() {
         for (int i = 0; i < (int) globalNets.size(); ++i) {
-            routeSingleNet(globalNets[i], globalNetWidths[i]);
+            routeSingleNet(globalNets[i], globalNetWidths[i], buses[i].numBits);
         }
     }
 
@@ -198,12 +198,12 @@ private:
         }
     }
 
-    bool routeSingleNet(const std::vector<int>& net, const std::vector<int>& widths) {
+    bool routeSingleNet(const std::vector<int>& net, const std::vector<int>& widths, const int numBits) {
         std::vector<int> tgt;
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
             int src = net[i];
-            auto result = routeSinglePath(src, tgt, widths, 1);
+            auto result = routeSinglePath(src, tgt, widths, numBits);
             if (!result.empty()) {
                 for (int v : result) {
                     tgt.emplace_back(v);

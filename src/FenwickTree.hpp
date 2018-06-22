@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    int lowbit(int x) {
+    int lowbit(int x) const {
         return x & (-x);
     }
 
