@@ -25,7 +25,15 @@ int main(int argc, char** argv) {
     auto& vertexMap = graphConstructor.vertexMap;
     auto& routingGraph = graphConstructor.routingGraph;
     auto& nets = graphConstructor.nets;
-    GlobalRouter globalRouter(layers, vertices, vertexMap, routingGraph, nets, buses, globalRoutingLogger);
+    GlobalRouter globalRouter(
+        layers,
+        vertices,
+        vertexMap,
+        routingGraph,
+        nets,
+        buses,
+        boundary,
+        globalRoutingLogger);
     globalRouter.globalRoute();
     return 0;
 }
