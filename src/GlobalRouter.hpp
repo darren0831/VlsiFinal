@@ -92,13 +92,13 @@ private:
         constructGlobalEdge();
         logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
-        printGlobalEdge();
+        // printGlobalEdge();
     }
     void printGlobalEdge(){
         Logger logs("GlobalGraph.log");
         for(int i=0;i<(int)globalGraph.size();i++){
             logs.show("%d: <",i);
-            for(int j=0;j<(int)globalGraph[i].size();i++){
+            for(int j=0;j<(int)globalGraph[i].size();j++){
                 logs.show("%d ",globalGraph[i][j]);
             }
             logs.show(">\n");
@@ -189,7 +189,7 @@ private:
                     {
                         if(j<yGridCount-1){
                             GlobalEdge lr(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+(j+1)) + k*xGridCount*yGridCount,maxVertexWidth);
-                            lr.layer = k-1;
+                            lr.layer = k;
                             globalEdges.emplace_back(lr);
                             globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
                             globalGraph[(i * xGridCount + (j+1)) + k*xGridCount*yGridCount].emplace_back(edgeId);
@@ -198,7 +198,7 @@ private:
                     }else {
                         if(i<xGridCount-1){
                             GlobalEdge fb(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,((i+1)*xGridCount+j) + k*xGridCount*yGridCount,maxVertexWidth);
-                            fb.layer = k-1;
+                            fb.layer = k;
                             globalEdges.emplace_back(fb);
                             globalGraph[(i*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);
                             globalGraph[((i+1)*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);
