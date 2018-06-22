@@ -5,6 +5,8 @@
 
 class FenwickTree {
 public:
+    FenwickTree() = default;
+
     FenwickTree(int width) :
         width(width) {
         array = std::vector<int>((unsigned long) width);

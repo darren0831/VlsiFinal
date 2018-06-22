@@ -9,33 +9,35 @@
 #include <cmath>
 #include "Vertex.hpp"
 #include "Layer.hpp"
+#include "FenwickTree.hpp"
 
 class GlobalRouter {
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id,int src,int tgt):id(id),src(src),tgt(tgt) {
+        GlobalEdge(int id,int src,int tgt,int maxVertexWidth):id(id),src(src),tgt(tgt),maxWidth(maxVertexWidth) {
             cost = 0;
             historical_cost = 0;
-            maxWidth = 0;
+            ft = FenwickTree(maxWidth);
         }
         double getCost() {return cost;}
         void setCost(double cost) {this->cost = cost;}
         double getHistoricalCost() {return historical_cost;}
         void setHistoricalCost(double historical_cost) {this->historical_cost = historical_cost;}
 
-        int edgeRequest(int count, double width) {
-
+        int edgeRequest(int count, int width) {
+            return 0;
         }
         void edgeRecover(int operId) {
 
         }
-        int edgeCount(double querywidth) {
+        int edgeCount(int querywidth) {
             if(layer==-1) return std::numeric_limits<int>::max();
+            return ft.query(querywidth);
         }
         void addVertexToEdge(Vertex v) {
             vertices[v.id] = (int) ceil(v.track.width);
-            maxWidth = std::max((int) v.track.width,maxWidth);
+            ft.insert((int)v.track.width,1);
         }
     public:
         int src;
@@ -46,6 +48,7 @@ private:
         double cost;
         double historical_cost;
         std::unordered_map<int,int> vertices;
+        FenwickTree ft;
         int maxWidth;
 
 
@@ -69,6 +72,7 @@ public:
 
 private:
     void initialize() {
+        calMaxVertexWidth();
         constructGlobalEdge();
         bindVertexToEdge();
     }
@@ -115,6 +119,12 @@ private:
             routeSingleNet(globalNets[i], globalNetWidths[i], buses[i].numBits);
         }
     }
+    void calMaxVertexWidth(){
+        maxVertexWidth = 0;
+        for(auto& v: vertices){
+            maxVertexWidth = std::max(maxVertexWidth,(int)v.track.width);
+        }
+    }
 
     double calGridWidth() {
         std::vector<int> medians;
@@ -140,7 +150,7 @@ private:
                 for(int j=0;j<yGridCount-1;j++) {
                     if(k!=(int)layers.size()-1)
                     {
-                        GlobalEdge via(edgeId,(i*xGridCount+j)*k,(i*xGridCount+j)*(k+1));
+                        GlobalEdge via(edgeId,(i*xGridCount+j)*k,(i*xGridCount+j)*(k+1),maxVertexWidth);
                         via.layer = -1;
                         globalEdges.emplace_back(via);
                         globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
@@ -149,7 +159,7 @@ private:
                     }
                     if(layers[k].isHorizontal())
                     {
-                        GlobalEdge lr(edgeId,(i*xGridCount+j)*k,(i*xGridCount+(j+1))*k);
+                        GlobalEdge lr(edgeId,(i*xGridCount+j)*k,(i*xGridCount+(j+1))*k,maxVertexWidth);
                         lr.layer = k;
                         globalEdges.emplace_back(lr);
                         globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
@@ -157,7 +167,7 @@ private:
                         ++edgeId;
                     }else if(layers[k].isVertical())
                     {
-                        GlobalEdge fb(edgeId,(i*xGridCount+j)*k,((i+1)*xGridCount+j)*k);
+                        GlobalEdge fb(edgeId,(i*xGridCount+j)*k,((i+1)*xGridCount+j)*k,maxVertexWidth);
                         fb.layer = k;
                         globalEdges.emplace_back(fb);
                         globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
@@ -270,6 +280,7 @@ private:
         }
         path.emplace_back(src);
         std::reverse(path.begin(),path.end());
+        return path;
     }
 
     int coordToGridId(Point p,int layer){
@@ -285,7 +296,7 @@ private:
             int layer = Alayer;
             if(layers[layer].isHorizontal()) {
                 return AgridID > BgridID ? 'L' : 'R';
-            }else if(layers[layer].isVertical()){
+            }else {
                 return AgridID > BgridID ? 'F' : 'B';
             }
         }
@@ -312,6 +323,7 @@ private:
     Logger& logger;
     double gridWidth;
     int xGridCount, yGridCount;
+    int maxVertexWidth;
 };
 
 #endif //VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
