@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 #include <stack>
@@ -49,6 +50,41 @@ public:
     void initialize() {
         logger.info("Graph constructor initialize\n");
         logger.info("Split track\n");
+        splitTracks();
+        logger.info("Generate vertices and edges\n");
+        logger.info("Generate vertices based on tracks split\n");
+        generateVertices();
+        logger.info("Generate edges based on routing region\n");
+        generateEdges();
+    }
+
+    void initializeNets() {
+        logger.info("Initialize nets\n");
+        for (const auto& bus : buses) {
+            Net net(bus.numPins);
+            for (const Bit& bit : bus.bits) {
+                for (int i = 0; i < (int) bit.pins.size(); ++i) {
+                    const Pin& pin = bit.pins[i];
+                    int layer = pin.layer;
+                    const Rectangle& location = pin.rect;
+                    int touchedVertices = 0;
+                    for (const Vertex& v : layerVertices[layer]) {
+                        if (v.track.rect.hasOverlap(location)) {
+                            net.addTerminal(i, v.id);
+                            ++touchedVertices;
+                        }
+                    }
+                    if (touchedVertices == 0) {
+                        logger.error("A bus doesn't touch any vertices\n");
+                    }
+                }
+            }
+            nets.emplace_back(net);
+        }
+        logger.info("%d nets generated\n", (int) nets.size());
+    }
+
+    void splitTracks() {
         layerObstacles = std::vector<std::vector<Obstacle>>(layers.size());
         for (const auto& o : obstacles) {
             layerObstacles[o.layer].push_back(o);
@@ -86,7 +122,6 @@ public:
         }
         logger.info("Track count(after split): %d\n", all_tracks.size());
         layerTracks = std::vector<std::vector<Track>>(layers.size());
-        layerVertices = std::vector<std::vector<Vertex>>(layers.size());
         for (const auto& t : all_tracks) {
             layerTracks[t.layer].push_back(t);
         }
@@ -94,8 +129,10 @@ public:
         for (int i = 0; i < (int) layers.size(); ++i) {
             logger.info("Layer %d: %d tracks\n", i, layerTracks[i].size());
         }
-        logger.info("Generate vertices and edges\n");
-        logger.info("Generate vertices based on tracks split\n");
+    }
+
+    void generateVertices() {
+        layerVertices = std::vector<std::vector<Vertex>>(layers.size());
         int vertexId = 0;
         for (int i = 0; i < (int) layerTracks.size(); ++i) {
             if (layers[i].isHorizontal()) {
@@ -115,9 +152,38 @@ public:
             }
         }
         logger.info("%d vertices generated\n", vertexId);
-        logger.info("Generate edges based on routing region\n");
+    }
+
+    void generateEdges() {
         routingGraph = std::vector<std::vector<Vertex>>(vertices.size());
-        for (const Vertex& v : vertices) {
+        std::vector<std::thread> threads;
+        int part = (int) vertices.size() / 3;
+        threads.emplace_back(std::thread([=] {
+            generateEdges(0, part);
+        }));
+        threads.emplace_back(std::thread([=] {
+            generateEdges(part, part * 2);
+        }));
+        threads.emplace_back(std::thread([=] {
+            generateEdges(part * 2, (int) vertices.size());
+        }));
+        for (auto& thread : threads) {
+            if (thread.joinable()) {
+                thread.join();
+            }
+        }
+        int edgeCount = 0;
+        double avgEdgeCount = 0;
+        for (const auto& v : routingGraph) {
+            edgeCount += (int) v.size();
+        }
+        avgEdgeCount = ((double) edgeCount) / routingGraph.size();
+        logger.info("%d edges generated, average %f edge for each vertex\n", edgeCount, avgEdgeCount);
+    }
+
+    void generateEdges(int start, int end) {
+        for (int i = start; i < end; ++i) {
+            const Vertex& v = vertices[i];
             int layer = v.track.layer;
             std::vector<Vertex>& outVertices = routingGraph[v.id];
             SegmentMap map[2];
@@ -131,39 +197,6 @@ public:
                 scanOutVertices(v, l, map[1], outVertices);
             }
         }
-        int edgeCount = 0;
-        double avgEdgeCount = 0;
-        for (const auto& v : routingGraph) {
-            edgeCount += (int) v.size();
-        }
-        avgEdgeCount = ((double) edgeCount) / routingGraph.size();
-        logger.info("%d edges generated, average %f edge for each vertex\n", edgeCount, avgEdgeCount);
-    }
-
-    void initializeNets() {
-        logger.info("Initialize nets\n");
-        for (const auto& bus : buses) {
-            Net net(bus.numPins);
-            for (const Bit& bit : bus.bits) {
-                for (int i = 0; i < (int) bit.pins.size(); ++i) {
-                    const Pin& pin = bit.pins[i];
-                    int layer = pin.layer;
-                    const Rectangle& location = pin.rect;
-                    int touchedVertices = 0;
-                    for (const Vertex& v : layerVertices[layer]) {
-                        if (v.track.rect.hasOverlap(location)) {
-                            net.addTerminal(i, v.id);
-                            ++touchedVertices;
-                        }
-                    }
-                    if (touchedVertices == 0) {
-                        logger.error("A bus doesn't touch any vertices\n");
-                    }
-                }
-            }
-            nets.emplace_back(net);
-        }
-        logger.info("%d nets generated\n", (int) nets.size());
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
