@@ -65,15 +65,21 @@ public:
     layers(layers), vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), buses(buses), boundary(boundary), logger(logger) {}
 
     void globalRoute() {
+        logger.info("Initialize\n");
         initialize();
+        logger.info("Prepare nets\n");
         prepareNets();
+        logger.info("Do global Route\n");
         doRouting();
     }
 
 private:
     void initialize() {
+        logger.info("Calculate Max Vertex Width\n");
         calMaxVertexWidth();
+        logger.info("Construct global edges\n");
         constructGlobalEdge();
+        logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
     }
 
@@ -140,6 +146,7 @@ private:
         gridWidth = calGridWidth();
         xGridCount = ceil(boundary.ur.x/gridWidth);
         yGridCount = ceil(boundary.ur.y/gridWidth);
+        logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
         int edgeId=0;
         globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
         for(auto& v: globalGraph){

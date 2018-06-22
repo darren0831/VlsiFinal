@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         nets,
         buses,
         boundary,
-        globalRoutingLogger);
+        stdLogger);
     globalRouter.globalRoute();
     return 0;
 }
