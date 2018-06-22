@@ -14,6 +14,10 @@ public:
         return (ax == 1) ? x : y;
     }
 
+    Point midPoint(const Point& that) const {
+        return {(x + that.x) / 2, (y + that.y) / 2};
+    }
+
     std::string toString() const {
         std::string s;
         s = "( " + std::to_string(x) + " , " + std::to_string(y) + " )";

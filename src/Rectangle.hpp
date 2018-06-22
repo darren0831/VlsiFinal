@@ -17,6 +17,10 @@ public:
         height = ur.y - ll.y;
     }
 
+    Point midPoint() const {
+        return ll.midPoint(ur);
+    }
+
     Rectangle overlap(const Rectangle& that, bool const lineOverlap = false) const {
         Point lowerLeft = Point(0, 0), upperRight = Point(0, 0);
 

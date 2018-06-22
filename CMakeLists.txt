@@ -12,6 +12,7 @@ set(SOURCE_FILES
         src/Layer.hpp
         src/Logger.hpp
         src/main.cpp
+        src/Net.hpp
         src/Obstacle.hpp
         src/Pin.hpp
         src/Point.hpp
@@ -19,6 +20,6 @@ set(SOURCE_FILES
         src/Rectangle.hpp
         src/SegmentMap.hpp
         src/Track.hpp
-        src/Vertex.hpp src/GlobalRouter.hpp)
+        src/Vertex.hpp src/GlobalRouter.hpp src/FenwickTree.hpp)
 
 add_executable(route ${SOURCE_FILES})
