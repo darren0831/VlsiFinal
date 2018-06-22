@@ -89,8 +89,57 @@ private:
         srcs.emplace_back(net.net[0]);
     }
 
-    bool routeSinglePath(const std::vector<int>& src, int target) {
+    std::vector<int> routeSinglePath(const int src, std::vector<int>& target,std::vector<int>& width,int bitCount) {
+        std::vector<int> vertexCandidates;
+        std::vector<bool> visited(globalGraph.size());
+        std::vector<int> perdecessor(globalGraph.size());
+        std::vector<int> gridCost(globalGraph.size());
+        for(bool &i: visited) i = false;
+        vertexCandidates.emplace_back(src);
+        visited[src] = true;
+        gridCost[src] = 0;
+        perdecessor[src] = src;
 
+        int nextId;
+        double lowestCost = -1;
+        bool foundTarget = false;
+        while(!foundTarget){
+            for(int &cur : vertexCandidates){
+                for(int &next: globalGraph[cur]){
+                    int nextVertex = globalEdges[next].tgt;
+                    if(visited[nextVertex]==true) continue;
+                    if(globalEdges[next].edgeCount(width[globalEdges[next].layer])<bitCount) continue;
+                    if(gridCost[cur] + globalEdges[next].getCost() < lowestCost || lowestCost==-1){
+                        nextId = nextVertex;
+                        perdecessor[nextVertex] = cur;
+                        lowestCost = gridCost[cur] + globalEdges[next].getCost();
+                    }
+                }
+            }
+
+            ///update grid cost and MST
+            if(lowestCost != -1){
+                vertexCandidates.emplace_back(nextId);
+                gridCost[nextId] = lowestCost;
+                visited[nextId] = true;
+            }
+
+            for(int &i: target){
+                if(i==nextId){
+                    foundTarget = true;
+                    break;
+                }
+            }
+        }
+        ///back trace
+        std::vector<int> path;
+        int curId = nextId;
+        while(curId!=src){
+            path.emplace_back(curId);
+            curId = perdecessor[curId];
+        }
+        path.emplace_back(src);
+        std::reverse(path.begin(),path.end());
     }
 
 private:
