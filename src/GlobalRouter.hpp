@@ -17,6 +17,20 @@ public:
 
     void globalRoute() {
         printf("%d\n", bfs(0, 5));
+        for(Net &curNet:nets){
+            for(int i=0;i<curNet.numBits;i++){
+
+                for(int m=0;m<curNet.net[i].size()-1;m++){
+                    for(int n=m+1;n<curNet.net[i].size();n++){
+                        bool found = bfs(m,n);
+                        if(!found){
+                            logger.warning("connect bits by bfs fail\n");
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
 private:
