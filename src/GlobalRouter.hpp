@@ -47,7 +47,7 @@ private:
         std::unordered_map<int,int> vertices;
         int maxWidth;
 
-        
+
     };
 public:
     GlobalRouter(std::vector<Layer>& layers,
@@ -61,27 +61,21 @@ public:
     layers(layers), vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), buses(buses), boundary(boundary), logger(logger) {}
 
     void globalRoute() {
-        printf("%d\n", bfs(0, 5));
-        for(Net &curNet:nets){
-            for(int i=0;i<curNet.numBits;i++){
-
-                for(int m=0;m<curNet.net[i].size()-1;m++){
-                    for(int n=m+1;n<curNet.net[i].size();n++){
-                        bool found = bfs(m,n);
-                        if(!found){
-                            logger.warning("connect bits by bfs fail\n");
-                        }
-                    }
-                }
-            }
-
-        }
+        initialize();
+        doRouting();
     }
 
 private:
     void initialize() {
-
+        constructGlobalEdge();
+        bindVertexToEdge();
     }
+    void doRouting() {
+        for (const Net& net : nets) {
+            routeSingleNet(net);
+        }
+    }
+
     double calGridWidth() {
         std::vector<int> medians;
         for(int i=0;i<(int)buses.size();i++){
@@ -92,7 +86,7 @@ private:
         std::sort(medians.begin(),medians.end());
         return medians[medians.size()/2];
     }
-    void implementGlobalGrid() {
+    void constructGlobalEdge() {
         gridWidth = calGridWidth();
         xGridCount = ceil(boundary.up.x/gridWidth);
         yGridCount = ceil(boundary.up.y/gridWidth);
@@ -101,7 +95,6 @@ private:
         for(auto& v: globalGraph){
             v = std::vector<int>(6);
         }
-
         for(int k=0;k<(int)layers.size();k++) {
             for(int i=0;i<xGridCount-1;i++) {
                 for(int j=0;j<yGridCount-1;j++) {
@@ -134,8 +127,8 @@ private:
                 }
             }
         }
-        
-
+    }
+    void bindVertexToEdge(){
         for(int i=0;i<(int)vertices.size();i++){
             int layer = vertices[i].track.layer;
             Point from = vertices[i].track.rect.ll;
@@ -162,28 +155,17 @@ private:
                     }
                 }
             }
-            
-            
         }
     }
 
-    bool bfs(int src, int tgt){
-        std::queue<int> vertexQueue;
-        bool isvisited[vertices.size()];
-        for(bool& it : isvisited) it = false;
-            vertexQueue.push(src);
-        while(!vertexQueue.empty()){
-            int cur = vertexQueue.front();
-            vertexQueue.pop();
-            if(cur==tgt) return true;
-            for(Vertex &neighbor : routingGraph[cur]){
-                if(isvisited[neighbor.id]==false){
-                    isvisited[neighbor.id]=true;
-                    vertexQueue.push(neighbor.id);
-                }
-            }
-        }
-        return false;
+
+    bool routeSingleNet(const Net& net) {
+        std::vector<int> srcs;
+        srcs.emplace_back(net.net[0]);
+    }
+
+    bool routeSinglePath(const std::vector<int>& src, int target) {
+
     }
 
     int coordToGridId(Point p,int layer){
@@ -211,6 +193,8 @@ private:
     std::vector<std::vector<Vertex>>& routingGraph;
     std::vector<Net>& nets;
     std::vector<Bus>& buses;
+
+private:
     std::vector<std::vector<int>> globalGraph;
     std::vector<GlobalEdge> globalEdges;
     Rectangle& boundary;
