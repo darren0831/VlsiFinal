@@ -8,11 +8,20 @@
 
 class GlobalRouter {
 private:
-    class GlobalGrid {
+    class GlobalEdge {
     public:
-        GlobalGrid(int width,std::vector<int>& vertices):width(width),vertices(vertices) {}
-        int width;
-        std::vector<int> vertices;
+        GlobalEdge(int id):id(id) {}
+        double getCost() {return cost;}
+        void setCost(double cost) {this->cost = cost;}
+        int src;
+        int tgt;
+        int id;
+
+    private:
+        double cost;
+        double historical_cost;
+
+        
     };
 public:
     GlobalRouter(std::vector<Vertex>& vertices,
@@ -55,6 +64,12 @@ private:
         std::sort(medians.begin(),medians.end());
         return medians[medians.size()/2];
     }
+    void implementGlobalGrid() {
+        int gridWidth = calGridWidth();
+        for(int i=0;i<(int)vertices.size();i++){
+
+        }
+    }
 
     bool bfs(int src, int tgt){
         std::queue<int> vertexQueue;
@@ -81,6 +96,8 @@ private:
     std::vector<std::vector<Vertex>>& routingGraph;
     std::vector<Net>& nets;
     std::vector<Bus>& buses;
+    std::vector<std::vector<int>> globalGraph;
+    std::vector<GlobalEdge> globalEdges;
 
 private:
     Logger& logger;
