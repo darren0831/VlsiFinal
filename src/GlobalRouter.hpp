@@ -15,30 +15,39 @@ class GlobalRouter {
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id,int src,int tgt,int maxVertexWidth):id(id),src(src),tgt(tgt),maxWidth(maxVertexWidth) {
+        GlobalEdge(int id, int src, int tgt, int maxVertexWidth) : id(id), src(src), tgt(tgt),
+                                                                   maxWidth(maxVertexWidth) {
             cost = 0;
             historical_cost = 0;
             ft = FenwickTree(maxWidth);
         }
-        double getCost() {return cost;}
-        void setCost(double cost) {this->cost = cost;}
-        double getHistoricalCost() {return historical_cost;}
-        void setHistoricalCost(double historical_cost) {this->historical_cost = historical_cost;}
+
+        double getCost() { return cost; }
+
+        void setCost(double cost) { this->cost = cost; }
+
+        double getHistoricalCost() { return historical_cost; }
+
+        void setHistoricalCost(double historical_cost) { this->historical_cost = historical_cost; }
 
         int edgeRequest(int count, int width) {
             return 0;
         }
+
         void edgeRecover(int operId) {
 
         }
+
         int edgeCount(int querywidth) {
-            if(layer==-1) return std::numeric_limits<int>::max();
+            if (layer == -1) { return std::numeric_limits<int>::max(); }
             return ft.query(querywidth);
         }
+
         void addVertexToEdge(Vertex v) {
             vertices[v.id] = (int) ceil(v.track.width);
-            ft.insert((int)v.track.width,1);
+            ft.insert((int) v.track.width, 1);
         }
+
     public:
         int src;
         int tgt;
@@ -47,22 +56,24 @@ private:
     private:
         double cost;
         double historical_cost;
-        std::unordered_map<int,int> vertices;
+        std::unordered_map<int, int> vertices;
         FenwickTree ft;
         int maxWidth;
 
 
     };
+
 public:
     GlobalRouter(std::vector<Layer>& layers,
-       std::vector<Vertex>& vertices,
-       std::unordered_map<int, Vertex>& vertexMap,
-       std::vector<std::vector<Vertex>>& routingGraph,
-       std::vector<Net>& nets,
-       std::vector<Bus>& buses,
-       Rectangle& boundary,
-       Logger& logger) :
-    layers(layers), vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), buses(buses), boundary(boundary), logger(logger) {}
+                 std::vector<Vertex>& vertices,
+                 std::unordered_map<int, Vertex>& vertexMap,
+                 std::vector<std::vector<Vertex>>& routingGraph,
+                 std::vector<Net>& nets,
+                 std::vector<Bus>& buses,
+                 Rectangle& boundary,
+                 Logger& logger) :
+            layers(layers), vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets),
+            buses(buses), boundary(boundary), logger(logger) {}
 
     void globalRoute() {
         logger.info("Initialize\n");
@@ -125,89 +136,100 @@ private:
             routeSingleNet(globalNets[i], globalNetWidths[i], buses[i].numBits);
         }
     }
-    void calMaxVertexWidth(){
+
+    void calMaxVertexWidth() {
         maxVertexWidth = 0;
-        for(auto& v: vertices){
-            maxVertexWidth = std::max(maxVertexWidth,(int)v.track.width);
+        for (auto& v: vertices) {
+            maxVertexWidth = std::max(maxVertexWidth, (int) v.track.width);
         }
     }
 
     double calGridWidth() {
         std::vector<int> medians;
-        for(int i=0;i<(int)buses.size();i++){
+        for (int i = 0; i < (int) buses.size(); i++) {
             std::vector<int> s = buses[i].widths;
-            std::sort(s.begin(),s.end());
-            medians.emplace_back(buses[i].widths[buses[i].widths.size()/2]);
+            std::sort(s.begin(), s.end());
+            medians.emplace_back(buses[i].widths[buses[i].widths.size() / 2]);
         }
-        std::sort(medians.begin(),medians.end());
-        return medians[medians.size()/2];
+        std::sort(medians.begin(), medians.end());
+        return medians[medians.size() / 2];
     }
+
     void constructGlobalEdge() {
-        gridWidth = calGridWidth();
-        xGridCount = ceil(boundary.ur.x/gridWidth);
-        yGridCount = ceil(boundary.ur.y/gridWidth);
+        gridWidth = calGridWidth() * 100;
+        xGridCount = (int) ceil(boundary.ur.x / gridWidth);
+        yGridCount = (int) ceil(boundary.ur.y / gridWidth);
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
-        int edgeId=0;
-        globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
-        for(auto& v: globalGraph){
+        int edgeId = 0;
+        globalGraph = std::vector<std::vector<int>>(xGridCount * yGridCount * layers.size());
+        for (auto& v: globalGraph) {
             v = std::vector<int>(6);
         }
-        for(int k=0;k<(int)layers.size();k++) {
-            for(int i=0;i<xGridCount-1;i++) {
-                for(int j=0;j<yGridCount-1;j++) {
-                    if(k!=(int)layers.size()-1)
-                    {
-                        GlobalEdge via(edgeId,(i*xGridCount+j)*k,(i*xGridCount+j)*(k+1),maxVertexWidth);
+        for (int k = 0; k < (int) layers.size(); k++) {
+            for (int i = 0; i < xGridCount - 1; i++) {
+                for (int j = 0; j < yGridCount - 1; j++) {
+                    if (k != (int) layers.size() - 1) {
+                        GlobalEdge via(edgeId, (i * xGridCount + j) * k, (i * xGridCount + j) * (k + 1),
+                                       maxVertexWidth);
                         via.layer = -1;
                         globalEdges.emplace_back(via);
-                        globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
-                        globalGraph[(i*xGridCount+j)*(k+1)].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) * k].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) * (k + 1)].emplace_back(edgeId);
                         ++edgeId;
                     }
-                    if(layers[k].isHorizontal())
-                    {
-                        GlobalEdge lr(edgeId,(i*xGridCount+j)*k,(i*xGridCount+(j+1))*k,maxVertexWidth);
+                    if (layers[k].isHorizontal()) {
+                        GlobalEdge lr(edgeId, (i * xGridCount + j) * k, (i * xGridCount + (j + 1)) * k, maxVertexWidth);
                         lr.layer = k;
                         globalEdges.emplace_back(lr);
-                        globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
-                        globalGraph[(i*xGridCount+(j+1))*k].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) * k].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + (j + 1)) * k].emplace_back(edgeId);
                         ++edgeId;
-                    }else if(layers[k].isVertical())
-                    {
-                        GlobalEdge fb(edgeId,(i*xGridCount+j)*k,((i+1)*xGridCount+j)*k,maxVertexWidth);
+                    } else if (layers[k].isVertical()) {
+                        GlobalEdge fb(edgeId, (i * xGridCount + j) * k, ((i + 1) * xGridCount + j) * k, maxVertexWidth);
                         fb.layer = k;
                         globalEdges.emplace_back(fb);
-                        globalGraph[(i*xGridCount+j)*k].emplace_back(edgeId);
-                        globalGraph[((i+1)*xGridCount+j)*k].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) * k].emplace_back(edgeId);
+                        globalGraph[((i + 1) * xGridCount + j) * k].emplace_back(edgeId);
                         ++edgeId;
                     }
                 }
             }
         }
+        logger.info("Global Graph vertex size %lu\n", globalGraph.size());
+        logger.info("Global Graph edge size %lu\n", globalEdges.size());
     }
-    void bindVertexToEdge(){
-        for(int i=0;i<(int)vertices.size();i++){
-            int layer = vertices[i].track.layer;
-            Point from = vertices[i].track.rect.ll;
-            Point to = vertices[i].track.rect.ur;
-            int fromGridID = coordToGridId(from, layer);
-            int toGridID = coordToGridId(to, layer);
-            char vertexDir = getDirection(fromGridID,layer,toGridID,layer);
-            if(layers[layer].isHorizontal()) {
-                for(int j=fromGridID;j<toGridID;j++){
-                    for(int k=0;k<(int)globalGraph[j].size();k++){
-                        if(getDirection(globalEdges[globalGraph[j][i]].src, layer,globalEdges[globalGraph[j][i]].tgt, layer)==vertexDir){
-                            globalEdges[globalGraph[j][i]].addVertexToEdge(vertices[i]);
-                            globalEdges[globalGraph[j+1][i]].addVertexToEdge(vertices[i]);
+
+    void bindVertexToEdge() {
+        for (const Vertex& v : vertices) {
+            int layer = v.track.layer;
+            Point from = v.track.terminal[0];
+            Point to = v.track.terminal[1];
+            int fromGridId = coordToGridId(from, layer);
+            int toGridId = coordToGridId(to, layer);
+            char vertexDir = getDirection(fromGridId, layer, toGridId, layer);
+            if (layers[layer].isHorizontal()) {
+                for (int i = fromGridId; i < toGridId; ++i) {
+                    for (int j : globalGraph[i]) {
+                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer)) {
+                            globalEdges[j].addVertexToEdge(v);
+                        }
+                    }
+                    for (int j : globalGraph[i + 1]) {
+                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer)) {
+                            globalEdges[j].addVertexToEdge(v);
                         }
                     }
                 }
-            }else if(layers[layer].isVertical()){
-                for(int j=0;j<(toGridID-fromGridID)/xGridCount;j++){
-                    for(int k=0;k<(int)globalGraph[j].size();k++){
-                        if(getDirection(globalEdges[globalGraph[j*xGridCount+fromGridID][i]].src,layer, globalEdges[globalGraph[j*xGridCount+fromGridID][i]].tgt, layer)==vertexDir){
-                            globalEdges[globalGraph[j*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
-                            globalEdges[globalGraph[(j+1)*xGridCount+fromGridID][i]].addVertexToEdge(vertices[i]);
+            } else {
+                for (int i = fromGridId; i < toGridId - xGridCount; i += xGridCount) {
+                    for (int j : globalGraph[i]) {
+                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer) == vertexDir) {
+                            globalEdges[j].addVertexToEdge(v);
+                        }
+                    }
+                    for (int j : globalGraph[i + xGridCount]) {
+                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer) == vertexDir) {
+                            globalEdges[j].addVertexToEdge(v);
                         }
                     }
                 }
@@ -234,7 +256,8 @@ private:
     }
 
 
-    std::vector<int> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
+    std::vector<int>
+    routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
         std::vector<int> vertexCandidates;
         std::vector<bool> visited(globalGraph.size());
         std::vector<int> perdecessor(globalGraph.size());
@@ -250,13 +273,13 @@ private:
         int nextId;
         double lowestCost = -1;
         bool foundTarget = false;
-        while(!foundTarget){
-            for(int &cur : vertexCandidates){
-                for(int &next: globalGraph[cur]){
+        while (!foundTarget) {
+            for (int& cur : vertexCandidates) {
+                for (int& next: globalGraph[cur]) {
                     int nextVertex = globalEdges[next].tgt;
-                    if(visited[nextVertex]==true) continue;
-                    if(globalEdges[next].edgeCount(width[globalEdges[next].layer])<bitCount) continue;
-                    if(gridCost[cur] + globalEdges[next].getCost() < lowestCost || lowestCost==-1){
+                    if (visited[nextVertex] == true) { continue; }
+                    if (globalEdges[next].edgeCount(width[globalEdges[next].layer]) < bitCount) { continue; }
+                    if (gridCost[cur] + globalEdges[next].getCost() < lowestCost || lowestCost == -1) {
                         nextId = nextVertex;
                         perdecessor[nextVertex] = cur;
                         lowestCost = gridCost[cur] + globalEdges[next].getCost();
@@ -265,14 +288,14 @@ private:
             }
 
             ///update grid cost and MST
-            if(lowestCost != -1){
+            if (lowestCost != -1) {
                 vertexCandidates.emplace_back(nextId);
                 gridCost[nextId] = lowestCost;
                 visited[nextId] = true;
             }
 
-            for(const int &i: target){
-                if(i==nextId){
+            for (const int& i: target) {
+                if (i == nextId) {
                     foundTarget = true;
                     break;
                 }
@@ -281,29 +304,29 @@ private:
         ///back trace
         std::vector<int> path;
         int curId = nextId;
-        while(curId!=src){
+        while (curId != src) {
             path.emplace_back(curId);
             curId = perdecessor[curId];
         }
         path.emplace_back(src);
-        std::reverse(path.begin(),path.end());
+        std::reverse(path.begin(), path.end());
         return path;
     }
 
-    int coordToGridId(Point p,int layer){
-        int x = ceil(p.x/gridWidth);
-        int y = ceil(p.y/gridWidth);
-        return (x*xGridCount+y)*layer;
+    int coordToGridId(Point p, int layer) {
+        int x = ceil(p.x / gridWidth);
+        int y = ceil(p.y / gridWidth);
+        return (x * xGridCount + y) * layer;
     }
+
     char getDirection(int AgridID, int Alayer, int BgridID, int Blayer) {
-        if(Alayer!=Blayer){
+        if (Alayer != Blayer) {
             return AgridID > BgridID ? 'U' : 'D';
-        }
-        else {
+        } else {
             int layer = Alayer;
-            if(layers[layer].isHorizontal()) {
+            if (layers[layer].isHorizontal()) {
                 return AgridID > BgridID ? 'L' : 'R';
-            }else {
+            } else {
                 return AgridID > BgridID ? 'F' : 'B';
             }
         }
