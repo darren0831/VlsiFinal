@@ -61,10 +61,9 @@ public:
     void initializeNets() {
         logger.info("Initialize nets\n");
         for (const auto& bus : buses) {
-            Net net(bus.numPins);
-            for (const Bit& bit : bus.bits) {
-                for (int i = 0; i < (int) bit.pins.size(); ++i) {
-                    const Pin& pin = bit.pins[i];
+            Net net(bus.numBits);
+            for (int i = 0; i < bus.numBits; ++i) {
+                for (const Pin& pin : bus.bits[i].pins) {
                     int layer = pin.layer;
                     const Rectangle& location = pin.rect;
                     int touchedVertices = 0;

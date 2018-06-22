@@ -1,6 +1,7 @@
 #ifndef VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 #define VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 
+#include <iterator>
 #include <unordered_map>
 #include <vector>
 #include <queue>
@@ -50,6 +51,7 @@ public:
 
     void globalRoute() {
         initialize();
+        prepareNets();
         doRouting();
     }
 
@@ -58,9 +60,46 @@ private:
 
     }
 
+    void prepareNets() {
+        globalNets = std::vector<std::vector<int>>();
+        globalNetWidths = std::vector<std::vector<int>>();
+        for (const Bus& bus : buses) {
+            std::vector<int> net;
+            std::vector<int> width;
+            for (int i = 0; i < (int) bus.widths.size(); ++i) {
+                width.emplace_back(bus.widths[i] * bus.numBits);
+            }
+            std::vector<int> grids;
+            for (int i = 0; i < bus.numPins; ++i) {
+                std::vector<int> pinGrids;
+                for (int j = 0; j < bus.numBits; ++j) {
+                    const Pin& pin = bus.bits[j].pins[i];
+                    Point midPoint = pin.rect.midPoint();
+                    int gridId = coordToGridId(midPoint, pin.layer);
+                    pinGrids.emplace_back(gridId);
+                }
+                std::unordered_map<int, int> countMap;
+                for (int v : pinGrids) {
+                    countMap[v]++;
+                }
+                int maxid = -1;
+                int maxv = 0;
+                for (const auto& vp : countMap) {
+                    if (vp.second > maxv) {
+                        maxv = vp.second;
+                        maxid = vp.first;
+                    }
+                }
+                grids.emplace_back(maxid);
+            }
+            globalNets.emplace_back(std::move(net));
+            globalNetWidths.emplace_back(std::move(width));
+        }
+    }
+
     void doRouting() {
-        for (const Net& net : nets) {
-            routeSingleNet(net);
+        for (int i = 0; i < (int) globalNets.size(); ++i) {
+            routeSingleNet(globalNets[i], globalNetWidths[i]);
         }
     }
 
@@ -78,18 +117,28 @@ private:
     void implementGlobalGrid() {
         int gridWidth = calGridWidth();
         for(int i=0;i<(int)vertices.size();i++){
-            Layer layer = vertices[i].track.layer;
-            Point from = vertices[i].track.rect.ll;
-            Point from = vertices[i].track.rect.ur;
         }
     }
 
-    bool routeSingleNet(const Net& net) {
-        std::vector<int> srcs;
-        srcs.emplace_back(net.net[0]);
+    bool routeSingleNet(const std::vector<int>& net, const std::vector<int>& widths) {
+        std::vector<int> tgt;
+        tgt.emplace_back(net.at(0));
+        for (int i = 1; i < (int) net.size(); ++i) {
+            int src = net[i];
+            auto result = routeSinglePath(src, tgt, widths);
+            if (!result.empty()) {
+                for (int v : result) {
+                    tgt.emplace_back(v);
+                }
+            } else {
+                logger.error("Fuck! Do rip-up reroute\n");
+                return false;
+            }
+        }
+        return true;
     }
 
-    bool routeSinglePath(const std::vector<int>& src, int target) {
+    std::vector<int> routeSinglePath(const int src, const std::vector<int> tgt, const std::vector<int>& width) {
 
     }
 
@@ -103,6 +152,10 @@ private:
 private:
     std::vector<std::vector<int>> globalGraph;
     std::vector<GlobalEdge> globalEdges;
+
+private:
+    std::vector<std::vector<int>> globalNets;
+    std::vector<std::vector<int>> globalNetWidths;
 
 private:
     Logger& logger;
