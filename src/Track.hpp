@@ -6,28 +6,29 @@
 
 class Track {
 public:
-    Track(double _lx, double _ly, double _rx, double _ry, double _w, int _layer) {
-        terminal[0] = Point(_lx, _ly);
-        terminal[1] = Point(_rx, _ry);
+    Track(double llx, double lly, double urx, double ury, double w, int l) {
+        terminal[0] = Point(llx, lly);
+        terminal[1] = Point(urx, ury);
 
-        if (_lx == _rx) {
-            rect = Rectangle(_lx - _w / 2, _ly, _rx + _w / 2, _ry);
-        } else if (_ly == _ry)
-            rect = Rectangle(_lx, _ly - _w / 2, _rx, _ry + _w / 2);
+        if (llx == urx) {
+            rect = Rectangle(llx - w / 2, lly, urx + w / 2, ury);
+        } else if (lly == ury) {
+            rect = Rectangle(llx, lly - w / 2, urx, ury + w / 2);
+        }
 
-        width = _w;
-        layer = _layer;
+        width = w;
+        layer = l;
     }
 
-    Rectangle overlap(const Track& that,bool lineOverlap) const {
-        return rect.overlap(that.rect,lineOverlap);
+    Rectangle overlap(const Track& that, bool lineOverlap) const {
+        return rect.overlap(that.rect, lineOverlap);
     }
 
-    bool hasOverlap(const Track& that,bool lineOverlap) const {
-        return rect.hasOverlap(that.rect,lineOverlap);
+    bool hasOverlap(const Track& that, bool lineOverlap) const {
+        return rect.hasOverlap(that.rect, lineOverlap);
     }
 
-    std::string toString() {
+    std::string toString() const {
         std::string s;
         s = rect.toString() + " , " + std::to_string(width) + " , " + std::to_string(layer);
         return s;
@@ -55,4 +56,4 @@ public:
     int layer;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_TRACK_HPP_

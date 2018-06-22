@@ -10,39 +10,34 @@
 
 class Bus {
 public:
-    Bus(std::string _name, const std::vector<int>& _bus_width, int numBits, int numPins) {
-        name = std::move(_name);
-        bus_width = _bus_width;
-        bit_counts = numBits;
-        pin_counts = numPins;
-    }
+    Bus(std::string name, std::vector<int> widths, int numBits, int numPins) :
+        name(std::move(name)), widths(std::move(widths)), numBits(numBits), numPins(numPins) {}
 
     void addBit(const Bit& b) {
         bits.push_back(b);
     }
 
-    std::string toString()
-    {
+    std::string toString() const {
         std::string s;
-        s+=name+std::string("\n");
-        s+=std::string("WIDTH: \n");
-        for(unsigned i=0;i<bus_width.size();i++)
-        {
-            s+=std::string("\t") + std::string("layer: ") + std::to_string(i) + " = " + std::to_string(bus_width[i]) + "\n";
+        s += name + std::string("\n");
+        s += std::string("WIDTH: \n");
+        for (unsigned i = 0; i < widths.size(); i++) {
+            s += std::string("\t") + std::string("layer: ") + std::to_string(i) + " = " + std::to_string(widths[i]) +
+                 "\n";
         }
-        s+=std::string("BITS: \n");
-        for(unsigned i=0;i<bits.size();i++)
-        {
-            s+=std::string("\t")+ bits[i].toString()+std::string("\n");
+        s += std::string("BITS: \n");
+        for (unsigned i = 0; i < bits.size(); i++) {
+            s += std::string("\t") + bits[i].toString() + std::string("\n");
         }
         return s;
     }
 
 public:
-    std::vector<Bit> bits;
-    std::vector<int> bus_width;
     std::string name;
-    int bit_counts;
-    int pin_counts;
+    std::vector<Bit> bits;
+    std::vector<int> widths;
+    int numBits;
+    int numPins;
 };
-#endif
+
+#endif // VLSI_FINAL_PROJECT_BUS_HPP_

@@ -10,51 +10,51 @@ class Rectangle {
 public:
     Rectangle() = default;
 
-    Rectangle(double lf_x, double lf_y, double ur_x, double ur_y) {
-        lower_left = Point(lf_x, lf_y);
-        upper_right = Point(ur_x, ur_y);
-        width = upper_right.x - lower_left.x;
-        height = upper_right.y - lower_left.y;
+    Rectangle(double llx, double lly, double urx, double ury) {
+        ll = Point(llx, lly);
+        ur = Point(urx, ury);
+        width = ur.x - ll.x;
+        height = ur.y - ll.y;
     }
 
     Rectangle overlap(const Rectangle& that, bool const lineOverlap = false) const {
-        Point ll = Point(0, 0), ur = Point(0, 0);
+        Point lowerLeft = Point(0, 0), upperRight = Point(0, 0);
 
         if (lineOverlap) {
-            if (lower_left.x <= that.upper_right.x && upper_right.x >= that.lower_left.x) {
-                if (lower_left.y <= that.upper_right.y && upper_right.y >= that.lower_left.y) {
-                    if (lower_left.x > that.lower_left.x) ll.x = lower_left.x;
-                    else ll.x = that.lower_left.x;
+            if (ll.x <= that.ur.x && ur.x >= that.ll.x) {
+                if (ll.y <= that.ur.y && ur.y >= that.ll.y) {
+                    if (ll.x > that.ll.x) { lowerLeft.x = ll.x; }
+                    else { lowerLeft.x = that.ll.x; }
 
-                    if (lower_left.y > that.lower_left.y) ll.y = lower_left.y;
-                    else ll.y = that.lower_left.y;
+                    if (ll.y > that.ll.y) { lowerLeft.y = ll.y; }
+                    else { lowerLeft.y = that.ll.y; }
 
-                    if (upper_right.x < that.upper_right.x) ur.x = upper_right.x;
-                    else ur.x = that.upper_right.x;
+                    if (ur.x < that.ur.x) { upperRight.x = ur.x; }
+                    else { upperRight.x = that.ur.x; }
 
-                    if (upper_right.y < that.upper_right.y) ur.y = upper_right.y;
-                    else ur.y = that.upper_right.y;
+                    if (ur.y < that.ur.y) { upperRight.y = ur.y; }
+                    else { upperRight.y = that.ur.y; }
                 }
             }
         } else {
-            if (lower_left.x < that.upper_right.x && upper_right.x > that.lower_left.x) {
-                if (lower_left.y < that.upper_right.y && upper_right.y > that.lower_left.y) {
-                    if (lower_left.x > that.lower_left.x) ll.x = lower_left.x;
-                    else ll.x = that.lower_left.x;
+            if (ll.x < that.ur.x && ur.x > that.ll.x) {
+                if (ll.y < that.ur.y && ur.y > that.ll.y) {
+                    if (ll.x > that.ll.x) { lowerLeft.x = ll.x; }
+                    else { lowerLeft.x = that.ll.x; }
 
-                    if (lower_left.y > that.lower_left.y) ll.y = lower_left.y;
-                    else ll.y = that.lower_left.y;
+                    if (ll.y > that.ll.y) { lowerLeft.y = ll.y; }
+                    else { lowerLeft.y = that.ll.y; }
 
-                    if (upper_right.x < that.upper_right.x) ur.x = upper_right.x;
-                    else ur.x = that.upper_right.x;
+                    if (ur.x < that.ur.x) { upperRight.x = ur.x; }
+                    else { upperRight.x = that.ur.x; }
 
-                    if (upper_right.y < that.upper_right.y) ur.y = upper_right.y;
-                    else ur.y = that.upper_right.y;
+                    if (ur.y < that.ur.y) { upperRight.y = ur.y; }
+                    else { upperRight.y = that.ur.y; }
                 }
             }
         }
 
-        return {ll.x, ll.y, ur.x, ur.y};
+        return {lowerLeft.x, lowerLeft.y, upperRight.x, upperRight.y};
     }
 
     bool hasOverlap(const Rectangle& that, bool lineOverlap = false) const {
@@ -62,27 +62,27 @@ public:
     }
 
     bool isCoveredBy(const Rectangle& that) const {
-        return that.lower_left.x <= lower_left.x &&
-               that.lower_left.y <= lower_left.y &&
-               that.upper_right.x >= upper_right.x &&
-               that.upper_right.y >= upper_right.y;
+        return that.ll.x <= ll.x &&
+               that.ll.y <= ll.y &&
+               that.ur.x >= ur.x &&
+               that.ur.y >= ur.y;
     }
 
     bool isZero() const {
-        double dx = upper_right.x - lower_left.x;
-        double dy = upper_right.y - lower_left.y;
+        double dx = ur.x - ll.x;
+        double dy = ur.y - ll.y;
         double area = dx * dy;
         return fabs(area) < 1e-6;
     }
 
-    std::string toString() {
+    std::string toString() const {
         std::string s;
-        s = lower_left.toString() + " " + upper_right.toString();
+        s = ll.toString() + " " + ur.toString();
         return s;
     }
 
     bool operator==(const Rectangle& that) const {
-        return lower_left == that.lower_left && upper_right == that.upper_right;
+        return ll == that.ll && ur == that.ur;
     }
 
     bool operator!=(const Rectangle& that) const {
@@ -90,10 +90,10 @@ public:
     }
 
 public:
-    Point lower_left;
-    Point upper_right;
+    Point ll;
+    Point ur;
     double width;
     double height;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_RECTANGLE_HPP_

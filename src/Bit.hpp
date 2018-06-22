@@ -9,28 +9,25 @@
 
 class Bit {
 public:
-	Bit(std::string _name) {
-		name = std::move(_name);
-	}
+    explicit Bit(std::string name) :
+        name(std::move(name)), pins(std::vector<Pin>()) {}
 
-	void addPin(Pin p) {
-		pins.push_back(p);
-	}
+    void addPin(Pin p) {
+        pins.push_back(p);
+    }
 
-	std::string toString()
-	{
-		std::string s;
-		s+=name+"\n";
-		for(unsigned i=0;i<pins.size();i++)
-		{
-			s+=std::string("\t")+ pins[i].toString()+std::string("\n");
-		}
-		return s;
-	}
+    std::string toString() const {
+        std::string s;
+        s += name + "\n";
+        for (unsigned i = 0; i < pins.size(); i++) {
+            s += std::string("\t") + pins[i].toString() + std::string("\n");
+        }
+        return s;
+    }
 
 public:
-	std::vector<Pin> pins;
-	std::string name;
+    std::string name;
+    std::vector<Pin> pins;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_BIT_HPP_

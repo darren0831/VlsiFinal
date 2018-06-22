@@ -25,8 +25,8 @@ public:
         return !(*this == that);
     }
 
-    std::string toString() {
-        return std::to_string(id)+" : "+ track.toString();
+    std::string toString() const {
+        return std::to_string(id) + " : " + track.toString();
     }
 
 public:

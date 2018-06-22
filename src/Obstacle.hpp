@@ -8,16 +8,13 @@ class Obstacle {
 public:
     Obstacle() = default;
 
-    Obstacle(int _layer, int lf_x, int lf_y, int ur_x, int ur_y) {
-        rect = Rectangle(lf_x, lf_y,ur_x,ur_y);
-        layer = _layer;
-    }
+    Obstacle(int layer, int llx, int lly, int urx, int ury) :
+        layer(layer), rect(Rectangle(llx, lly, urx, ury)) {}
 
-    std::string toString()
-    {
-    	std::string s;
-    	s = rect.toString()+ " , " + std::to_string(layer);
-    	return s;
+    std::string toString() const {
+        std::string s;
+        s = rect.toString() + " , " + std::to_string(layer);
+        return s;
     }
 
     bool operator==(const Obstacle& that) const {
@@ -29,8 +26,8 @@ public:
     }
 
 public:
-    Rectangle rect;
     int layer;
+    Rectangle rect;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_OBSTACLE_HPP_

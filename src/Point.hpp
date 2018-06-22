@@ -5,19 +5,19 @@
 
 class Point {
 public:
-    Point(): x(0), y(0) {}
+    Point() = default;
 
-    Point (double _x, double _y): x(_x), y(_y) {}
+    Point(double x, double y) :
+        x(x), y(y) {}
 
-    double axis(int a) {
-        return (a == 1) ? x : y;
+    double axis(int ax) const {
+        return (ax == 1) ? x : y;
     }
 
-    std::string toString()
-    {
-    	std::string s;
-    	s = "( " + std::to_string(x) + " , " + std::to_string(y) + " )";
-    	return s;
+    std::string toString() const {
+        std::string s;
+        s = "( " + std::to_string(x) + " , " + std::to_string(y) + " )";
+        return s;
     }
 
     bool operator==(const Point& that) const {
@@ -35,4 +35,4 @@ public:
     double y;
 };
 
-#endif
+#endif // VLSI_FINAL_PROJECT_POINT_HPP_

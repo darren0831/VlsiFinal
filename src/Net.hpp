@@ -7,7 +7,7 @@ class Net {
 public:
     Net(int numBins) :
         numBins(numBins) {
-        net = std::vector<std::vector<int>>(numBins);
+        net = std::vector<std::vector<int>>((unsigned long) numBins);
     }
 
     void addTerminal(int binId, int terminalVertexId) {

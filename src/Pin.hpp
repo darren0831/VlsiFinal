@@ -8,16 +8,13 @@ class Pin {
 public:
     Pin() = default;
 
-    Pin(int _layer, int lf_x, int lf_y, int ur_x, int ur_y) {
-        layer = _layer;
-        rect = Rectangle(lf_x, lf_y, ur_x, ur_y);
-    }
+    Pin(int layer, int llx, int lly, int urx, int ury) :
+        layer(layer), rect(Rectangle(llx, lly, urx, ury)) {}
 
-    std::string toString()
-    {
-    	std::string s;
-    	s = rect.toString() + " , " + std::to_string(layer);
-    	return s;
+    std::string toString() const {
+        std::string s;
+        s = rect.toString() + " , " + std::to_string(layer);
+        return s;
     }
 
     bool operator==(const Pin& that) const {
@@ -32,4 +29,5 @@ public:
     int layer;
     Rectangle rect;
 };
-#endif
+
+#endif // VLSI_FINAL_PROJECT_PIN_HPP_

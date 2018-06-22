@@ -8,16 +8,13 @@ class Layer {
 public:
     Layer() = default;
 
-    Layer(std::string _name, int _spacing, std::string _direction) {
-        name = std::move(_name);
-        spacing = _spacing;
-        direction = dir_str2char(_direction);
-    }
+    Layer(std::string name, int spacing, const std::string& direction) :
+        name(std::move(name)), spacing(spacing), direction(directionToChar(direction)) {}
 
-    char dir_str2char(const std::string& s) {
-        if (s == "horizontal") return 'H';
+    char directionToChar(const std::string& s) const {
+        if (s == "horizontal") { return 'H'; }
 
-        if (s == "vertical") return 'V';
+        if (s == "vertical") { return 'V'; }
         return ' ';
     }
 
@@ -29,8 +26,7 @@ public:
         return direction == 'V';
     }
 
-    std::string toString()
-    {
+    std::string toString() const {
         std::string s;
         s = name + " , " + std::to_string(spacing) + " , " + direction;
         return s;
@@ -41,4 +37,5 @@ public:
     int spacing;
     char direction;
 };
-#endif
+
+#endif // VLSI_FINAL_PROJECT_LAYER_HPP_
