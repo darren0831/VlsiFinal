@@ -8,7 +8,8 @@
 
 class Rectangle {
 public:
-    Rectangle() = default;
+    Rectangle() :
+        ll(Point(0, 0)), ur(Point(0, 0)), width(0), height(0) {}
 
     Rectangle(double llx, double lly, double urx, double ury) {
         ll = Point(llx, lly);
