@@ -19,13 +19,6 @@ public:
         }
     }
 
-    void remove(int value, int count) {
-        while (value < width) {
-            array[value] -= count;
-            value += lowbit(value);
-        }
-    }
-
     int query(int value) const {
         int sum = 0;
         while (value > 0) {
@@ -34,6 +27,10 @@ public:
         }
         return sum;
     }
+
+    std::vector<std::pair<int, int>> remove(int value, int count) {
+        return std::vector<std::pair<int, int>>();
+    };
 
 private:
     int lowbit(int x) const {
