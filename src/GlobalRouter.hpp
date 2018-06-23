@@ -67,7 +67,7 @@ private:
 
         void addVertexToEdge(Vertex v) {
             vertices[v.id] = (int) ceil(v.track.width);
-            ft.insert((int) v.track.width, 1);
+            // ft.insert((int) v.track.width, 1);
         }
 
         int insertOper(std::vector<std::pair<int,int>> p){
@@ -142,10 +142,11 @@ private:
         constructGlobalEdge();
         logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
+        printGlobalEdge();
     }
 
     void printGlobalEdge(){
-        Logger logs;
+        Logger logs("GlobalGraph.log");
         for(int i=0;i<(int)globalGraph.size();i++){
             logs.show("%d: <",i);
             for(int j=0;j<(int)globalGraph[i].size();j++){
@@ -237,7 +238,7 @@ private:
                     }
                     if(layers[k].isHorizontal())
                     {
-                        if(j<yGridCount-1){
+                        if(j<xGridCount-1){
                             GlobalEdge lr(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+(j+1)) + k*xGridCount*yGridCount,maxVertexWidth);
                             lr.layer = k;
                             globalEdges.emplace_back(lr);
@@ -246,7 +247,7 @@ private:
                             ++edgeId;
                         }
                     }else {
-                        if(i<xGridCount-1){
+                        if(i<yGridCount-1){
                             GlobalEdge fb(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,((i+1)*xGridCount+j) + k*xGridCount*yGridCount,maxVertexWidth);
                             fb.layer = k;
                             globalEdges.emplace_back(fb);
