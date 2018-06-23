@@ -138,7 +138,7 @@ public:
         logger.info("Prepare nets\n");
         prepareNets();
         logger.info("Do global route\n");
-        doRouting();
+        doGlobalRouting();
     }
 
 private:
@@ -169,7 +169,7 @@ private:
         for (const Bus& bus : buses) {
             std::vector<int> width;
             for (int i = 0; i < (int) bus.widths.size(); ++i) {
-                width.emplace_back(bus.widths[i] * bus.numBits);
+                width.emplace_back(bus.widths[i]);
             }
             std::vector<int> grids;
             for (int i = 0; i < bus.numPins; ++i) {
@@ -199,10 +199,11 @@ private:
         }
     }
 
-    void doRouting() {
+    void doGlobalRouting() {
+        netOperations = std::vector<std::vector<std::pair<int, int>>>(globalNets.size());
         for (int i = 0; i < (int) globalNets.size(); ++i) {
             logger.info("Routing bus %s\n", buses[i].name.c_str());
-            routeSingleNet(globalNets[i], globalNetWidths[i], buses[i].numBits);
+            routeSingleNet(i, globalNets[i], globalNetWidths[i], buses[i].numBits);
         }
     }
 
@@ -315,29 +316,37 @@ private:
         }
     }
 
-    bool routeSingleNet(const std::vector<int>& net, const std::vector<int>& widths, const int numBits) {
+    bool routeSingleNet(int id, const std::vector<int>& net, const std::vector<int>& widths, const int numBits) {
         std::vector<int> tgt;
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
+            logger.info("  - Routing pins %d / %d\n", i, (int) net.size() - 1);
             int src = net[i];
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
+                logger.info("      Omitted! Source and target are in the same grid\n");
                 continue;
             }
-            auto result = routeSinglePath(src, tgt, widths, numBits);
+            auto result = routeSinglePath(id, src, tgt, widths, numBits);
             if (!result.empty()) {
                 for (const auto& v : result) {
                     tgt.emplace_back(v.first);
                 }
             } else {
-                logger.error("Failed! Do rip-up re-route\n");
-                return false;
+                logger.warning("    - Failed! Do rip-up re-route\n");
+                // TODO re-route
+                // if remove edge 'id', then
+                // call recover on all edges id in vector netOperations[id]
+                // for ex.
+                //    for (const auto& v : netOperations[id])
+                //        for (const auto& p : v)
+                //            globalEdges[p.first].edgeRecover(p.second);
             }
         }
         return true;
     }
 
 
-    std::vector<std::pair<int, int>> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
+    std::vector<std::pair<int, int>> routeSinglePath(const int id, const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
         std::priority_queue<VisitNode> pQ;
         bool visited[globalGraph.size()];
         bool targetVertex[globalGraph.size()];
@@ -374,15 +383,21 @@ private:
             for (int edgeId : globalGraph[node]) {
                 GlobalEdge& edge = globalEdges[edgeId];
                 int out = (node == edge.tgt) ? edge.src : edge.tgt;
-                if (visited[out] || (edge.layer != -1 && edge.edgeCount(width[edge.layer]) >= (int) (0.75 * bitCount))) {
+                if (visited[out] || (edge.layer != -1 && edge.edgeCount(width[edge.layer]) < (int) (0.5 * bitCount))) {
                     continue;
                 }
-                if (gridCost[node] + globalEdges[edgeId].getCost() < gridCost[out]) {
-                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost();
+                int edgeNotEnough = 0;
+                if (edge.layer != -1) {
+                    edgeNotEnough = bitCount - edge.edgeCount(width[edge.layer]);
+                    edgeNotEnough = std::max(0, edgeNotEnough);
+                }
+                if (gridCost[node] + globalEdges[edgeId].getCost() + edgeNotEnough < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost() + edgeNotEnough;
                     pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
         }
+        logger.info("      Path finding finished\n");
         if (!found || finalVertex == -1) {
             return std::vector<std::pair<int, int>>();
         }
@@ -392,6 +407,16 @@ private:
             finalVertex = predecessor[finalVertex];
         }
         std::reverse(path.begin(), path.end());
+        logger.info("      Back trace finished\n");
+        for (const auto& v : path) {
+            if (v.second != -1) {
+                GlobalEdge& edge = globalEdges[v.second];
+                if (edge.layer != -1) {
+                    int operationId = edge.edgeRequest(bitCount, width[edge.layer]);
+                    netOperations[id].emplace_back(std::make_pair(v.second, operationId));
+                }
+            }
+        }
 //        for (const auto& v : path) {
 //            logger.info("  - node %d, from edge %d\n", v.first, v.second);
 //        }
@@ -430,6 +455,9 @@ private:
 private:
     std::vector<std::vector<int>> globalNets;
     std::vector<std::vector<int>> globalNetWidths;
+
+private:
+    std::vector<std::vector<std::pair<int, int>>> netOperations;
 
 private:
     Logger& logger;

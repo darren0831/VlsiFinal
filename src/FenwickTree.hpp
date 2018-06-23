@@ -9,13 +9,14 @@ public:
     FenwickTree() = default;
 
     explicit FenwickTree(int width) :
-        width(width) {
-        treeData = std::vector<int>((unsigned long) width);
-        rawData = std::vector<int>((unsigned long) width);
+        width(width + 5) {
+        treeData = std::vector<int>((unsigned long) width + 5);
+        rawData = std::vector<int>((unsigned long) width + 5);
     }
 
     void insert(int value, int count) {
-        if (value > width) {
+        if (value > width || value <= 0) {
+            fprintf(stderr, "Error: Add %d into Fenwick Tree with width %d\n", value, width);
             return;
         }
         rawData[value] += count;
@@ -26,7 +27,8 @@ public:
     }
 
     int query(int value) const {
-        if (value > width) {
+        if (value > width || value <= 0) {
+            fprintf(stderr, "Error: Query %d from Fenwick Tree with width %d\n", value, width);
             return 0;
         }
         int sum = 0;
@@ -38,7 +40,8 @@ public:
     }
 
     std::vector<std::pair<int, int>> remove(int value, int count) {
-        if (value > width) {
+        if (value > width || value <= 0) {
+            fprintf(stderr, "Error: Remove %d from Fenwick Tree with width %d\n", value, width);
             return std::vector<std::pair<int, int>>();
         }
         std::vector<std::pair<int, int>> result;
