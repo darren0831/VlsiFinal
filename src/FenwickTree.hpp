@@ -6,7 +6,10 @@
 
 class FenwickTree {
 public:
-    FenwickTree() = default;
+    FenwickTree() {
+        treeData = std::vector<int>();
+        rawData = std::vector<int>();
+    }
 
     explicit FenwickTree(int width) :
         width(width) {
