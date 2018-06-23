@@ -22,6 +22,10 @@ private:
             ft = FenwickTree(maxWidth);
         }
 
+        int getTarget(int source) const {
+            return (source == src) ? tgt : src;
+        }
+
         double getCost() { return cost; }
 
         void setCost(double cost) { this->cost = cost; }
@@ -85,6 +89,20 @@ public:
     }
 
 private:
+    struct VisitNode {
+        int nodeId;
+        int from;
+        double cost;
+
+        VisitNode(int nodeId, int from, double cost) :
+            nodeId(nodeId), from(from), cost(cost) {}
+
+        bool operator<(const VisitNode& that) const {
+            return cost < that.cost || (fabs(cost - that.cost) < 1e-6 && nodeId < that.nodeId);
+        }
+    };
+
+private:
     void initialize() {
         logger.info("Calculate Max Vertex Width\n");
         calMaxVertexWidth();
@@ -92,14 +110,14 @@ private:
         constructGlobalEdge();
         logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
-        // printGlobalEdge();
     }
+
     void printGlobalEdge(){
-        Logger logs("GlobalGraph.log");
+        Logger logs;
         for(int i=0;i<(int)globalGraph.size();i++){
             logs.show("%d: <",i);
             for(int j=0;j<(int)globalGraph[i].size();j++){
-                logs.show("%d ",globalGraph[i][j]);
+                logs.show("%d ",globalEdges[globalGraph[i][j]].getTarget(i));
             }
             logs.show(">\n");
         }
@@ -212,6 +230,7 @@ private:
         logger.info("Global Graph vertex size %lu\n", globalGraph.size());
         logger.info("Global Graph edge size %lu\n", globalEdges.size());
     }
+
     void bindVertexToEdge() {
         for (const Vertex& v : vertices) {
             int layer = v.track.layer;
@@ -260,6 +279,11 @@ private:
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 continue;
             }
+            printf("from %d to ", src);
+            for (int v : tgt) {
+                printf(" %d", v);
+            }
+            puts("");
             auto result = routeSinglePath(src, tgt, widths, numBits);
             if (!result.empty()) {
                 for (int v : result) {
@@ -275,66 +299,67 @@ private:
 
 
     std::vector<int> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
-        std::vector<int> vertexCandidates;
-        std::vector<bool> visited(globalGraph.size());
-        std::vector<int> perdecessor(globalGraph.size());
-        std::vector<int> gridCost(globalGraph.size());
+        std::priority_queue<VisitNode> pQ;
+        bool visited[globalGraph.size()];
+        bool targetVertex[globalGraph.size()];
+        std::vector<double> gridCost(globalGraph.size());
+        std::vector<int> predecessor(globalGraph.size());
         for (int i = 0; i < (int) globalGraph.size(); ++i) {
             visited[i] = false;
+            targetVertex[i] = false;
+            gridCost[i] = 1e6;
         }
-        vertexCandidates.emplace_back(src);
-        visited[src] = true;
+        for (int v : target) {
+            targetVertex[v] = true;
+        }
+        bool found = false;
+        int finalVertex = -1;
         gridCost[src] = 0;
-        perdecessor[src] = src;
-
-        int nextId;
-        bool foundTarget = false;
-        while (!foundTarget) {
-            double lowestCost = -1;
-            for (int& cur : vertexCandidates) {
-                for (int& next : globalGraph[cur]) {
-                    int nextVertex = (cur == globalEdges[next].tgt) ? globalEdges[next].src : globalEdges[next].tgt;
-                    if (visited[nextVertex] == true) { continue; }
-                    if (globalEdges[next].edgeCount(width[globalEdges[next].layer]) < 1) { continue; }
-                    if (gridCost[cur] + globalEdges[next].getCost() < lowestCost || lowestCost == -1) {
-                        nextId = nextVertex;
-                        perdecessor[nextVertex] = cur;
-                        lowestCost = gridCost[cur] + globalEdges[next].getCost();
-                    }
+        pQ.push(VisitNode(src, -1, 0));
+        while (!pQ.empty()) {
+            VisitNode top = pQ.top();
+            pQ.pop();
+            int node = top.nodeId;
+            if (targetVertex[node]) {
+                found = true;
+                finalVertex = node;
+                predecessor[node] = top.from;
+                break;
+            }
+            if (visited[node]) {
+                continue;
+            }
+            visited[node] = true;
+            predecessor[node] = top.from;
+            for (int next : globalGraph[node]) {
+                int out = (node == globalEdges[next].tgt) ? globalEdges[next].src : globalEdges[next].tgt;
+                if (visited[out]) {
+                    continue;
                 }
-            }
-
-            ///update grid cost and MST
-            if (lowestCost != -1) {
-                vertexCandidates.emplace_back(nextId);
-                gridCost[nextId] = lowestCost;
-                visited[nextId] = true;
-            } else {
-                return std::vector<int>();
-            }
-
-            for (const int& i: target) {
-                if (i == nextId) {
-                    foundTarget = true;
-                    break;
+                if (gridCost[node] + globalEdges[next].getCost() < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + globalEdges[next].getCost();
+                    pQ.push(VisitNode(out, node, gridCost[out]));
                 }
             }
         }
-        ///back trace
+        if (!found || finalVertex == -1) {
+            return std::vector<int>();
+        }
         std::vector<int> path;
-        int curId = nextId;
-        while (curId != src) {
-            path.emplace_back(curId);
-            curId = perdecessor[curId];
+        printf("%d ", finalVertex);
+        while (finalVertex != -1) {
+            path.emplace_back(finalVertex);
+            finalVertex = predecessor[finalVertex];
+            printf("%d ", finalVertex);
         }
-        path.emplace_back(src);
+        printf("\n");
         std::reverse(path.begin(), path.end());
         return path;
     }
 
     int coordToGridId(Point p, int layer) {
-        int x = floor(p.x / gridWidth);
-        int y = floor(p.y / gridWidth);
+        int x = (int) floor(p.x / gridWidth);
+        int y = (int) floor(p.y / gridWidth);
         return (y * xGridCount + x) + layer * xGridCount * yGridCount;
     }
 
