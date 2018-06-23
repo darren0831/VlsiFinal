@@ -7,9 +7,22 @@
 #include <vector>
 #include <queue>
 #include <cmath>
-#include "Vertex.hpp"
-#include "Layer.hpp"
+#include "Bit.hpp"
+#include "Bus.hpp"
+#include "Edge.hpp"
 #include "FenwickTree.hpp"
+#include "GraphConstructor.hpp"
+#include "InputReader.hpp"
+#include "Layer.hpp"
+#include "Logger.hpp"
+#include "Net.hpp"
+#include "Obstacle.hpp"
+#include "Pin.hpp"
+#include "Point.hpp"
+#include "Rectangle.hpp"
+#include "SegmentMap.hpp"
+#include "Track.hpp"
+#include "Vertex.hpp"
 
 class GlobalRouter {
 private:
@@ -36,8 +49,7 @@ private:
 
         int edgeRequest(int count, int width) {
             std::vector<std::pair<int,int>> remove = ft.remove(width,count);
-            insertOper(remove);
-            return operation.size()-1;
+            return insertOper(remove);
         }
 
         void edgeRecover(int operId) {
@@ -204,7 +216,7 @@ private:
     }
 
     void constructGlobalEdge() {
-        gridWidth = calGridWidth() * 100;
+        gridWidth = calGridWidth();
         xGridCount = (int) ceil(boundary.ur.x/gridWidth);
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
@@ -309,7 +321,7 @@ private:
                     tgt.emplace_back(v);
                 }
             } else {
-                logger.error("Fuck! Do rip-up reroute\n");
+                logger.error("Failed! Do rip-up re-route\n");
                 return false;
             }
         }
