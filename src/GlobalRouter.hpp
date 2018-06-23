@@ -35,19 +35,16 @@ private:
         void setHistoricalCost(double historical_cost) { this->historical_cost = historical_cost; }
 
         int edgeRequest(int count, int width) {
-            std::pair<int,int> p(count,width);
-            insertOper(p);
-            while(--count){
-                ft.remove(width,1);
-            }
+            std::vector<std::pair<int,int>> remove = ft.remove(width,count);
+            insertOper(remove);
             return operation.size()-1;
         }
 
         void edgeRecover(int operId) {
-            std::pair<int,int> p = operation[operId];
+            std::vector<std::pair<int,int>> recover = operation[operId];
             isOperUsed[operId]=0;
-            while(--p.first){
-                ft.insert(p.second,1);
+            for(int i=0;i<(int)recover.size();i++){
+                ft.insert(recover[i].first,recover[i].second);
             }
         }
 
@@ -61,7 +58,7 @@ private:
             ft.insert((int) v.track.width, 1);
         }
 
-        int insertOper(std::pair<int,int> p){
+        int insertOper(std::vector<std::pair<int,int>> p){
             for(int i=0;i<(int)operation.size();i++){
                 if(isOperUsed[i]==0){
                     operation[i]=p;
@@ -85,7 +82,7 @@ private:
         std::unordered_map<int, int> vertices;
         FenwickTree ft;
         int maxWidth;
-        std::vector<std::pair<int,int>> operation;
+        std::vector<std::vector<std::pair<int,int>>> operation;
         std::vector<int> isOperUsed;
 
     };
