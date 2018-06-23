@@ -9,6 +9,32 @@ public:
     Vertex(const Track& track, int id) :
         track(track), id(id) {}
 
+    Vertex(const Vertex& that) {
+        track = that.track;
+        id = that.id;
+    }
+
+    Vertex(Vertex&& that) noexcept {
+        track = std::move(that.track);
+        id = that.id;
+    }
+
+    Vertex& operator=(const Vertex& that) {
+        if (this != &that) {
+            track = that.track;
+            id = that.id;
+        }
+        return *this;
+    }
+
+    Vertex& operator=(Vertex&& that) noexcept {
+        if (this != &that) {
+            track = std::move(that.track);
+            id = that.id;
+        }
+        return *this;
+    }
+
     Rectangle overlap(const Vertex& that, bool lineOverlap) const {
         return track.rect.overlap(that.track.rect, lineOverlap);
     }

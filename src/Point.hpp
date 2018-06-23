@@ -10,6 +10,28 @@ public:
     Point(double x, double y) :
         x(x), y(y) {}
 
+    Point(const Point& that) {
+        x = that.x;
+        y = that.y;
+    }
+
+    Point(Point&& that) noexcept {
+        x = that.x;
+        y = that.y;
+    }
+
+    Point& operator=(const Point& that) {
+        x = that.x;
+        y = that.y;
+        return *this;
+    }
+
+    Point& operator=(Point&& that) noexcept {
+        x = that.x;
+        y = that.y;
+        return *this;
+    }
+
     double axis(int ax) const {
         return (ax == 1) ? x : y;
     }

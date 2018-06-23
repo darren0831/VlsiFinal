@@ -6,6 +6,8 @@
 
 class Track {
 public:
+    Track() = default;
+
     Track(double llx, double lly, double urx, double ury, double w, int l) {
         terminal[0] = Point(llx, lly);
         terminal[1] = Point(urx, ury);
@@ -18,6 +20,44 @@ public:
 
         width = w;
         layer = l;
+    }
+
+    Track(const Track& that) {
+        terminal[0] = that.terminal[0];
+        terminal[1] = that.terminal[1];
+        rect = that.rect;
+        width = that.width;
+        layer = that.layer;
+    }
+
+    Track(Track&& that) noexcept {
+        terminal[0] = std::move(that.terminal[0]);
+        terminal[1] = std::move(that.terminal[1]);
+        rect = std::move(that.rect);
+        width = that.width;
+        layer = that.layer;
+    }
+
+    Track& operator=(const Track& that) {
+        if (this != &that) {
+            terminal[0] = that.terminal[0];
+            terminal[1] = that.terminal[1];
+            rect = that.rect;
+            width = that.width;
+            layer = that.layer;
+        }
+        return *this;
+    }
+
+    Track& operator=(Track&& that) noexcept {
+        if (this != &that) {
+            terminal[0] = std::move(that.terminal[0]);
+            terminal[1] = std::move(that.terminal[1]);
+            rect = std::move(that.rect);
+            width = that.width;
+            layer = that.layer;
+        }
+        return *this;
     }
 
     Rectangle overlap(const Track& that, bool lineOverlap) const {

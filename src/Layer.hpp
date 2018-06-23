@@ -11,6 +11,36 @@ public:
     Layer(std::string name, int spacing, const std::string& direction) :
         name(std::move(name)), spacing(spacing), direction(directionToChar(direction)) {}
 
+    Layer(const Layer& that) {
+        name = that.name;
+        spacing = that.spacing;
+        direction = that.direction;
+    }
+
+    Layer(Layer&& that) noexcept {
+        name = std::move(that.name);
+        spacing = that.spacing;
+        direction = that.direction;
+    }
+
+    Layer& operator=(const Layer& that) {
+        if (this != &that) {
+            name = that.name;
+            spacing = that.spacing;
+            direction = that.direction;
+        }
+        return *this;
+    }
+
+    Layer& operator=(Layer&& that) noexcept {
+        if (this != &that) {
+            name = std::move(that.name);
+            spacing = that.spacing;
+            direction = that.direction;
+        }
+        return *this;
+    }
+
     char directionToChar(const std::string& s) const {
         if (s == "horizontal") { return 'H'; }
 

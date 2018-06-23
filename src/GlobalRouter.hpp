@@ -28,8 +28,8 @@ class GlobalRouter {
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id_, int src_, int tgt_, int maxVertexWidth) : id(id_), src(src_), tgt(tgt_),
-        maxWidth(maxVertexWidth) {
+        GlobalEdge(int id_, int src_, int tgt_, int maxVertexWidth) :
+            id(id_), src(src_), tgt(tgt_), maxWidth(maxVertexWidth) {
             cost = 0;
             historical_cost = 0;
             ft = FenwickTree(maxWidth);
@@ -55,8 +55,8 @@ private:
         void edgeRecover(int operId) {
             std::vector<std::pair<int,int>> recover = operation[operId];
             isOperUsed[operId]=0;
-            for(int i=0;i<(int)recover.size();i++){
-                ft.insert(recover[i].first,recover[i].second);
+            for (auto& i : recover) {
+                ft.insert(i.first, i.second);
             }
         }
 
@@ -80,13 +80,13 @@ private:
             }
             isOperUsed.emplace_back(1);
             operation.emplace_back(p);
-            return operation.size()-1;
+            return (int) operation.size()-1;
         }
 
     public:
+        int id;
         int src;
         int tgt;
-        int id;
         int layer;
     private:
         double cost;
@@ -310,7 +310,7 @@ private:
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 continue;
             }
-            printf("from %d to ", src);
+            printf("from %d to", src);
             for (int v : tgt) {
                 printf(" %d", v);
             }

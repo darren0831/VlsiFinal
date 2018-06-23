@@ -17,6 +17,40 @@ public:
         height = ur.y - ll.y;
     }
 
+    Rectangle(const Rectangle& that) {
+        ll = that.ll;
+        ur = that.ur;
+        width = that.width;
+        height = that.height;
+    }
+
+    Rectangle(Rectangle&& that) noexcept {
+        ll = std::move(that.ll);
+        ur = std::move(that.ur);
+        width = that.width;
+        height = that.height;
+    }
+
+    Rectangle& operator=(const Rectangle& that) {
+        if (this != &that) {
+            ll = that.ll;
+            ur = that.ur;
+            width = that.width;
+            height = that.height;
+        }
+        return *this;
+    }
+
+    Rectangle& operator=(Rectangle&& that) noexcept {
+        if (this != &that) {
+            ll = std::move(that.ll);
+            ur = std::move(that.ur);
+            width = that.width;
+            height = that.height;
+        }
+        return *this;
+    }
+
     Point midPoint() const {
         return ll.midPoint(ur);
     }

@@ -11,6 +11,32 @@ public:
     Obstacle(int layer, int llx, int lly, int urx, int ury) :
         layer(layer), rect(Rectangle(llx, lly, urx, ury)) {}
 
+    Obstacle(const Obstacle& that) {
+        layer = that.layer;
+        rect = that.rect;
+    }
+
+    Obstacle(Obstacle&& that) noexcept {
+        layer = that.layer;
+        rect = std::move(that.rect);
+    }
+
+    Obstacle& operator=(const Obstacle& that) {
+        if (this != &that) {
+            layer = that.layer;
+            rect = that.rect;
+        }
+        return *this;
+    }
+
+    Obstacle& operator=(Obstacle&& that) noexcept {
+        if (this != &that) {
+            layer = that.layer;
+            rect = std::move(that.rect);
+        }
+        return *this;
+    }
+
     std::string toString() const {
         std::string s;
         s = rect.toString() + " , " + std::to_string(layer);

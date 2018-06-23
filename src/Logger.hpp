@@ -22,7 +22,7 @@ public:
         fout = stdout;
     }
 
-    Logger(const char* filename) {
+    explicit Logger(const char* filename) {
         if (filename == nullptr) {
             enabled = false;
             fout = nullptr;
@@ -39,7 +39,7 @@ public:
 
     Logger(const Logger& that) = delete;
 
-    Logger(Logger&& that) {
+    Logger(Logger&& that) noexcept {
         fout = that.fout;
         enabled = that.enabled;
         that.fout = nullptr;
@@ -53,7 +53,7 @@ public:
 
     Logger& operator=(const Logger& that) = delete;
 
-    Logger& operator=(Logger&& that) {
+    Logger& operator=(Logger&& that) noexcept {
         if (this != &that) {
             fout = that.fout;
             enabled = that.enabled;

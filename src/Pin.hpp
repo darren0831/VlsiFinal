@@ -11,6 +11,32 @@ public:
     Pin(int layer, int llx, int lly, int urx, int ury) :
         layer(layer), rect(Rectangle(llx, lly, urx, ury)) {}
 
+    Pin(const Pin& that) {
+        layer = that.layer;
+        rect = that.rect;
+    }
+
+    Pin(Pin&& that) noexcept {
+        layer = that.layer;
+        rect = std::move(that.rect);
+    }
+
+    Pin& operator=(const Pin& that) {
+        if (this != &that) {
+            layer = that.layer;
+            rect = that.rect;
+        }
+        return *this;
+    }
+
+    Pin& operator=(Pin&& that) noexcept {
+        if (this != &that) {
+            layer = that.layer;
+            rect = std::move(that.rect);
+        }
+        return *this;
+    }
+
     std::string toString() const {
         std::string s;
         s = rect.toString() + " , " + std::to_string(layer);

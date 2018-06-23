@@ -12,15 +12,41 @@ public:
     explicit Bit(std::string name) :
         name(std::move(name)), pins(std::vector<Pin>()) {}
 
-    void addPin(Pin p) {
+    Bit(const Bit& that) {
+        name = that.name;
+        pins = that.pins;
+    }
+
+    Bit(Bit&& that) noexcept {
+        name = std::move(that.name);
+        pins = std::move(that.pins);
+    }
+
+    Bit& operator=(const Bit& that) {
+        if (this != &that) {
+            name = that.name;
+            pins = that.pins;
+        }
+        return *this;
+    }
+
+    Bit& operator=(Bit&& that) noexcept {
+        if (this != &that) {
+            name = std::move(that.name);
+            pins = std::move(that.pins);
+        }
+        return *this;
+    }
+
+    void addPin(const Pin& p) {
         pins.push_back(p);
     }
 
     std::string toString() const {
         std::string s;
         s += name + "\n";
-        for (unsigned i = 0; i < pins.size(); i++) {
-            s += std::string("\t") + pins[i].toString() + std::string("\n");
+        for (const auto& pin : pins) {
+            s += std::string("\t") + pin.toString() + std::string("\n");
         }
         return s;
     }

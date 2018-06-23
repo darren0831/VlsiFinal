@@ -5,9 +5,35 @@
 
 class Net {
 public:
-    Net(int numBits) :
+    explicit Net(int numBits) :
         numBits(numBits) {
         net = std::vector<std::vector<int>>((unsigned long) numBits);
+    }
+
+    Net(const Net& that) {
+        net = that.net;
+        numBits = that.numBits;
+    }
+
+    Net(Net&& that) noexcept {
+        net = std::move(that.net);
+        numBits = that.numBits;
+    }
+
+    Net& operator=(const Net& that) {
+        if (this != &that) {
+            net = that.net;
+            numBits = that.numBits;
+        }
+        return *this;
+    }
+
+    Net& operator=(Net&& that) noexcept {
+        if (this != &that) {
+            net = std::move(that.net);
+            numBits = that.numBits;
+        }
+        return *this;
     }
 
     void addTerminal(int binId, int terminalVertexId) {
