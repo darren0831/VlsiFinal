@@ -58,9 +58,6 @@ int main(int argc, char** argv) {
         GlobalRouter globalRouter(
             layers,
             vertices,
-            vertexMap,
-            routingGraph,
-            nets,
             buses,
             boundary,
             stdLogger);

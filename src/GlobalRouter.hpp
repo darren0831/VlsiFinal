@@ -39,13 +39,21 @@ private:
             return (source == src) ? tgt : src;
         }
 
-        double getCost() { return cost; }
+        double getCost() {
+            return cost;
+        }
 
-        void setCost(double cost) { this->cost = cost; }
+        void setCost(double cost) {
+            this->cost = cost;
+        }
 
-        double getHistoricalCost() { return historical_cost; }
+        double getHistoricalCost() {
+            return historical_cost;
+        }
 
-        void setHistoricalCost(double historical_cost) { this->historical_cost = historical_cost; }
+        void setHistoricalCost(double historical_cost) {
+            this->historical_cost = historical_cost;
+        }
 
         int edgeRequest(int count, int width) {
             std::vector<std::pair<int,int>> remove = ft.remove(width,count);
@@ -67,7 +75,7 @@ private:
 
         void addVertexToEdge(Vertex v) {
             vertices[v.id] = (int) ceil(v.track.width);
-            // ft.insert((int) v.track.width, 1);
+            ft.insert((int) v.track.width, 1);
         }
 
         int insertOper(std::vector<std::pair<int,int>> p){
@@ -88,28 +96,39 @@ private:
         int src;
         int tgt;
         int layer;
+
     private:
+        int maxWidth;
         double cost;
         double historical_cost;
-        std::unordered_map<int, int> vertices;
         FenwickTree ft;
-        int maxWidth;
         std::vector<std::vector<std::pair<int,int>>> operation;
         std::vector<int> isOperUsed;
+        std::unordered_map<int, int> vertices;
+    };
 
+private:
+    struct VisitNode {
+        int nodeId;
+        int fromNode;
+        int fromEdge;
+        double cost;
+
+        VisitNode(int nodeId, int fromNode, int fromEdge, double cost) :
+            nodeId(nodeId), fromNode(fromNode), fromEdge(fromEdge), cost(cost) {}
+
+        bool operator<(const VisitNode& that) const {
+            return cost < that.cost || (fabs(cost - that.cost) < 1e-6 && nodeId < that.nodeId);
+        }
     };
 
 public:
     GlobalRouter(std::vector<Layer>& layers,
-       std::vector<Vertex>& vertices,
-       std::unordered_map<int, Vertex>& vertexMap,
-       std::vector<std::vector<Vertex>>& routingGraph,
-       std::vector<Net>& nets,
-       std::vector<Bus>& buses,
-       Rectangle& boundary,
-       Logger& logger) :
-    layers(layers), vertices(vertices), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets),
-    buses(buses), boundary(boundary), logger(logger) {}
+                 std::vector<Vertex>& vertices,
+                 std::vector<Bus>& buses,
+                 Rectangle& boundary,
+                 Logger& logger) :
+    layers(layers), vertices(vertices), buses(buses), boundary(boundary), logger(logger) {}
 
     void globalRoute() {
         logger.info("Initialize\n");
@@ -119,20 +138,6 @@ public:
         logger.info("Do global route\n");
         doRouting();
     }
-
-private:
-    struct VisitNode {
-        int nodeId;
-        int from;
-        double cost;
-
-        VisitNode(int nodeId, int from, double cost) :
-            nodeId(nodeId), from(from), cost(cost) {}
-
-        bool operator<(const VisitNode& that) const {
-            return cost < that.cost || (fabs(cost - that.cost) < 1e-6 && nodeId < that.nodeId);
-        }
-    };
 
 private:
     void initialize() {
@@ -155,6 +160,7 @@ private:
             logs.show(">\n");
         }
     }
+
     void prepareNets() {
         globalNets = std::vector<std::vector<int>>();
         globalNetWidths = std::vector<std::vector<int>>();
@@ -311,15 +317,10 @@ private:
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 continue;
             }
-            printf("from %d to", src);
-            for (int v : tgt) {
-                printf(" %d", v);
-            }
-            puts("");
             auto result = routeSinglePath(src, tgt, widths, numBits);
             if (!result.empty()) {
-                for (int v : result) {
-                    tgt.emplace_back(v);
+                for (const auto& v : result) {
+                    tgt.emplace_back(v.first);
                 }
             } else {
                 logger.error("Failed! Do rip-up re-route\n");
@@ -330,12 +331,13 @@ private:
     }
 
 
-    std::vector<int> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
+    std::vector<std::pair<int, int>> routeSinglePath(const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
         std::priority_queue<VisitNode> pQ;
         bool visited[globalGraph.size()];
         bool targetVertex[globalGraph.size()];
         std::vector<double> gridCost(globalGraph.size());
         std::vector<int> predecessor(globalGraph.size());
+        std::vector<int> preEdges(globalGraph.size());
         for (int i = 0; i < (int) globalGraph.size(); ++i) {
             visited[i] = false;
             targetVertex[i] = false;
@@ -347,51 +349,52 @@ private:
         bool found = false;
         int finalVertex = -1;
         gridCost[src] = 0;
-        pQ.push(VisitNode(src, -1, 0));
+        pQ.push(VisitNode(src, -1, -1, 0));
         while (!pQ.empty()) {
             VisitNode top = pQ.top();
             pQ.pop();
             int node = top.nodeId;
-            if (targetVertex[node]) {
-                found = true;
-                finalVertex = node;
-                predecessor[node] = top.from;
-                break;
-            }
             if (visited[node]) {
                 continue;
             }
             visited[node] = true;
-            predecessor[node] = top.from;
-            for (int next : globalGraph[node]) {
-                int out = (node == globalEdges[next].tgt) ? globalEdges[next].src : globalEdges[next].tgt;
-                if (visited[out]) {
+            predecessor[node] = top.fromNode;
+            preEdges[node] = top.fromEdge;
+            if (targetVertex[node]) {
+                found = true;
+                finalVertex = top.nodeId;
+                break;
+            }
+            for (int edgeId : globalGraph[node]) {
+                GlobalEdge& edge = globalEdges[edgeId];
+                int out = (node == edge.tgt) ? edge.src : edge.tgt;
+                if (visited[out] || (edge.layer != -1 && edge.edgeCount(width[edge.layer]) >= (int) (0.75 * bitCount))) {
                     continue;
                 }
-                if (gridCost[node] + globalEdges[next].getCost() < gridCost[out]) {
-                    gridCost[out] = gridCost[node] + globalEdges[next].getCost();
-                    pQ.push(VisitNode(out, node, gridCost[out]));
+                if (gridCost[node] + globalEdges[edgeId].getCost() < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost();
+                    pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
         }
         if (!found || finalVertex == -1) {
-            return std::vector<int>();
+            return std::vector<std::pair<int, int>>();
         }
-        std::vector<int> path;
-        printf("%d ", finalVertex);
+        std::vector<std::pair<int, int>> path;
         while (finalVertex != -1) {
-            path.emplace_back(finalVertex);
+            path.emplace_back(std::make_pair(finalVertex, preEdges[finalVertex]));
             finalVertex = predecessor[finalVertex];
-            printf("%d ", finalVertex);
         }
-        printf("\n");
         std::reverse(path.begin(), path.end());
+//        for (const auto& v : path) {
+//            logger.info("  - node %d, from edge %d\n", v.first, v.second);
+//        }
         return path;
     }
 
     int coordToGridId(Point p, int layer) {
-        int x = (int) floor(p.x / gridWidth);
-        int y = (int) floor(p.y / gridWidth);
+        auto x = (int) floor(p.x / gridWidth);
+        auto y = (int) floor(p.y / gridWidth);
         return (y * xGridCount + x) + layer * xGridCount * yGridCount;
     }
 
@@ -411,9 +414,6 @@ private:
 private:
     std::vector<Layer>& layers;
     std::vector<Vertex>& vertices;
-    std::unordered_map<int, Vertex>& vertexMap;
-    std::vector<std::vector<Vertex>>& routingGraph;
-    std::vector<Net>& nets;
     std::vector<Bus>& buses;
 
 private:
@@ -428,7 +428,8 @@ private:
 private:
     Logger& logger;
     double gridWidth;
-    int xGridCount, yGridCount;
+    int xGridCount;
+    int yGridCount;
     int maxVertexWidth;
 };
 
