@@ -15,6 +15,9 @@ public:
     }
 
     void insert(int value, int count) {
+        if (value > width) {
+            return;
+        }
         rawData[value] += count;
         while (value < width) {
             treeData[value] += count;
@@ -23,6 +26,9 @@ public:
     }
 
     int query(int value) const {
+        if (value > width) {
+            return 0;
+        }
         int sum = 0;
         while (value > 0) {
             sum += treeData[value];
@@ -32,6 +38,9 @@ public:
     }
 
     std::vector<std::pair<int, int>> remove(int value, int count) {
+        if (value > width) {
+            return std::vector<std::pair<int, int>>();
+        }
         std::vector<std::pair<int, int>> result;
         while (value <= width && count > 0) {
             int request = std::min(count, rawData[value]);

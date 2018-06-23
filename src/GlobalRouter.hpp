@@ -216,7 +216,7 @@ private:
     }
 
     void constructGlobalEdge() {
-        gridWidth = calGridWidth();
+        gridWidth = calGridWidth() * 50;
         xGridCount = (int) ceil(boundary.ur.x/gridWidth);
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
         int edgeId=0;
