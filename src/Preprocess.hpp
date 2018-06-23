@@ -21,10 +21,19 @@ public:
         for (auto& o : obstacles) {
             double spacing = layers[o.layer].spacing;
             Rectangle origin = o.rect;
-            Rectangle cur = Rectangle(origin.ll.x - spacing / 2,
-                                      origin.ll.y - spacing / 2,
-                                      origin.ur.x + spacing / 2,
-                                      origin.ur.y + spacing / 2);
+            Rectangle cur;
+            if(layers[o.layer].isHorizontal()){
+                cur = Rectangle(origin.ll.x,
+                                origin.ll.y - spacing / 2,
+                                origin.ur.x,
+                                origin.ur.y + spacing / 2);  
+            }else{
+                cur = Rectangle(origin.ll.x - spacing / 2,
+                                origin.ll.y,
+                                origin.ur.x + spacing / 2,
+                                origin.ur.y);
+            }
+            
             o.rect = cur;
         }
         double bx = boundary.ur.x;

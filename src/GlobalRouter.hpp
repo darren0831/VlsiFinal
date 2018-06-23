@@ -15,7 +15,7 @@ class GlobalRouter {
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id, int src, int tgt, int maxVertexWidth) : id(id), src(src), tgt(tgt),
+        GlobalEdge(int id_, int src_, int tgt_, int maxVertexWidth) : id(id_), src(src_), tgt(tgt_),
         maxWidth(maxVertexWidth) {
             cost = 0;
             historical_cost = 0;
@@ -31,11 +31,20 @@ private:
         void setHistoricalCost(double historical_cost) { this->historical_cost = historical_cost; }
 
         int edgeRequest(int count, int width) {
-            return 0;
+            std::pair<int,int> p(count,width);
+            insertOper(p);
+            while(--count){
+                ft.remove(width,1);
+            }
+            return operation.size()-1;
         }
 
         void edgeRecover(int operId) {
-
+            std::pair<int,int> p = operation[operId];
+            isOperUsed[operId]=0;
+            while(--p.first){
+                ft.insert(p.second,1);
+            }
         }
 
         int edgeCount(int querywidth) {
@@ -46,6 +55,19 @@ private:
         void addVertexToEdge(Vertex v) {
             vertices[v.id] = (int) ceil(v.track.width);
             ft.insert((int) v.track.width, 1);
+        }
+
+        int insertOper(std::pair<int,int> p){
+            for(int i=0;i<(int)operation.size();i++){
+                if(isOperUsed[i]==0){
+                    operation[i]=p;
+                    isOperUsed[i]=1;
+                    return i;
+                }
+            }
+            isOperUsed.emplace_back(1);
+            operation.emplace_back(p);
+            return operation.size()-1;
         }
 
     public:
@@ -59,7 +81,8 @@ private:
         std::unordered_map<int, int> vertices;
         FenwickTree ft;
         int maxWidth;
-
+        std::vector<std::pair<int,int>> operation;
+        std::vector<int> isOperUsed;
 
     };
 
@@ -179,7 +202,6 @@ private:
                     if(k<(int)layers.size()-1)
                     {
                         GlobalEdge via(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+j) + (k+1)*xGridCount*yGridCount,maxVertexWidth);
-
                         via.layer = -1;
                         globalEdges.emplace_back(via);
                         globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
