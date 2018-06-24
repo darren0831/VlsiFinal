@@ -23,6 +23,7 @@
 #include "SegmentMap.hpp"
 #include "Track.hpp"
 #include "Vertex.hpp"
+#include "GlobalRoutingPath.hpp"
 
 class GlobalRouter {
 private:
@@ -107,7 +108,7 @@ private:
         std::vector<std::vector<std::pair<int,int>>> operation;
         std::vector<int> isOperUsed;
         std::unordered_map<int, int> vertices;
-        
+
     };
 
 private:
@@ -133,6 +134,7 @@ public:
                  Logger& logger) :
         layers(layers), vertices(vertices), buses(buses), boundary(boundary), logger(logger) {
         failCount = std::vector<int>(buses.size());
+        globalResult = std::vector<std::vector<GlobalRoutingPath>>(buses.size());
     }
 
     void globalRoute() {
@@ -351,6 +353,8 @@ private:
             int src = net[i];
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 logger.info("      Omitted! Source and target are in the same grid\n");
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),"");
+                globalResult[id].emplace_back(globalPath);
                 continue;
             }
             auto result = routeSinglePath(id, src, tgt, widths, numBits);
@@ -358,6 +362,13 @@ private:
                 for (const auto& v : result) {
                     tgt.emplace_back(v.first);
                 }
+                char direction[result.size()];
+                for(unsigned int j=0; j<result.size()-1;j++){
+                    direction[j] = getDirection(result[j].first,result[j+1].first);
+                }
+                direction[result.size()-1]= '\0';
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),direction);
+                globalResult[id].emplace_back(globalPath);
             } else {
                 if(failCount[id]>=1) {
                     logger.warning("    > What a Terrible Fail\n");
@@ -371,10 +382,11 @@ private:
                 }
                 GlobalEdge& edge = globalEdges[result[0].second];
                 logger.info("        Recover bus name: %s\n",buses[id].name.c_str());
-                for (const auto& p : netOperations[id]){    
+                for (const auto& p : netOperations[id]){
                     globalEdges[p.first].edgeRecover(p.second);
                     globalEdges[p.first].popRequestBusId(id);
                 }
+                globalResult[id].clear();
                 netOperations[id].clear();
                 for(auto it = edge.requestBusId.rbegin();it!=edge.requestBusId.rend();++it){
                     logger.info("        Recover bus name: %s\n",buses[*it].name.c_str());
@@ -382,6 +394,7 @@ private:
                         globalEdges[p.first].edgeRecover(p.second);
                         globalEdges[p.first].popRequestBusId(*it);
                     }
+                    globalResult[*it].clear();
                     netOperations[*it].clear();
                     stack.push(*it);
                 }
@@ -504,6 +517,9 @@ private:
             }
         }
     }
+
+public:
+    std::vector<std::vector<GlobalRoutingPath>> globalResult;
 
 private:
     std::vector<Layer>& layers;
