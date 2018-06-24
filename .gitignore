@@ -4,6 +4,7 @@
 
 # Executable files
 route
+run
 
 # vscode
 *.json

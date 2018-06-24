@@ -27,27 +27,19 @@
 class GlobalRouter {
 private:
     constexpr static double EXPECTED_GRID_COUNT = 200.0;
+    constexpr static double EDGE_COST_ALPHA = 1000.0;
 
 private:
     class GlobalEdge {
     public:
         GlobalEdge(int id_, int src_, int tgt_, int maxVertexWidth) :
             id(id_), src(src_), tgt(tgt_), maxWidth(maxVertexWidth) {
-            cost = 0;
             historical_cost = 0;
             ft = FenwickTree(maxWidth);
         }
 
         int getTarget(int source) const {
             return (source == src) ? tgt : src;
-        }
-
-        double getCost() {
-            return cost;
-        }
-
-        void setCost(double cost) {
-            this->cost = cost;
         }
 
         double getHistoricalCost() {
@@ -102,7 +94,6 @@ private:
 
     private:
         int maxWidth;
-        double cost;
         double historical_cost;
         FenwickTree ft;
         std::vector<std::vector<std::pair<int,int>>> operation;
@@ -284,7 +275,6 @@ private:
             Point to = v.track.terminal[1];
             int fromGridId = coordToGridId(from, layer);
             int toGridId = coordToGridId(to, layer);
-            // logger.show("%s:%d - %d\n",v.toString().c_str(),fromGridId,toGridId);
             char vertexDir = getDirection(fromGridId, layer, toGridId, layer);
             if (layers[layer].isHorizontal()) {
                 for (int i = fromGridId; i < toGridId; ++i) {
@@ -396,10 +386,11 @@ private:
                 if (edgeNotEnough > 10) {
                     continue;
                 } else {
-                    edgeCountCost = std::min(exp(edgeNotEnough), 1e6);
+                    edgeCountCost = EDGE_COST_ALPHA * edgeNotEnough;
                 }
-                if (gridCost[node] + globalEdges[edgeId].getCost() + edgeCountCost < gridCost[out]) {
-                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost() + edgeCountCost;
+                if (gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost;
+                    globalEdges[edgeId].setHistoricalCost(edgeCountCost + globalEdges[edgeId].getHistoricalCost());
                     pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
