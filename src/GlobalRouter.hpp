@@ -359,24 +359,30 @@ private:
                     tgt.emplace_back(v.first);
                 }
             } else {
-                if(failCount[id]>=1){
+                if(failCount[id]>=1) {
                     logger.warning("    > What a Terrible Fail\n");
                     return false;
                 }
                 failCount[id]++;
                 logger.warning("    > Failed! Do rip-up re-route\n");
+                if(result[0].second == -1) {
+                    logger.warning("    > What a Significantly Terrible Fail\n");
+                    return false;
+                }
                 GlobalEdge& edge = globalEdges[result[0].second];
                 logger.info("        Recover bus name: %s\n",buses[id].name.c_str());
                 for (const auto& p : netOperations[id]){    
                     globalEdges[p.first].edgeRecover(p.second);
                     globalEdges[p.first].popRequestBusId(id);
                 }
+                netOperations[id].clear();
                 for(auto it = edge.requestBusId.rbegin();it!=edge.requestBusId.rend();++it){
                     logger.info("        Recover bus name: %s\n",buses[*it].name.c_str());
                     for (const auto& p : netOperations[*it]){
                         globalEdges[p.first].edgeRecover(p.second);
                         globalEdges[p.first].popRequestBusId(*it);
                     }
+                    netOperations[*it].clear();
                     stack.push(*it);
                 }
                 stack.push(id);
@@ -435,7 +441,7 @@ private:
                 }
                 double edgeCountCost = 0;
                 if (edgeNotEnough > 15) {
-                    if(firstEdgeId == -1)
+                    if(firstEdgeId == -1 && !edge.requestBusId.empty())
                         firstEdgeId = edgeId;
                     continue;
                 } else {
