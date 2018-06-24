@@ -85,13 +85,21 @@ private:
             operation.emplace_back(p);
             return (int) operation.size()-1;
         }
+        void pushRequestBusId(int id){
+            requestBusId.emplace_back(id);
+        }
+        void popRequestBusId(int id) {
+            auto index = std::find(requestBusId.begin(),requestBusId.end(),id);
+            if(index!= requestBusId.end())
+                requestBusId.erase(index);
+        }
 
     public:
         int id;
         int src;
         int tgt;
         int layer;
-
+        std::vector<int> requestBusId;
     private:
         int maxWidth;
         double historical_cost;
@@ -99,6 +107,7 @@ private:
         std::vector<std::vector<std::pair<int,int>>> operation;
         std::vector<int> isOperUsed;
         std::unordered_map<int, int> vertices;
+        
     };
 
 private:
@@ -122,7 +131,9 @@ public:
                  std::vector<Bus>& buses,
                  Rectangle& boundary,
                  Logger& logger) :
-    layers(layers), vertices(vertices), buses(buses), boundary(boundary), logger(logger) {}
+        layers(layers), vertices(vertices), buses(buses), boundary(boundary), logger(logger) {
+        failCount = std::vector<int>(buses.size());
+    }
 
     void globalRoute() {
         logger.info("Initialize\n");
@@ -212,10 +223,15 @@ private:
                 return a < b;
             }
         });
-        for (int i = 0; i < (int) globalNets.size(); ++i) {
-            int idx = routingOrderList[i];
+        std::stack<int> stack;
+        for (int i=(int)globalNets.size()-1;i>=0;--i){
+            stack.push(routingOrderList[i]);
+        }
+        while(!stack.empty()){
+            int idx = stack.top();
+            stack.pop();
             logger.info("Routing bus %s\n", buses[idx].name.c_str());
-            routeSingleNet(i, globalNets[idx], globalNetWidths[idx], buses[idx].numBits);
+            routeSingleNet(idx, globalNets[idx], globalNetWidths[idx], buses[idx].numBits, stack);
         }
     }
 
@@ -327,7 +343,7 @@ private:
         }
     }
 
-    bool routeSingleNet(int id, const std::vector<int>& net, const std::vector<int>& widths, const int numBits) {
+    bool routeSingleNet(int id, const std::vector<int>& net, const std::vector<int>& widths, const int numBits, std::stack<int>& stack) {
         std::vector<int> tgt;
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
@@ -338,19 +354,32 @@ private:
                 continue;
             }
             auto result = routeSinglePath(id, src, tgt, widths, numBits);
-            if (!result.empty()) {
+            if (result[0].first != -1) {
                 for (const auto& v : result) {
                     tgt.emplace_back(v.first);
                 }
             } else {
+                if(failCount[id]>=1){
+                    logger.warning("    > What a Terrible Fail\n");
+                    return false;
+                }
+                failCount[id]++;
                 logger.warning("    > Failed! Do rip-up re-route\n");
-                // TODO re-route
-                // if remove edge 'id', then
-                // call recover on all edges of net id in vector netOperations[id]
-                // for ex.
-                //    for (const auto& v : netOperations[id])
-                //        for (const auto& p : v)
-                //            globalEdges[p.first].edgeRecover(p.second);
+                GlobalEdge& edge = globalEdges[result[0].second];
+                logger.info("        Recover bus name: %s\n",buses[id].name.c_str());
+                for (const auto& p : netOperations[id]){    
+                    globalEdges[p.first].edgeRecover(p.second);
+                    globalEdges[p.first].popRequestBusId(id);
+                }
+                for(auto it = edge.requestBusId.rbegin();it!=edge.requestBusId.rend();++it){
+                    logger.info("        Recover bus name: %s\n",buses[*it].name.c_str());
+                    for (const auto& p : netOperations[*it]){
+                        globalEdges[p.first].edgeRecover(p.second);
+                        globalEdges[p.first].popRequestBusId(*it);
+                    }
+                    stack.push(*it);
+                }
+                stack.push(id);
             }
         }
         return true;
@@ -375,6 +404,7 @@ private:
         }
         bool found = false;
         int finalVertex = -1;
+        int firstEdgeId = -1;
         gridCost[src] = 0;
         pQ.push(VisitNode(src, -1, -1, 0));
         while (!pQ.empty()) {
@@ -405,6 +435,8 @@ private:
                 }
                 double edgeCountCost = 0;
                 if (edgeNotEnough > 15) {
+                    if(firstEdgeId == -1)
+                        firstEdgeId = edgeId;
                     continue;
                 } else {
                     edgeCountCost = EDGE_COST_ALPHA * edgeNotEnough;
@@ -418,7 +450,9 @@ private:
         }
         logger.info("      Path finding finished\n");
         if (!found || finalVertex == -1) {
-            return std::vector<std::pair<int, int>>();
+            std::vector<std::pair<int, int>> temp;
+            temp.emplace_back(std::make_pair(-1,firstEdgeId));
+            return temp;
         }
         std::vector<std::pair<int, int>> path;
         while (finalVertex != -1) {
@@ -431,6 +465,7 @@ private:
                 GlobalEdge& edge = globalEdges[v.second];
                 if (edge.layer != -1) {
                     int operationId = edge.edgeRequest(bitCount, width[edge.layer]);
+                    edge.pushRequestBusId(id);
                     edge.setHistoricalCost(edgeHistoricalCost[v.second]);
                     netOperations[id].emplace_back(std::make_pair(v.second, operationId));
                 }
@@ -478,6 +513,7 @@ private:
 
 private:
     std::vector<std::vector<std::pair<int, int>>> netOperations;
+    std::vector<int> failCount;
 
 private:
     Logger& logger;
