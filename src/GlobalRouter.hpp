@@ -342,6 +342,7 @@ private:
         bool visited[globalGraph.size()];
         bool targetVertex[globalGraph.size()];
         std::vector<double> gridCost(globalGraph.size());
+        std::vector<double> edgeHistoricalCost(globalEdges.size());
         std::vector<int> predecessor(globalGraph.size());
         std::vector<int> preEdges(globalGraph.size());
         for (int i = 0; i < (int) globalGraph.size(); ++i) {
@@ -390,7 +391,7 @@ private:
                 }
                 if (gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost < gridCost[out]) {
                     gridCost[out] = gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost;
-                    globalEdges[edgeId].setHistoricalCost(edgeCountCost + globalEdges[edgeId].getHistoricalCost());
+                    edgeHistoricalCost[edgeId] = globalEdges[edgeId].getHistoricalCost() + edgeCountCost;
                     pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
@@ -405,16 +406,17 @@ private:
             finalVertex = predecessor[finalVertex];
         }
         std::reverse(path.begin(), path.end());
-        logger.info("      Back trace finished\n");
         for (const auto& v : path) {
             if (v.second != -1) {
                 GlobalEdge& edge = globalEdges[v.second];
                 if (edge.layer != -1) {
                     int operationId = edge.edgeRequest(bitCount, width[edge.layer]);
+                    edge.setHistoricalCost(edgeHistoricalCost[v.second]);
                     netOperations[id].emplace_back(std::make_pair(v.second, operationId));
                 }
             }
         }
+        logger.info("      Back trace finished\n");
 //        for (const auto& v : path) {
 //            logger.info("  - node %d, from edge %d\n", v.first, v.second);
 //        }
