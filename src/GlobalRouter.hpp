@@ -145,7 +145,7 @@ private:
     }
 
     void printGlobalEdge(){
-        Logger logs("GlobalGraph.log");
+        Logger logs("Log/GlobalGraph.log");
         for(int i=0;i<(int)globalGraph.size();i++){
             logs.show("%d: <",i);
             for(int j=0;j<(int)globalGraph[i].size();j++){
@@ -346,7 +346,7 @@ private:
                 logger.warning("    > Failed! Do rip-up re-route\n");
                 // TODO re-route
                 // if remove edge 'id', then
-                // call recover on all edges id in vector netOperations[id]
+                // call recover on all edges of net id in vector netOperations[id]
                 // for ex.
                 //    for (const auto& v : netOperations[id])
                 //        for (const auto& p : v)

@@ -4,6 +4,7 @@
 #include "Preprocess.hpp"
 
 int main(int argc, char** argv) {
+    setbuf(stdout, NULL);
     if (argc != 2) {
         fprintf(stderr, "usage: %s <input file>\n", argv[0]);
         return 1;
@@ -12,9 +13,9 @@ int main(int argc, char** argv) {
 
     // Loggers
     Logger stdLogger;
-    Logger inputLogger("input.log");
-    Logger graphLogger("graph.log");
-    Logger globalRoutingLogger("global.log");
+    Logger inputLogger("Log/input.log");
+    Logger graphLogger("Log/graph.log");
+    Logger globalRoutingLogger("Log/global.log");
 
     // Input information
     std::vector<Layer> layers;

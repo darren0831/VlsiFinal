@@ -167,7 +167,7 @@ private:
     }
 
     void printInput() {
-        Logger input_logger("InputInfo.log");
+        Logger input_logger("Log/InputInfo.log");
         input_logger.show("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
         {
