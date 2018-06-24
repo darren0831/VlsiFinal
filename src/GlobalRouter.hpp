@@ -2,11 +2,11 @@
 #define VLSI_FINAL_PROJECT_GLOBAL_ROUTER_HPP_
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include <cmath>
 #include "Bit.hpp"
 #include "Bus.hpp"
 #include "Edge.hpp"
@@ -333,7 +333,7 @@ private:
                     tgt.emplace_back(v.first);
                 }
             } else {
-                logger.warning("    - Failed! Do rip-up re-route\n");
+                logger.warning("    > Failed! Do rip-up re-route\n");
                 // TODO re-route
                 // if remove edge 'id', then
                 // call recover on all edges id in vector netOperations[id]
@@ -357,7 +357,7 @@ private:
         for (int i = 0; i < (int) globalGraph.size(); ++i) {
             visited[i] = false;
             targetVertex[i] = false;
-            gridCost[i] = 1e6;
+            gridCost[i] = 1e12;
         }
         for (int v : target) {
             targetVertex[v] = true;
@@ -384,7 +384,7 @@ private:
             for (int edgeId : globalGraph[node]) {
                 GlobalEdge& edge = globalEdges[edgeId];
                 int out = (node == edge.tgt) ? edge.src : edge.tgt;
-                if (visited[out] || (edge.layer != -1 && edge.edgeCount(width[edge.layer]) < (int) (0.5 * bitCount))) {
+                if (visited[out]) {
                     continue;
                 }
                 int edgeNotEnough = 0;
@@ -392,8 +392,14 @@ private:
                     edgeNotEnough = bitCount - edge.edgeCount(width[edge.layer]);
                     edgeNotEnough = std::max(0, edgeNotEnough);
                 }
-                if (gridCost[node] + globalEdges[edgeId].getCost() + edgeNotEnough < gridCost[out]) {
-                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost() + edgeNotEnough;
+                double edgeCountCost = 0;
+                if (edgeNotEnough > 10) {
+                    continue;
+                } else {
+                    edgeCountCost = std::min(exp(edgeNotEnough), 1e6);
+                }
+                if (gridCost[node] + globalEdges[edgeId].getCost() + edgeCountCost < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getCost() + edgeCountCost;
                     pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
