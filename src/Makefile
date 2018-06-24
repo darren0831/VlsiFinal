@@ -3,7 +3,7 @@
 
 CC := g++
 
-CXXFLAGS := -std=c++14 -O3 -Wall -Wextra -Wno-unused-result
+CXXFLAGS := -std=c++17 -O3 -Wall -Wextra -Wno-unused-result
 
 LDFLAGS := -lm -pthread
 

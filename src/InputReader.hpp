@@ -2,6 +2,7 @@
 #define VLSI_FINAL_PROJECT_INPUT_READER_HPP_
 
 #include <cerrno>
+#include <cstdlib>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,13 +18,13 @@
 
 class InputReader {
 public:
-    InputReader(std::string filename, Logger& logger) :
+    InputReader(const std::string& filename, Logger& logger) :
         logger(logger) {
         fin = fopen(filename.c_str(), "r");
 
         if (!fin) {
             fprintf(stderr, "Error: %s: %s\n", filename.c_str(), strerror(errno));
-            return;
+            exit(1);
         }
 
         logger.info("Start reading input file %s\n", filename.c_str());
