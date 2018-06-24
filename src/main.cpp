@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
     Logger stdLogger;
     Logger inputLogger("Log/input.log");
     Logger graphLogger("Log/graph.log");
-    Logger globalRoutingLogger("Log/global.log");
 
     // Input information
     std::vector<Layer> layers;

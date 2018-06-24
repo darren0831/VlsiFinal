@@ -144,6 +144,7 @@ public:
         prepareNets();
         logger.info("Do global route\n");
         doGlobalRouting();
+        printGlobalResult();
     }
 
 private:
@@ -155,6 +156,16 @@ private:
         logger.info("Bind vertex to edges\n");
         bindVertexToEdge();
         printGlobalEdge();
+    }
+    void printGlobalResult(){
+        Logger globalRoutingLogger("Log/global.log");
+        for(int i=0;i<(int)globalResult.size();i++) {
+            globalRoutingLogger.show("bus: %d:\n",i);
+            for(int j=0;j<(int)globalResult[i].size();j++) {
+                globalRoutingLogger.show("\tnet %d: ",j);
+                globalRoutingLogger.show("%s\n",globalResult[i][j].toString().c_str());
+            }
+        }
     }
 
     void printGlobalEdge(){

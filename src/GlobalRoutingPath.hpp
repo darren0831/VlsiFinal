@@ -9,7 +9,9 @@ class GlobalRoutingPath{
 public:
     GlobalRoutingPath(int id,std::pair<int,int> terminal, std::string sequence) :
         busId(id),terminal(terminal),sequence(sequence){}
-
+    std::string toString() const {
+    	return sequence;
+    }
 private:
     int busId;
     std::pair<int,int> terminal;
