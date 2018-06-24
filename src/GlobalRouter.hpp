@@ -26,7 +26,7 @@
 
 class GlobalRouter {
 private:
-    constexpr static double EXPECTED_GRID_COUNT = 200.0;
+    constexpr static double EXPECTED_GRID_COUNT = 150.0;
     constexpr static double EDGE_COST_ALPHA = 1000.0;
 
 private:
@@ -193,9 +193,29 @@ private:
 
     void doGlobalRouting() {
         netOperations = std::vector<std::vector<std::pair<int, int>>>(globalNets.size());
+        int routingOrderList[globalNets.size()];
         for (int i = 0; i < (int) globalNets.size(); ++i) {
-            logger.info("Routing bus %s\n", buses[i].name.c_str());
-            routeSingleNet(i, globalNets[i], globalNetWidths[i], buses[i].numBits);
+            routingOrderList[i] = i;
+        }
+        std::sort(routingOrderList, routingOrderList + globalNets.size(), [&](int a, int b) {
+            const std::vector<int>& va = globalNets[a];
+            const std::vector<int>& vb = globalNets[b];
+            const int bitA = buses[a].numBits;
+            const int bitB = buses[b].numBits;
+            const auto termA = (int) va.size();
+            const auto termB = (int) vb.size();
+            if (bitA != bitB) {
+                return bitA > bitB;
+            } else if (termA != termB) {
+                return termA > termB;
+            } else {
+                return a < b;
+            }
+        });
+        for (int i = 0; i < (int) globalNets.size(); ++i) {
+            int idx = routingOrderList[i];
+            logger.info("Routing bus %s\n", buses[idx].name.c_str());
+            routeSingleNet(i, globalNets[idx], globalNetWidths[idx], buses[idx].numBits);
         }
     }
 
@@ -226,7 +246,7 @@ private:
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
 
         int edgeId=0;
-        globalGraph = std::vector<std::vector<int>>(xGridCount*yGridCount*(int)layers.size());
+        globalGraph = std::vector<std::vector<int>>(xGridCount * yGridCount * layers.size());
         logger.info("gridWidth: %lf\n", gridWidth);
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
         for(int k=0;k<(int)layers.size();k++) {
@@ -384,7 +404,7 @@ private:
                     edgeNotEnough = std::max(0, edgeNotEnough);
                 }
                 double edgeCountCost = 0;
-                if (edgeNotEnough > 10) {
+                if (edgeNotEnough > 15) {
                     continue;
                 } else {
                     edgeCountCost = EDGE_COST_ALPHA * edgeNotEnough;
