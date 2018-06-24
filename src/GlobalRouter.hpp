@@ -24,9 +24,10 @@
 #include "Track.hpp"
 #include "Vertex.hpp"
 
-#define expectGridCount 200.0
-
 class GlobalRouter {
+private:
+    constexpr static double EXPECTED_GRID_COUNT = 200.0;
+
 private:
     class GlobalEdge {
     public:
@@ -228,7 +229,7 @@ private:
     void constructGlobalEdge() {
         gridWidth = calGridWidth();
         double shortBoundary = std::min(boundary.ur.x,boundary.ur.y);
-        double expectGridWidth = shortBoundary/expectGridCount;
+        double expectGridWidth = shortBoundary/EXPECTED_GRID_COUNT;
         gridWidth = std::max(expectGridWidth,gridWidth);
         xGridCount = (int) ceil(boundary.ur.x/gridWidth);
         yGridCount = (int) ceil(boundary.ur.y/gridWidth);
