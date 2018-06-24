@@ -311,16 +311,16 @@ private:
             Point to = v.track.terminal[1];
             int fromGridId = coordToGridId(from, layer);
             int toGridId = coordToGridId(to, layer);
-            char vertexDir = getDirection(fromGridId, layer, toGridId, layer);
+            char vertexDir = getDirection(fromGridId, toGridId);
             if (layers[layer].isHorizontal()) {
                 for (int i = fromGridId; i < toGridId; ++i) {
                     for (int j : globalGraph[i]) {
-                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer)) {
+                        if (getDirection(globalEdges[j].src, globalEdges[j].tgt)) {
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
                     for (int j : globalGraph[i + 1]) {
-                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer)) {
+                        if (getDirection(globalEdges[j].src, globalEdges[j].tgt)) {
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
@@ -328,12 +328,12 @@ private:
             } else {
                 for (int i = fromGridId; i < toGridId - xGridCount; i += xGridCount) {
                     for (int j : globalGraph[i]) {
-                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer) == vertexDir) {
+                        if (getDirection(globalEdges[j].src, globalEdges[j].tgt) == vertexDir) {
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
                     for (int j : globalGraph[i + xGridCount]) {
-                        if (getDirection(globalEdges[j].src, layer, globalEdges[j].tgt, layer) == vertexDir) {
+                        if (getDirection(globalEdges[j].src, globalEdges[j].tgt) == vertexDir) {
                             globalEdges[j].addVertexToEdge(v);
 
                         }
@@ -490,7 +490,9 @@ private:
         return (y * xGridCount + x) + layer * xGridCount * yGridCount;
     }
 
-    char getDirection(int AgridID, int Alayer, int BgridID, int Blayer) {
+    char getDirection(int AgridID, int BgridID) {
+        int Alayer = floor(AgridID/(xGridCount*yGridCount));
+        int Blayer = floor(BgridID/(xGridCount*yGridCount));
         if (Alayer != Blayer) {
             return AgridID > BgridID ? 'U' : 'D';
         } else {
