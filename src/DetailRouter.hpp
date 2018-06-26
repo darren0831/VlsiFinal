@@ -27,12 +27,13 @@ public:
 	}
 
 private:
-	std::vector<Vertex> vertices;
-	std::vector<std::vector<GlobalRoutingPath>> globalResult;
-	std::vector<Bus> buses;
-	std::vector<Layer> layers;
-	std::unordered_map<int, Vertex> vertexMap;
+	std::vector<Vertex>& vertices;
+	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
+	std::vector<Bus>& buses;
+	std::vector<Layer>& layers;
+	std::unordered_map<int, Vertex>& vertexMap;
 	Logger& logger;
+
 };
 
-#endif
+#endif //VLSI_FINAL_PROJECT_DETAIL_ROUTER_HPP_
