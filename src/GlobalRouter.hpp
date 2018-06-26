@@ -182,7 +182,7 @@ private:
 
     void printGlobalResult() {
 #ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
-        Logger globalRoutingLogger("Log/global.log");
+        Logger globalRoutingLogger("Log/GlobalResult.log");
         for(int i=0;i<(int)globalResult.size();i++) {
             globalRoutingLogger.show("bus: %d:\n",i);
             for(int j=0;j<(int)globalResult[i].size();j++) {

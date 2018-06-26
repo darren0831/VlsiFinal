@@ -57,6 +57,7 @@ public:
         generateVertices();
         logger.info("Generate edges based on routing region\n");
         generateEdges();
+        printRoutingGraph();
     }
 
     void initializeNets() {
@@ -368,6 +369,19 @@ public:
 
     bool doubleEqual(double a, double b) {
         return fabs(a - b) < 1e-6;
+    }
+
+    void printRoutingGraph(){
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+        Logger logger("Log/RoutingGraph.log");
+        for(int i=0;i<(int)routingGraph.size();i++){
+            logger.show("Vertex ID %d: <",i);
+            for(int j=0;j<(int)routingGraph[i].size();j++){
+                logger.show("%d ",routingGraph[i][j].getTarget());
+            }
+            logger.show(">\n");
+        }
+#endif
     }
 
 public:

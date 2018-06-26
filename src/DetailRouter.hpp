@@ -39,7 +39,7 @@ public:
 	}
 	void detailRoute(){
 		logger.info("Detail Route\n");
-		for(int i=0;i<(int)nets.size();i++){
+		for(int i=0;i<(int)1;i++){
 			logger.info("Bus: %d\n",i);
 			//for A bus
 			for(int j=0; j<(int)nets[i].net.size();j++){
@@ -57,6 +57,7 @@ public:
 
 					if(k==0){	//put target to endVertexId
 						endVertexId.emplace_back(nets[i].net[j][k+1]);
+						logger.info("End ID:%d\n",nets[i].net[j][k+1]);
 					}else{
 						for(int d: detailPath)
 							endVertexId.emplace_back(d);
@@ -82,12 +83,13 @@ public:
 							}
 						}
 					}
-					// logger.info("End ID: %d\n",currentVertexId);
+					logger.info("Start ID: %d, End ID: %d\n",startVertexId,currentVertexId);
 					if(flag){
 						logger.info("Do Detail Back Trace\n");
 						while(currentVertexId!=-1){
+							logger.show("%d\n",currentVertexId);
 							detailPath.emplace_back(currentVertexId);
-							isVertexUsed.insert(currentVertexId);
+							// isVertexUsed.insert(currentVertexId);
 							currentVertexId = prev[currentVertexId];
 						}
 					}else{
