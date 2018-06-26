@@ -329,11 +329,13 @@ private:
                 for (int i = fromGridId; i < toGridId; ++i) {
                     for (int j : globalGraph[i]) {
                         if (getDirection(globalEdges[j].src, globalEdges[j].tgt)) {
+                            v.gridId.emplace_back(i);
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
                     for (int j : globalGraph[i + 1]) {
                         if (getDirection(globalEdges[j].src, globalEdges[j].tgt)) {
+                            v.gridId.emplace_back(i);
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
@@ -342,11 +344,13 @@ private:
                 for (int i = fromGridId; i < toGridId - xGridCount; i += xGridCount) {
                     for (int j : globalGraph[i]) {
                         if (getDirection(globalEdges[j].src, globalEdges[j].tgt) == vertexDir) {
+                            v.gridId.emplace_back(i);
                             globalEdges[j].addVertexToEdge(v);
                         }
                     }
                     for (int j : globalGraph[i + xGridCount]) {
                         if (getDirection(globalEdges[j].src, globalEdges[j].tgt) == vertexDir) {
+                            v.gridId.emplace_back(i);
                             globalEdges[j].addVertexToEdge(v);
 
                         }

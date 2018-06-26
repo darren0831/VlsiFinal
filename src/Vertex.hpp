@@ -39,11 +39,11 @@ public:
         return *this;
     }
 
-    void setGridId(const int id) {
+    void setGridId(const std::vector<int>& id) {
         gridId = id;
     }
 
-    int getGridId() const {
+    std::vector<int> getGridId() const {
         return gridId;
     }
 
@@ -70,7 +70,7 @@ public:
 public:
     Track track;
     int id;
-    int gridId;
+    std::vector<int> gridId;
 };
 
 #endif // VLSI_FINAL_PROJECT_VERTEX_HPP_
