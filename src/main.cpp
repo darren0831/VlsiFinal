@@ -16,7 +16,17 @@ int main(int argc, char** argv) {
     std::string inputfile = argv[1];
 
     // Loggers
+
+#ifdef __APPLE__
     mkdir("./Log", 0755);
+#endif
+#ifdef __unix__
+    mkdir("./Log", 0755);
+#endif
+#ifdef _WIN64
+    mkdir("./Log");
+#endif
+
     Logger stdLogger;
     Logger inputLogger("Log/input.log");
     Logger graphLogger("Log/graph.log");
