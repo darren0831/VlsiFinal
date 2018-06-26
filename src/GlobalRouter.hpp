@@ -319,7 +319,7 @@ private:
     }
 
     void bindVertexToEdge() {
-        for (const Vertex& v : vertices) {
+        for (Vertex& v : vertices) {
             int layer = v.track.layer;
             Point from = v.track.terminal[0];
             Point to = v.track.terminal[1];

@@ -1,17 +1,22 @@
+#include <cstdlib>
 #include <string>
+#include <sys/stat.h>
 #include "GraphConstructor.hpp"
 #include "GlobalRouter.hpp"
 #include "Preprocess.hpp"
 
 int main(int argc, char** argv) {
-    setbuf(stdout, NULL);
+    setbuf(stdout, nullptr);
+
     if (argc != 2) {
         fprintf(stderr, "usage: %s <input file>\n", argv[0]);
         return 1;
     }
+
     std::string inputfile = argv[1];
 
     // Loggers
+    mkdir("./Log", 0755);
     Logger stdLogger;
     Logger inputLogger("Log/input.log");
     Logger graphLogger("Log/graph.log");

@@ -1,13 +1,16 @@
 #ifndef VLSI_FINAL_PROJECT_VERTEX_HPP_
 #define VLSI_FINAL_PROJECT_VERTEX_HPP_
 
+#include <vector>
+#include "Track.hpp"
+
 class Vertex {
 public:
     Vertex() :
-        track(Track(-1, -1, -1, -1, -1, -1)), id(-1), gridId(-1) {}
+        track(Track(-1, -1, -1, -1, -1, -1)), id(-1), gridId(std::vector<int>()) {}
 
-    Vertex(const Track& track, int id, int gridId = -1) :
-        track(track), id(id), gridId(gridId) {}
+    Vertex(const Track& track, int id) :
+        track(track), id(id), gridId(std::vector<int>()) {}
 
     Vertex(const Vertex& that) {
         track = that.track;
