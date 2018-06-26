@@ -4,6 +4,7 @@
 #include "GraphConstructor.hpp"
 #include "GlobalRouter.hpp"
 #include "Preprocess.hpp"
+#include "DetailRouter.hpp"
 
 int main(int argc, char** argv) {
     setbuf(stdout, nullptr);
@@ -44,6 +45,9 @@ int main(int argc, char** argv) {
     std::vector<std::vector<Vertex>> routingGraph;
     std::vector<Net> nets;
 
+    // Global Result
+    std::vector<std::vector<GlobalRoutingPath>> globalResult;
+
     // Read input file
     {
         InputReader inputReader(inputfile, stdLogger);
@@ -77,6 +81,18 @@ int main(int argc, char** argv) {
             boundary,
             stdLogger);
         globalRouter.globalRoute();
+        globalResult = std::move(globalRouter.globalResult);
+    }
+
+    {
+        DetailRouter detailRouter(
+            vertices,
+            globalResult,
+            buses,
+            layers,
+            vertexMap,
+            stdLogger);
+        detailRouter.detailRoute();
     }
     return 0;
 }
