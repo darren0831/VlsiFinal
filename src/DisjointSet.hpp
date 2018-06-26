@@ -5,9 +5,8 @@
 
 class DisjointSet {
 public:
-    DisjointSet(int size) {
-        this->size = size;
-        this->parent = std::vector<int>();
+    DisjointSet(int size) :
+        size(size) {
         initialize();
     }
 
@@ -16,12 +15,14 @@ public:
         for (int i = 0; i < size; ++i) {
             parent[i] = i;
         }
-        groupSize = (int) parent.size();
+        groupSize = size;
     }
 
     void pack(int a, int b) {
         if (find(a) != find(b)) {
             --groupSize;
+        } else {
+            return;
         }
         parent[find(b)] = find(a);
     }
