@@ -364,7 +364,8 @@ private:
             int src = net[i];
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 logger.info("      Omitted! Source and target are in the same grid\n");
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),"");
+                std::vector<int> gridSeq;
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),gridSeq,"");
                 globalResult[id].emplace_back(globalPath);
                 continue;
             }
@@ -374,11 +375,13 @@ private:
                     tgt.emplace_back(v.first);
                 }
                 char direction[result.size()];
+                std::vector<int> gridSeq(result.size()-1);
                 for(unsigned int j=0; j<result.size()-1;j++){
                     direction[j] = getDirection(result[j].first,result[j+1].first);
+                    gridSeq[j] = result[j+1].first;
                 }
                 direction[result.size()-1]= '\0';
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),direction);
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),gridSeq,direction);
                 globalResult[id].emplace_back(globalPath);
             } else {
                 if(failCount[id]>=1) {
