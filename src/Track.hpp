@@ -6,7 +6,13 @@
 
 class Track {
 public:
-    Track() = default;
+    Track() {
+        terminal[0] = Point(-1, -1);
+        terminal[1] = Point(-1, -1);
+        rect = Rectangle(-1, -1, -1, -1);
+        width = -1;
+        layer = -1;
+    }
 
     Track(double llx, double lly, double urx, double ury, double w, int l) {
         terminal[0] = Point(llx, lly);

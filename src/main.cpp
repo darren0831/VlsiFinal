@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     // Graph information
     std::vector<Vertex> vertices;
     std::unordered_map<int, Vertex> vertexMap;
-    std::vector<std::vector<Vertex>> routingGraph;
+    std::vector<std::vector<Edge>> routingGraph;
     std::vector<Net> nets;
 
     // Global Result
