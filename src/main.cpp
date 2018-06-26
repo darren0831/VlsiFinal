@@ -87,20 +87,16 @@ int main(int argc, char** argv) {
         nets = std::move(graphConstructor.nets);
     }
 
-    // check
+    // Graph connection check
     {
+        Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
         DisjointSet ds(vertices.size());
-        printf("$groups = %d\n", ds.numGroups());
         for (const auto& edges : routingGraph) {
             for (const auto edge : edges) {
-                if (edge.src < 0 || edge.src >= (int) vertices.size() ||
-                    edge.tgt < 0 || edge.tgt >= (int) vertices.size()) {
-                    fprintf(stderr, "???\n");
-                }
                 ds.pack(edge.src, edge.tgt);
             }
         }
-        printf("#groups = %d\n", ds.numGroups());
+        logger.info("Number of connected graphs: %d\n", ds.numGroups());
     }
 
     // Global route
@@ -116,6 +112,7 @@ int main(int argc, char** argv) {
         globalResult = std::move(globalRouter.globalResult);
     }
 
+    // Detail route
     {
         Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
         DetailRouter detailRouter(
@@ -128,7 +125,6 @@ int main(int argc, char** argv) {
             nets,
             logger);
         detailRouter.detailRoute();
-        // detailRouter.debug();
     }
     return 0;
 }
