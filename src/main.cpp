@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
     std::vector<std::vector<GlobalRoutingPath>> globalResult;
 
     // Read input file
+    stdoutLogger.info("===== Read Input File =====\n");
     {
         Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
         InputReader inputReader(inputfile, logger);
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
     }
 
     // Preprocess
+    stdoutLogger.info("===== Preprocess =====\n");
     {
         Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
         logger.info("Preprocess\n");
@@ -78,6 +80,7 @@ int main(int argc, char** argv) {
     }
 
     // Construct graph
+    stdoutLogger.info("===== Routing Graph Construction =====\n");
     {
         Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
         GraphConstructor graphConstructor(layers, tracks, buses, obstacles, logger);
@@ -100,6 +103,7 @@ int main(int argc, char** argv) {
     }
 
     // Global route
+    stdoutLogger.info("===== Global Route =====\n");
     {
         Logger& logger = (printToFile) ? globalLogger : stdoutLogger;
         GlobalRouter globalRouter(
@@ -113,6 +117,7 @@ int main(int argc, char** argv) {
     }
 
     // Detail route
+    stdoutLogger.info("===== Detail Route =====\n");
     {
         Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
         DetailRouter detailRouter(
