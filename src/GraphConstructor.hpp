@@ -35,6 +35,7 @@ public:
         initialize();
         initializeNets();
         writeLog();
+        printRoutingGraph();
     }
 
     void preCalculate() {
@@ -57,7 +58,6 @@ public:
         generateVertices();
         logger.info("Generate edges based on routing region\n");
         generateEdges();
-        printRoutingGraph();
     }
 
     void initializeNets() {
