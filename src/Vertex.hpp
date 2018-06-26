@@ -4,25 +4,28 @@
 class Vertex {
 public:
     Vertex() :
-        track(Track(-1, -1, -1, -1, -1, -1)), id(-1) {}
+        track(Track(-1, -1, -1, -1, -1, -1)), id(-1), gridId(-1) {}
 
-    Vertex(const Track& track, int id) :
-        track(track), id(id) {}
+    Vertex(const Track& track, int id, int gridId = -1) :
+        track(track), id(id), gridId(gridId) {}
 
     Vertex(const Vertex& that) {
         track = that.track;
         id = that.id;
+        gridId = that.gridId;
     }
 
     Vertex(Vertex&& that) noexcept {
         track = std::move(that.track);
         id = that.id;
+        gridId = that.gridId;
     }
 
     Vertex& operator=(const Vertex& that) {
         if (this != &that) {
             track = that.track;
             id = that.id;
+            gridId = that.gridId;
         }
         return *this;
     }
@@ -31,8 +34,17 @@ public:
         if (this != &that) {
             track = std::move(that.track);
             id = that.id;
+            gridId = that.gridId;
         }
         return *this;
+    }
+
+    void setGridId(const int id) {
+        gridId = id;
+    }
+
+    int getGridId() const {
+        return gridId;
     }
 
     Rectangle overlap(const Vertex& that, bool lineOverlap) const {
@@ -44,7 +56,7 @@ public:
     }
 
     bool operator==(const Vertex& that) const {
-        return track == that.track && id == that.id;
+        return track == that.track && id == that.id && gridId == that.gridId;
     }
 
     bool operator!=(const Vertex& that) const {
@@ -58,6 +70,7 @@ public:
 public:
     Track track;
     int id;
+    int gridId;
 };
 
 #endif // VLSI_FINAL_PROJECT_VERTEX_HPP_
