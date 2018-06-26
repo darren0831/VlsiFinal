@@ -3,11 +3,13 @@
 
 CC := g++
 
-CXXFLAGS := -std=c++17 -O3 -Wall -Wextra -Wno-unused-result
+CXXFLAGS := -O3 -std=c++17 -Wall -Wextra -Wno-unused-result
 
-LDFLAGS := -lm -pthread
+LDFLAGS := -pthread
 
-DEFFLAGS := -DVLSI_FINAL_PROJECT_DEBUG_FLAG
+DEBUGFLAGS := -DVLSI_FINAL_PROJECT_DEBUG_FLAG
+
+RELEASEFLAGS := -DVLSI_FINAL_PROJECT_RELEASE_FLAG
 
 BIN := route
 
@@ -16,13 +18,13 @@ BIN := route
 
 
 all: main.cpp
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEFFLAGS) -o $(BIN) $<
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEBUGFLAGS) -o $(BIN) $<
 
 debug: main.cpp
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEFFLAGS) -o $(BIN) $<
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEBUGFLAGS) -o $(BIN) $<
 
 release: main.cpp
-	$(CC) $(CXXFLAGS) $(LDFLAGS) -o $(BIN) $<
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $(RELEASEFLAGS) -o $(BIN) $<
 
 clean:
 	-rm -rf *.o $(BIN)

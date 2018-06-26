@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 project(VlsiFinalProject)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+
+set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Wno-unused-result -pthread")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3 -DVLSI_FINAL_PROJECT_DEBUG_FLAG")
+set(CMAKE_CXX_FLAGS_RELEASE "-DVLSI_FINAL_PROJECT_RELEASE_FLAG")
 
 set(SOURCE_FILES
         src/Bit.hpp
