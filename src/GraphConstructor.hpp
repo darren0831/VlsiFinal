@@ -60,26 +60,47 @@ public:
 
     void initializeNets() {
         logger.info("Initialize nets\n");
+        int multiOverlapCount = 0;
+        int totalTerminals = 0;
+        int vertexId = (int) vertices.size();
         for (const auto& bus : buses) {
             Net net(bus.numBits);
+            totalTerminals += bus.numBits * bus.numPins;
             for (int i = 0; i < bus.numBits; ++i) {
                 for (const Pin& pin : bus.bits[i].pins) {
                     int layer = pin.layer;
                     const Rectangle& location = pin.rect;
-                    int touchedVertices = 0;
+                    std::vector<int> touchedVertices;
                     for (const Vertex& v : layerVertices[layer]) {
                         if (v.track.rect.hasOverlap(location)) {
-                            net.addTerminal(i, v.id);
-                            ++touchedVertices;
+                            touchedVertices.emplace_back(v.id);
                         }
                     }
-                    if (touchedVertices == 0) {
-                        logger.error("A bus doesn't touch any vertices\n");
+                    if (touchedVertices.empty()) {
+                        logger.error("A pin of bus %s doesn't touch any vertices\n", bus.name.c_str());
+                    } else if (touchedVertices.size() == 1lu) {
+                        net.addTerminal(i, touchedVertices[0]);
+                    } else {
+                        ++multiOverlapCount;
+                        vertexMap[vertexId] = Vertex(Track(), vertexId);
+                        vertices.emplace_back(Track(), vertexId);
+                        std::vector<Edge> newEdges;
+                        for (const int touched : touchedVertices) {
+                            newEdges.emplace_back(vertexId, touched, ' ', 'S');
+                        }
+                        routingGraph.emplace_back(newEdges);
+                        if (routingGraph[vertexId].size() != newEdges.size()) {
+                            fprintf(stderr, "FUCK!\n");
+                        }
+                        net.addTerminal(i, vertexId);
+                        ++vertexId;
                     }
                 }
             }
+            net.widths = bus.widths;
             nets.emplace_back(net);
         }
+        logger.warning("%d / %d pins of buses overlap with more than one vertex\n", multiOverlapCount, totalTerminals);
         logger.info("%d nets generated\n", (int) nets.size());
     }
 
@@ -154,7 +175,7 @@ public:
     }
 
     void generateEdges() {
-        routingGraph = std::vector<std::vector<Vertex>>(vertices.size());
+        routingGraph = std::vector<std::vector<Edge>>(vertices.size());
         std::vector<std::thread> threads;
         int part = (int) vertices.size() / 3;
         threads.emplace_back(std::thread([=] {
@@ -184,7 +205,7 @@ public:
         for (int i = start; i < end; ++i) {
             const Vertex& v = vertices[i];
             int layer = v.track.layer;
-            std::vector<Vertex>& outVertices = routingGraph[v.id];
+            std::vector<Edge>& outVertices = routingGraph[v.id];
             SegmentMap map[2];
             map[0] = SegmentMap(v.track.rect);
             map[1] = SegmentMap(v.track.rect);
@@ -199,7 +220,7 @@ public:
     }
 
     void splitTrack(const Track& t, const Rectangle& overlap, std::stack<Track>& stack) {
-        Layer layer = layers[t.layer];
+        const Layer& layer = layers[t.layer];
         double a, b, c, d, e, f, g, h;
         a = t.rect.ll.x;
         b = t.rect.ll.y;
@@ -255,31 +276,67 @@ public:
         }
     }
 
-    void scanOutVertices(const Vertex& v, int targetLayer, std::vector<Vertex>& out) {
+    void scanOutVertices(const Vertex& v, int targetLayer, std::vector<Edge>& out) {
         const Layer& layer = layers[targetLayer];
         const double threshold = min_bus_width[targetLayer];
+        const Point src = v.track.rect.midPoint();
         for (const Vertex& u : layerVertices[targetLayer]) {
             if (v != u && v.hasOverlap(u, true)) {
                 Rectangle r = v.overlap(u, true);
                 if (layer.isHorizontal() && r.height > threshold) {
-                    out.push_back(u);
+                    const Point tgt = u.track.rect.midPoint();
+                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirection, layer.direction);
+                    out.push_back(std::move(edge));
                 }
                 if (layer.isVertical() && r.width > threshold) {
-                    out.push_back(u);
+                    const Point tgt = u.track.rect.midPoint();
+                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirection, layer.direction);
+                    out.push_back(std::move(edge));
                 }
             }
         }
     }
 
-    void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Vertex>& out) {
+    void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<Edge>& out) {
         int beginLayer = std::min(v.track.layer, targetLayer);
         int endLayer = std::max(v.track.layer, targetLayer);
+        const Point src = v.track.rect.midPoint();
         for (const Vertex& u : layerVertices[targetLayer]) {
             if (v != u && v.hasOverlap(u, true)) {
                 Rectangle r = v.overlap(u, true);
                 if (map.insert(r) && isValidEdge(r, beginLayer, endLayer)) {
-                    out.push_back(u);
+                    const Point tgt = u.track.rect.midPoint();
+                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirection, 'C');
+                    out.push_back(std::move(edge));
                 }
+            }
+        }
+    }
+
+    char getEdgeDirection(const Point& src, const Point& tgt, int srcLayer, int tgtLayer) const {
+        if (srcLayer == tgtLayer) {
+            char layerDirection = layers[srcLayer].direction;
+            if (layerDirection == 'H') {
+                if (src.x < tgt.x) {
+                    return 'L';
+                } else {
+                    return 'R';
+                }
+            } else {
+                if (src.y < tgt.y) {
+                    return 'B';
+                } else {
+                    return 'F';
+                }
+            }
+        } else {
+            if (srcLayer < tgtLayer) {
+                return 'U';
+            } else {
+                return 'D';
             }
         }
     }
@@ -314,7 +371,7 @@ public:
 
 public:
     std::unordered_map<int, Vertex> vertexMap;
-    std::vector<std::vector<Vertex>> routingGraph;
+    std::vector<std::vector<Edge>> routingGraph;
 
 public:
     std::vector<int> min_bus_width;
