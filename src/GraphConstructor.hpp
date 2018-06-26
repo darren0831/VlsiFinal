@@ -34,7 +34,7 @@ public:
         preCalculate();
         initialize();
         initializeNets();
-        logger.info("%lu vertices, %lu edges after graph construction\n", vertices.size(), edges.size());
+        writeLog();
     }
 
     void preCalculate() {
@@ -106,6 +106,16 @@ public:
         }
         logger.warning("%d / %d pins of buses overlap with more than one vertex\n", multiOverlapCount, totalTerminals);
         logger.info("%d nets generated\n", (int) nets.size());
+    }
+
+    void writeLog() {
+        int totalEdges = 0;
+        for (const auto& edges : routingGraph) {
+            totalEdges += (int) edges.size();
+        }
+        logger.info("After graph construction,\n");
+        logger.info("  %lu vertices generated\n", vertices.size());
+        logger.info("  %d edges generated\n", totalEdges);
     }
 
     void splitTracks() {
