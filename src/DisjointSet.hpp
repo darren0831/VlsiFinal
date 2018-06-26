@@ -20,13 +20,10 @@ public:
     }
 
     void pack(int a, int b) {
-        if (find(a) == find(b)) {
-            return;
-        }
         if (find(a) != find(b)) {
             --groupSize;
         }
-        parent[a] = find(b);
+        parent[find(b)] = find(a);
     }
 
     int find(int t) {
