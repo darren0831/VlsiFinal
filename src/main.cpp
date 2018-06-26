@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include <sys/stat.h>
+#include "DisjointSet.hpp"
 #include "GraphConstructor.hpp"
 #include "GlobalRouter.hpp"
 #include "Preprocess.hpp"
@@ -84,6 +85,22 @@ int main(int argc, char** argv) {
         vertexMap = std::move(graphConstructor.vertexMap);
         routingGraph = std::move(graphConstructor.routingGraph);
         nets = std::move(graphConstructor.nets);
+    }
+
+    // check
+    {
+        DisjointSet ds(vertices.size());
+        printf("$groups = %d\n", ds.numGroups());
+        for (const auto& edges : routingGraph) {
+            for (const auto edge : edges) {
+                if (edge.src < 0 || edge.src >= (int) vertices.size() ||
+                    edge.tgt < 0 || edge.tgt >= (int) vertices.size()) {
+                    fprintf(stderr, "???\n");
+                }
+                ds.pack(edge.src, edge.tgt);
+            }
+        }
+        printf("#groups = %d\n", ds.numGroups());
     }
 
     // Global route
