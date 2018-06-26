@@ -9,12 +9,20 @@
 int main(int argc, char** argv) {
     setbuf(stdout, nullptr);
 
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <input file>\n", argv[0]);
+    if (argc != 2 && argc != 3) {
+        fprintf(stderr, "usage: %s [-d] <input file>\n", argv[0]);
         return 1;
     }
 
-    std::string inputfile = argv[1];
+    bool printToFile = false;
+    std::string inputfile;
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "-d") {
+            printToFile = true;
+        } else {
+            inputfile = argv[i];
+        }
+    }
 
     // Loggers
 
@@ -28,9 +36,11 @@ int main(int argc, char** argv) {
     mkdir("./Log");
 #endif
 
-    Logger stdLogger;
+    Logger stdoutLogger;
     Logger inputLogger("Log/input.log");
     Logger graphLogger("Log/graph.log");
+    Logger globalLogger("Log/globalroute.log");
+    Logger detailLogger("Log/detailroute.log");
 
     // Input information
     std::vector<Layer> layers;
@@ -50,7 +60,8 @@ int main(int argc, char** argv) {
 
     // Read input file
     {
-        InputReader inputReader(inputfile, stdLogger);
+        Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
+        InputReader inputReader(inputfile, logger);
         layers = std::move(inputReader.layers);
         tracks = std::move(inputReader.tracks);
         buses = std::move(inputReader.buses);
@@ -60,12 +71,15 @@ int main(int argc, char** argv) {
 
     // Preprocess
     {
+        Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
+        logger.info("Preprocess\n");
         Preprocess(layers, obstacles, boundary);
     }
 
     // Construct graph
     {
-        GraphConstructor graphConstructor(layers, tracks, buses, obstacles, stdLogger);
+        Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
+        GraphConstructor graphConstructor(layers, tracks, buses, obstacles, logger);
         vertices = std::move(graphConstructor.vertices);
         vertexMap = std::move(graphConstructor.vertexMap);
         routingGraph = std::move(graphConstructor.routingGraph);
@@ -74,24 +88,26 @@ int main(int argc, char** argv) {
 
     // Global route
     {
+        Logger& logger = (printToFile) ? globalLogger : stdoutLogger;
         GlobalRouter globalRouter(
             layers,
             vertices,
             buses,
             boundary,
-            stdLogger);
+            logger);
         globalRouter.globalRoute();
         globalResult = std::move(globalRouter.globalResult);
     }
 
     {
+        Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
         DetailRouter detailRouter(
             vertices,
             globalResult,
             buses,
             layers,
             vertexMap,
-            stdLogger);
+            logger);
         detailRouter.detailRoute();
     }
     return 0;

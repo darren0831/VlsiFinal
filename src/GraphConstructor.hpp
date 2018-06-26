@@ -60,8 +60,11 @@ public:
 
     void initializeNets() {
         logger.info("Initialize nets\n");
+        int multiOverlapCount = 0;
+        int totalTerminals = 0;
         for (const auto& bus : buses) {
             Net net(bus.numBits);
+            totalTerminals += bus.numBits * bus.numPins;
             for (int i = 0; i < bus.numBits; ++i) {
                 for (const Pin& pin : bus.bits[i].pins) {
                     int layer = pin.layer;
@@ -76,10 +79,15 @@ public:
                     if (touchedVertices == 0) {
                         logger.error("A bus doesn't touch any vertices\n");
                     }
+                    if (touchedVertices > 1) {
+                        ++multiOverlapCount;
+                    }
                 }
             }
+            net.widths = bus.widths;
             nets.emplace_back(net);
         }
+        logger.warning("%d / %d pins of buses overlap with more than one vertex\n", multiOverlapCount, totalTerminals);
         logger.info("%d nets generated\n", (int) nets.size());
     }
 

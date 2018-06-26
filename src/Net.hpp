@@ -42,6 +42,7 @@ public:
 
 public:
     std::vector<std::vector<int>> net;
+    std::vector<int> widths;
     int numBits;
 };
 

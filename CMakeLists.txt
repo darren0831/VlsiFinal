@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-DVLSI_FINAL_PROJECT_RELEASE_FLAG")
 set(SOURCE_FILES
         src/Bit.hpp
         src/Bus.hpp
+        src/DetailRouter.hpp
         src/Edge.hpp
         src/FenwickTree.hpp
         src/GlobalRouter.hpp
