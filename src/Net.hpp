@@ -43,6 +43,7 @@ public:
 public:
     std::vector<std::vector<int>> net;
     int numBits;
+    std::vector<int>detailPath;
 };
 
 #endif // VLSI_FINAL_PROJECT_NET_HPP_

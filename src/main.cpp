@@ -91,8 +91,11 @@ int main(int argc, char** argv) {
             buses,
             layers,
             vertexMap,
+            routingGraph,
+            nets,
             stdLogger);
-        detailRouter.detailRoute();
+        // detailRouter.detailRoute();
+        detailRouter.debug();
     }
     return 0;
 }

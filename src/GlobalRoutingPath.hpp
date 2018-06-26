@@ -7,8 +7,8 @@
 
 class GlobalRoutingPath {
 public:
-    GlobalRoutingPath(int id, std::pair<int, int> terminal, std::vector<int> gridSequence, std::string sequence) :
-        busId(id), terminal(std::move(terminal)), gridSequence(std::move(gridSequence)), topologySequence(std::move(sequence)) {}
+    GlobalRoutingPath(int id, std::string busName, std::pair<int, int> terminal, std::vector<int> gridSequence, std::string sequence) :
+        busId(id), busName(busName), terminal(std::move(terminal)), gridSequence(std::move(gridSequence)), topologySequence(std::move(sequence)) {}
 
     std::string toString() const {
         return topologySequence;
@@ -16,6 +16,7 @@ public:
 
 private:
     int busId;
+    std::string busName;
     std::pair<int, int> terminal;
     std::vector<int> gridSequence;
     std::string topologySequence;

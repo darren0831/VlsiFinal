@@ -28,7 +28,7 @@
 
 class GlobalRouter {
 private:
-    constexpr static double EXPECTED_GRID_COUNT = 200.0;
+    constexpr static double EXPECTED_GRID_COUNT = 150.0;
     constexpr static double EDGE_COST_ALPHA = 1000.0;
 
 private:
@@ -396,7 +396,7 @@ private:
             int src = net[i];
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
                 logger.info("      Omitted! Path source and target are in the same grid\n");
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id, std::make_pair(i - 1, i), std::vector<int>(), "");
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id, buses[id].name, std::make_pair(i - 1, i), std::vector<int>(), "");
                 globalResult[id].emplace_back(std::move(globalPath));
                 continue;
             }
@@ -417,7 +417,7 @@ private:
                     fprintf(stderr, "[ERROR] Direction and grid sequence size not matched\n");
                 }
 #endif
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id, std::make_pair(i - 1, i), gridSeq, direction);
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id, buses[id].name, std::make_pair(i - 1, i), gridSeq, direction);
                 globalResult[id].emplace_back(std::move(globalPath));
             } else {
                 if (failCount[id] >= 1) {
