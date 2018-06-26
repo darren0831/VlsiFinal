@@ -220,13 +220,13 @@ public:
             }
             if (!doubleEqual(b, f)) {
                 Track t3(e, (b + f) / 2, g, (b + f) / 2, (f - b), t.layer); //(e,b,g,f)
-                if ((f - b) >= min_bus_width[t.layer] + layer.spacing / 2) {
+                if ((f - b) >= min_bus_width[t.layer] + (double) layer.spacing / 2) {
                     stack.push(t3);
                 }
             }
             if (!doubleEqual(d, h)) {
                 Track t4(e, (h + d) / 2, g, (h + d) / 2, (d - h), t.layer); //(e,h,g,d)
-                if ((d - h) >= min_bus_width[t.layer] + layer.spacing / 2) {
+                if ((d - h) >= min_bus_width[t.layer] + (double) layer.spacing / 2) {
                     stack.push(t4);
                 }
             }
@@ -242,13 +242,13 @@ public:
             }
             if (!doubleEqual(a, e)) {
                 Track t3((a + e) / 2, f, (a + e) / 2, h, (e - a), t.layer); //(a,f,e,h)
-                if ((e - a) >= min_bus_width[t.layer] + layer.spacing / 2) {
+                if ((e - a) >= min_bus_width[t.layer] + (double) layer.spacing / 2) {
                     stack.push(t3);
                 }
             }
             if (!doubleEqual(c, g)) {
                 Track t4((g + c) / 2, f, (g + c) / 2, h, (c - g), t.layer); //(g,f,c,h)
-                if ((c - g) >= min_bus_width[t.layer] + layer.spacing / 2) {
+                if ((c - g) >= min_bus_width[t.layer] + (double) layer.spacing / 2) {
                     stack.push(t4);
                 }
             }

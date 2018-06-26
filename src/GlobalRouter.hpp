@@ -5,6 +5,7 @@
 #include <cmath>
 #include <limits>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <queue>
 #include "Bit.hpp"
@@ -27,7 +28,7 @@
 
 class GlobalRouter {
 private:
-    constexpr static double EXPECTED_GRID_COUNT = 150.0;
+    constexpr static double EXPECTED_GRID_COUNT = 200.0;
     constexpr static double EDGE_COST_ALPHA = 1000.0;
 
 private:
@@ -53,17 +54,19 @@ private:
         }
 
         int edgeRequest(int count, int width) {
-            std::vector<std::pair<int,int>> remove = ft.remove(width, count);
+            std::vector<std::pair<int, int>> remove = ft.remove(width, count);
             return insertOper(remove);
         }
 
         void edgeRecover(int operId) {
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
             if (!operations.count(operId)) {
                 fprintf(stderr, "[ERROR] Edge recover using an invalid operation id %d\n", operId);
                 return;
             }
-            std::vector<std::pair<int,int>> recover = operations[operId];
-            for (auto& i : recover) {
+#endif
+            std::vector<std::pair<int, int>> recover = operations[operId];
+            for (const auto& i : recover) {
                 ft.insert(i.first, i.second);
             }
             operations.erase(operId);
@@ -81,22 +84,29 @@ private:
             ft.insert((int) v.track.width, 1);
         }
 
-        int insertOper(std::vector<std::pair<int,int>> p){
+        int insertOper(std::vector<std::pair<int, int>> p) {
             int returnValue = operationId;
             operations[operationId] = std::move(p);
-            operationId++;
+            ++operationId;
             return returnValue;
         }
 
-        void pushRequestBusId(int id){
-            requestBusId.emplace_back(id);
+        void pushRequestBusId(int id) {
+            requestBusId.insert(id);
         }
 
         void popRequestBusId(int id) {
-            auto index = std::find(requestBusId.begin(), requestBusId.end(), id);
-            if(index != requestBusId.end()) {
-                requestBusId.erase(index);
+            if (requestBusId.count(id)) {
+                requestBusId.erase(id);
             }
+        }
+
+        std::vector<int> getRequestBusId() const {
+            std::vector<int> result;
+            for (const int v : requestBusId) {
+                result.emplace_back(v);
+            }
+            return result;
         }
 
     public:
@@ -104,7 +114,7 @@ private:
         int src;
         int tgt;
         int layer;
-        std::vector<int> requestBusId;
+        std::unordered_set<int> requestBusId;
 
     private:
         int maxWidth;
@@ -126,7 +136,15 @@ private:
             nodeId(nodeId), fromNode(fromNode), fromEdge(fromEdge), cost(cost) {}
 
         bool operator<(const VisitNode& that) const {
-            return cost < that.cost || (fabs(cost - that.cost) < 1e-6 && nodeId < that.nodeId);
+            if (fabs(cost - that.cost) > 1e-6) {
+                return cost < that.cost;
+            } else if (nodeId != that.nodeId) {
+                return nodeId < that.nodeId;
+            } else if (fromNode != that.fromNode) {
+                return fromNode < that.fromNode;
+            } else {
+                return fromEdge < that.fromEdge;
+            }
         }
     };
 
@@ -161,7 +179,9 @@ private:
         bindVertexToEdge();
         printGlobalEdge();
     }
-    void printGlobalResult(){
+
+    void printGlobalResult() {
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
         Logger globalRoutingLogger("Log/global.log");
         for(int i=0;i<(int)globalResult.size();i++) {
             globalRoutingLogger.show("bus: %d:\n",i);
@@ -170,9 +190,11 @@ private:
                 globalRoutingLogger.show("%s\n",globalResult[i][j].toString().c_str());
             }
         }
+#endif
     }
 
-    void printGlobalEdge(){
+    void printGlobalEdge() {
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
         Logger logs("Log/GlobalGraph.log");
         for(int i=0;i<(int)globalGraph.size();i++){
             logs.show("%d: <",i);
@@ -181,15 +203,16 @@ private:
             }
             logs.show(">\n");
         }
+#endif
     }
 
     void prepareNets() {
         globalNets = std::vector<std::vector<int>>();
         globalNetWidths = std::vector<std::vector<int>>();
         for (const Bus& bus : buses) {
-            std::vector<int> width;
-            for (int i = 0; i < (int) bus.widths.size(); ++i) {
-                width.emplace_back(bus.widths[i]);
+            std::vector<int> widths;
+            for (int i : bus.widths) {
+                widths.emplace_back(i);
             }
             std::vector<int> grids;
             for (int i = 0; i < bus.numPins; ++i) {
@@ -215,7 +238,7 @@ private:
                 grids.emplace_back(maxid);
             }
             globalNets.emplace_back(std::move(grids));
-            globalNetWidths.emplace_back(std::move(width));
+            globalNetWidths.emplace_back(std::move(widths));
         }
     }
 
@@ -241,10 +264,10 @@ private:
             }
         });
         std::stack<int> stack;
-        for (int i=(int)globalNets.size()-1;i>=0;--i){
+        for (int i = (int) globalNets.size() - 1; i >= 0; --i) {
             stack.push(routingOrderList[i]);
         }
-        while(!stack.empty()){
+        while (!stack.empty()) {
             int idx = stack.top();
             stack.pop();
             logger.info("Routing bus %s\n", buses[idx].name.c_str());
@@ -254,17 +277,17 @@ private:
 
     void calMaxVertexWidth() {
         maxVertexWidth = 0;
-        for (auto& v: vertices) {
+        for (auto& v : vertices) {
             maxVertexWidth = std::max(maxVertexWidth, (int) v.track.width);
         }
     }
 
     double calGridWidth() {
         std::vector<int> medians;
-        for (int i = 0; i < (int) buses.size(); i++) {
-            std::vector<int> s = buses[i].widths;
+        for (auto& bus : buses) {
+            std::vector<int> s = bus.widths;
             std::sort(s.begin(), s.end());
-            medians.emplace_back(buses[i].widths[buses[i].widths.size() / 2]);
+            medians.emplace_back(bus.widths[bus.widths.size() / 2]);
         }
         std::sort(medians.begin(), medians.end());
         return medians[medians.size() / 2];
@@ -272,42 +295,43 @@ private:
 
     void constructGlobalEdge() {
         gridWidth = calGridWidth();
-        double shortBoundary = std::min(boundary.ur.x,boundary.ur.y);
-        double expectGridWidth = shortBoundary/EXPECTED_GRID_COUNT;
-        gridWidth = std::max(expectGridWidth,gridWidth);
-        xGridCount = (int) ceil(boundary.ur.x/gridWidth);
-        yGridCount = (int) ceil(boundary.ur.y/gridWidth);
+        double shortBoundary = std::min(boundary.ur.x, boundary.ur.y);
+        double expectGridWidth = shortBoundary / EXPECTED_GRID_COUNT;
+        gridWidth = std::max(expectGridWidth, gridWidth);
+        xGridCount = (int) ceil(boundary.ur.x / gridWidth);
+        yGridCount = (int) ceil(boundary.ur.y / gridWidth);
 
-        int edgeId=0;
+        int edgeId = 0;
         globalGraph = std::vector<std::vector<int>>(xGridCount * yGridCount * layers.size());
         logger.info("gridWidth: %lf\n", gridWidth);
         logger.info("Grid: %d * %d\n", xGridCount, yGridCount);
-        for(int k=0;k<(int)layers.size();k++) {
-            for(int i=0;i<yGridCount;i++) {
-                for(int j=0;j<xGridCount;j++) {
-                    if(k<(int)layers.size()-1)
-                    {
-                        GlobalEdge via(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+j) + (k+1)*xGridCount*yGridCount, -1,maxVertexWidth);
+        for (int k = 0; k < (int) layers.size(); k++) {
+            for (int i = 0; i < yGridCount; i++) {
+                for (int j = 0; j < xGridCount; j++) {
+                    if (k < (int) layers.size() - 1) {
+                        GlobalEdge via(edgeId, (i * xGridCount + j) + k * xGridCount * yGridCount,
+                                       (i * xGridCount + j) + (k + 1) * xGridCount * yGridCount, -1, maxVertexWidth);
                         globalEdges.emplace_back(via);
-                        globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
-                        globalGraph[(i * xGridCount + j) + (k+1)*xGridCount*yGridCount].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) + k * xGridCount * yGridCount].emplace_back(edgeId);
+                        globalGraph[(i * xGridCount + j) + (k + 1) * xGridCount * yGridCount].emplace_back(edgeId);
                         ++edgeId;
                     }
-                    if(layers[k].isHorizontal())
-                    {
-                        if(j<xGridCount-1){
-                            GlobalEdge lr(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+(j+1)) + k*xGridCount*yGridCount, k,maxVertexWidth);
+                    if (layers[k].isHorizontal()) {
+                        if (j < xGridCount - 1) {
+                            GlobalEdge lr(edgeId, (i * xGridCount + j) + k * xGridCount * yGridCount,
+                                          (i * xGridCount + (j + 1)) + k * xGridCount * yGridCount, k, maxVertexWidth);
                             globalEdges.emplace_back(lr);
-                            globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
-                            globalGraph[(i * xGridCount + (j+1)) + k*xGridCount*yGridCount].emplace_back(edgeId);
+                            globalGraph[(i * xGridCount + j) + k * xGridCount * yGridCount].emplace_back(edgeId);
+                            globalGraph[(i * xGridCount + (j + 1)) + k * xGridCount * yGridCount].emplace_back(edgeId);
                             ++edgeId;
                         }
-                    }else {
-                        if(i<yGridCount-1){
-                            GlobalEdge fb(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,((i+1)*xGridCount+j) + k*xGridCount*yGridCount, k, maxVertexWidth);
+                    } else {
+                        if (i < yGridCount - 1) {
+                            GlobalEdge fb(edgeId, (i * xGridCount + j) + k * xGridCount * yGridCount,
+                                          ((i + 1) * xGridCount + j) + k * xGridCount * yGridCount, k, maxVertexWidth);
                             globalEdges.emplace_back(fb);
-                            globalGraph[(i*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);
-                            globalGraph[((i+1)*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);
+                            globalGraph[(i * xGridCount + j) + k * xGridCount * yGridCount].emplace_back(edgeId);
+                            globalGraph[((i + 1) * xGridCount + j) + k * xGridCount * yGridCount].emplace_back(edgeId);
                             ++edgeId;
                         }
                     }
@@ -353,7 +377,6 @@ private:
                         if (getDirection(globalEdges[j].src, globalEdges[j].tgt) == vertexDir) {
                             v.gridId.emplace_back(i);
                             globalEdges[j].addVertexToEdge(v);
-
                         }
                     }
                 }
@@ -361,17 +384,20 @@ private:
         }
     }
 
-    bool routeSingleNet(int id, const std::vector<int>& net, const std::vector<int>& widths, const int numBits, std::stack<int>& stack) {
+    bool routeSingleNet(int id,
+                        const std::vector<int>& net,
+                        const std::vector<int>& widths,
+                        const int numBits,
+                        std::stack<int>& stack) {
         std::vector<int> tgt;
         tgt.emplace_back(net.at(0));
         for (int i = 1; i < (int) net.size(); ++i) {
             logger.info("  - Routing pins %d / %d\n", i, (int) net.size() - 1);
             int src = net[i];
             if (std::count(tgt.begin(), tgt.end(), src) > 0) {
-                logger.info("      Omitted! Source and target are in the same grid\n");
-                std::vector<int> gridSeq;
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),gridSeq,"");
-                globalResult[id].emplace_back(globalPath);
+                logger.info("      Omitted! Path source and target are in the same grid\n");
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id, std::make_pair(i - 1, i), std::vector<int>(), "");
+                globalResult[id].emplace_back(std::move(globalPath));
                 continue;
             }
             auto result = routeSinglePath(id, src, tgt, widths, numBits);
@@ -380,42 +406,48 @@ private:
                     tgt.emplace_back(v.first);
                 }
                 char direction[result.size()];
-                std::vector<int> gridSeq(result.size()-1);
-                for(unsigned int j=0; j<result.size()-1;j++){
-                    direction[j] = getDirection(result[j].first,result[j+1].first);
-                    gridSeq[j] = result[j+1].first;
+                std::vector<int> gridSeq(result.size() - 1);
+                for (unsigned int j = 0; j < result.size() - 1; j++) {
+                    direction[j] = getDirection(result[j].first, result[j + 1].first);
+                    gridSeq[j] = result[j + 1].first;
                 }
-                direction[result.size()-1]= '\0';
-                GlobalRoutingPath globalPath = GlobalRoutingPath(id,std::make_pair(i-1,i),gridSeq,direction);
-                globalResult[id].emplace_back(globalPath);
+                direction[result.size() - 1] = '\0';
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+                if (gridSeq.size() != strlen(direction)) {
+                    fprintf(stderr, "[ERROR] Direction and grid sequence size not matched\n");
+                }
+#endif
+                GlobalRoutingPath globalPath = GlobalRoutingPath(id, std::make_pair(i - 1, i), gridSeq, direction);
+                globalResult[id].emplace_back(std::move(globalPath));
             } else {
-                if(failCount[id]>=1) {
+                if (failCount[id] >= 1) {
                     logger.warning("    > What a Terrible Fail\n");
                     return false;
                 }
                 failCount[id]++;
                 logger.warning("    > Failed! Do rip-up re-route\n");
-                if(result[0].second == -1) {
+                if (result[0].second == -1) {
                     logger.warning("    > What a Significantly Terrible Fail\n");
                     return false;
                 }
                 GlobalEdge& edge = globalEdges[result[0].second];
-                logger.info("        Recover bus name: %s\n",buses[id].name.c_str());
-                for (const auto& p : netOperations[id]){
+                logger.info("        Recover bus name: %s: %lu edges modified\n", buses[id].name.c_str(), netOperations[id].size());
+                for (const auto& p : netOperations[id]) {
                     globalEdges[p.first].edgeRecover(p.second);
                     globalEdges[p.first].popRequestBusId(id);
                 }
                 globalResult[id].clear();
                 netOperations[id].clear();
-                for(auto it = edge.requestBusId.rbegin();it!=edge.requestBusId.rend();++it){
-                    logger.info("        Recover bus name: %s\n",buses[*it].name.c_str());
-                    for (const auto& p : netOperations[*it]){
+                std::vector<int> requestBusId = edge.getRequestBusId();
+                for (const int it : requestBusId) {
+                    logger.info("        Recover bus name: %s: %lu edges modified\n", buses[it].name.c_str(), netOperations[it].size());
+                    for (const auto& p : netOperations[it]) {
                         globalEdges[p.first].edgeRecover(p.second);
-                        globalEdges[p.first].popRequestBusId(*it);
+                        globalEdges[p.first].popRequestBusId(it);
                     }
-                    globalResult[*it].clear();
-                    netOperations[*it].clear();
-                    stack.push(*it);
+                    globalResult[it].clear();
+                    netOperations[it].clear();
+                    stack.push(it);
                 }
                 stack.push(id);
             }
@@ -424,10 +456,14 @@ private:
     }
 
 
-    std::vector<std::pair<int, int>> routeSinglePath(const int id, const int src, const std::vector<int>& target, const std::vector<int>& width, const int bitCount) {
+    std::vector<std::pair<int, int>> routeSinglePath(const int id,
+                                                     const int src,
+                                                     const std::vector<int>& target,
+                                                     const std::vector<int>& width,
+                                                     const int bitCount) {
         std::priority_queue<VisitNode> pQ;
-        bool visited[globalGraph.size()];
-        bool targetVertex[globalGraph.size()];
+        std::vector<bool> visited(globalGraph.size());
+        std::vector<bool> targetVertex(globalGraph.size());
         std::vector<double> gridCost(globalGraph.size());
         std::vector<double> edgeHistoricalCost(globalEdges.size());
         std::vector<int> predecessor(globalGraph.size());
@@ -435,7 +471,10 @@ private:
         for (int i = 0; i < (int) globalGraph.size(); ++i) {
             visited[i] = false;
             targetVertex[i] = false;
-            gridCost[i] = 1e12;
+            gridCost[i] = 1e20;
+            edgeHistoricalCost[i] = 1e20;
+            predecessor[i] = -1;
+            preEdges[i] = -1;
         }
         for (int v : target) {
             targetVertex[v] = true;
@@ -462,7 +501,7 @@ private:
             }
             for (int edgeId : globalGraph[node]) {
                 GlobalEdge& edge = globalEdges[edgeId];
-                int out = (node == edge.tgt) ? edge.src : edge.tgt;
+                int out = edge.getTarget(node);
                 if (visited[out]) {
                     continue;
                 }
@@ -473,24 +512,25 @@ private:
                 }
                 double edgeCountCost = 0;
                 if (edgeNotEnough > 15) {
-                    if(firstEdgeId == -1 && !edge.requestBusId.empty())
+                    if (firstEdgeId == -1 &&
+                        !edge.requestBusId.empty() &&
+                        gridCost[node] + edge.getHistoricalCost() < gridCost[out]) {
                         firstEdgeId = edgeId;
+                    }
                     continue;
                 } else {
                     edgeCountCost = EDGE_COST_ALPHA * edgeNotEnough;
                 }
-                if (gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost < gridCost[out]) {
-                    gridCost[out] = gridCost[node] + globalEdges[edgeId].getHistoricalCost() + edgeCountCost;
-                    edgeHistoricalCost[edgeId] = globalEdges[edgeId].getHistoricalCost() + edgeCountCost;
+                if (gridCost[node] + edge.getHistoricalCost() + edgeCountCost < gridCost[out]) {
+                    gridCost[out] = gridCost[node] + edge.getHistoricalCost() + edgeCountCost;
+                    edgeHistoricalCost[edgeId] = edge.getHistoricalCost() + edgeCountCost;
                     pQ.push(VisitNode(out, node, edgeId, gridCost[out]));
                 }
             }
         }
         logger.info("      Path finding finished\n");
         if (!found || finalVertex == -1) {
-            std::vector<std::pair<int, int>> temp;
-            temp.emplace_back(std::make_pair(-1,firstEdgeId));
-            return temp;
+            return {std::make_pair(-1, firstEdgeId)};
         }
         std::vector<std::pair<int, int>> path;
         while (finalVertex != -1) {
@@ -510,21 +550,18 @@ private:
             }
         }
         logger.info("      Back trace finished\n");
-//        for (const auto& v : path) {
-//            logger.info("  - node %d, from edge %d\n", v.first, v.second);
-//        }
         return path;
     }
 
-    int coordToGridId(Point p, int layer) {
+    int coordToGridId(Point p, int layer) const {
         auto x = (int) floor(p.x / gridWidth);
         auto y = (int) floor(p.y / gridWidth);
         return (y * xGridCount + x) + layer * xGridCount * yGridCount;
     }
 
-    char getDirection(int AgridID, int BgridID) {
-        int Alayer = floor(AgridID/(xGridCount*yGridCount));
-        int Blayer = floor(BgridID/(xGridCount*yGridCount));
+    char getDirection(int AgridID, int BgridID) const {
+        auto Alayer = (int) floor(AgridID / (xGridCount * yGridCount));
+        auto Blayer = (int) floor(BgridID / (xGridCount * yGridCount));
         if (Alayer != Blayer) {
             return AgridID > BgridID ? 'U' : 'D';
         } else {

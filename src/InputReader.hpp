@@ -167,6 +167,7 @@ private:
     }
 
     void printInput() {
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
         Logger input_logger("Log/InputInfo.log");
         input_logger.show("Layers:\n");
         for(unsigned i=0;i<layers.size();i++)
@@ -187,6 +188,7 @@ private:
         for (unsigned i = 0; i < obstacles.size(); ++i) {
             input_logger.show("%d : %s\n", i, obstacles[i].toString().c_str());
         }
+#endif
     }
 
 public:
