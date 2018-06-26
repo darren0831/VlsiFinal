@@ -33,9 +33,10 @@ private:
 private:
     class GlobalEdge {
     public:
-        GlobalEdge(int id_, int src_, int tgt_, int maxVertexWidth) :
-            id(id_), src(src_), tgt(tgt_), maxWidth(maxVertexWidth) {
+        GlobalEdge(int id, int src, int tgt, int layer, int maxVertexWidth) :
+            id(id), src(src), tgt(tgt), layer(layer), maxWidth(maxVertexWidth) {
             historical_cost = 0;
+            operationId = 0;
             ft = FenwickTree(maxWidth);
         }
 
@@ -52,20 +53,26 @@ private:
         }
 
         int edgeRequest(int count, int width) {
-            std::vector<std::pair<int,int>> remove = ft.remove(width,count);
+            std::vector<std::pair<int,int>> remove = ft.remove(width, count);
             return insertOper(remove);
         }
 
         void edgeRecover(int operId) {
-            std::vector<std::pair<int,int>> recover = operation[operId];
-            isOperUsed[operId]=0;
+            if (!operations.count(operId)) {
+                fprintf(stderr, "[ERROR] Edge recover using an invalid operation id %d\n", operId);
+                return;
+            }
+            std::vector<std::pair<int,int>> recover = operations[operId];
             for (auto& i : recover) {
                 ft.insert(i.first, i.second);
             }
+            operations.erase(operId);
         }
 
         int edgeCount(int querywidth) {
-            if (layer == -1) { return std::numeric_limits<int>::max(); }
+            if (layer == -1) {
+                return std::numeric_limits<int>::max();
+            }
             return ft.query(querywidth);
         }
 
@@ -75,24 +82,21 @@ private:
         }
 
         int insertOper(std::vector<std::pair<int,int>> p){
-            for(int i=0;i<(int)operation.size();i++){
-                if(isOperUsed[i]==0){
-                    operation[i]=p;
-                    isOperUsed[i]=1;
-                    return i;
-                }
-            }
-            isOperUsed.emplace_back(1);
-            operation.emplace_back(p);
-            return (int) operation.size()-1;
+            int returnValue = operationId;
+            operations[operationId] = std::move(p);
+            operationId++;
+            return returnValue;
         }
+
         void pushRequestBusId(int id){
             requestBusId.emplace_back(id);
         }
+
         void popRequestBusId(int id) {
-            auto index = std::find(requestBusId.begin(),requestBusId.end(),id);
-            if(index!= requestBusId.end())
+            auto index = std::find(requestBusId.begin(), requestBusId.end(), id);
+            if(index != requestBusId.end()) {
                 requestBusId.erase(index);
+            }
         }
 
     public:
@@ -101,14 +105,14 @@ private:
         int tgt;
         int layer;
         std::vector<int> requestBusId;
+
     private:
         int maxWidth;
+        int operationId;
         double historical_cost;
         FenwickTree ft;
-        std::vector<std::vector<std::pair<int,int>>> operation;
-        std::vector<int> isOperUsed;
         std::unordered_map<int, int> vertices;
-
+        std::unordered_map<int, std::vector<std::pair<int, int>>> operations;
     };
 
 private:
@@ -283,8 +287,7 @@ private:
                 for(int j=0;j<xGridCount;j++) {
                     if(k<(int)layers.size()-1)
                     {
-                        GlobalEdge via(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+j) + (k+1)*xGridCount*yGridCount,maxVertexWidth);
-                        via.layer = -1;
+                        GlobalEdge via(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+j) + (k+1)*xGridCount*yGridCount, -1,maxVertexWidth);
                         globalEdges.emplace_back(via);
                         globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
                         globalGraph[(i * xGridCount + j) + (k+1)*xGridCount*yGridCount].emplace_back(edgeId);
@@ -293,8 +296,7 @@ private:
                     if(layers[k].isHorizontal())
                     {
                         if(j<xGridCount-1){
-                            GlobalEdge lr(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+(j+1)) + k*xGridCount*yGridCount,maxVertexWidth);
-                            lr.layer = k;
+                            GlobalEdge lr(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,(i*xGridCount+(j+1)) + k*xGridCount*yGridCount, k,maxVertexWidth);
                             globalEdges.emplace_back(lr);
                             globalGraph[(i * xGridCount + j) + k*xGridCount*yGridCount].emplace_back(edgeId);
                             globalGraph[(i * xGridCount + (j+1)) + k*xGridCount*yGridCount].emplace_back(edgeId);
@@ -302,8 +304,7 @@ private:
                         }
                     }else {
                         if(i<yGridCount-1){
-                            GlobalEdge fb(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,((i+1)*xGridCount+j) + k*xGridCount*yGridCount,maxVertexWidth);
-                            fb.layer = k;
+                            GlobalEdge fb(edgeId,(i*xGridCount+j) + k*xGridCount*yGridCount,((i+1)*xGridCount+j) + k*xGridCount*yGridCount, k, maxVertexWidth);
                             globalEdges.emplace_back(fb);
                             globalGraph[(i*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);
                             globalGraph[((i+1)*xGridCount+j) + k*xGridCount*yGridCount].emplace_back(edgeId);

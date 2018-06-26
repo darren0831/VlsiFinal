@@ -7,6 +7,9 @@ set(SOURCE_FILES
         src/Bit.hpp
         src/Bus.hpp
         src/Edge.hpp
+        src/FenwickTree.hpp
+        src/GlobalRouter.hpp
+        src/GlobalRoutingPath.hpp
         src/GraphConstructor.hpp
         src/InputReader.hpp
         src/Layer.hpp
@@ -20,6 +23,6 @@ set(SOURCE_FILES
         src/Rectangle.hpp
         src/SegmentMap.hpp
         src/Track.hpp
-        src/Vertex.hpp src/GlobalRouter.hpp src/FenwickTree.hpp)
+        src/Vertex.hpp)
 
 add_executable(route ${SOURCE_FILES})
