@@ -34,6 +34,7 @@ public:
         preCalculate();
         initialize();
         initializeNets();
+        logger.info("%lu vertices, %lu edges after graph construction\n", vertices.size(), edges.size());
     }
 
     void preCalculate() {
@@ -94,6 +95,9 @@ public:
                         }
                         net.addTerminal(i, vertexId);
                         ++vertexId;
+                        if ((int) vertices.size() != vertexId) {
+                            fprintf(stderr, "FUCK\n");
+                        }
                     }
                 }
             }
@@ -107,7 +111,7 @@ public:
     void splitTracks() {
         layerObstacles = std::vector<std::vector<Obstacle>>(layers.size());
         for (const auto& o : obstacles) {
-            layerObstacles[o.layer].push_back(o);
+            layerObstacles[o.layer].emplace_back(o);
         }
         for (int i = 0; i < (int) layers.size(); ++i) {
             std::sort(layerObstacles[i].begin(), layerObstacles[i].end(), [](Obstacle a, Obstacle b) {
@@ -136,14 +140,14 @@ public:
                     }
                 }
                 if (!hasOverlap) {
-                    all_tracks.push_back(topTrack);
+                    all_tracks.emplace_back(topTrack);
                 }
             }
         }
         logger.info("Track count(after split): %d\n", all_tracks.size());
         layerTracks = std::vector<std::vector<Track>>(layers.size());
         for (const auto& t : all_tracks) {
-            layerTracks[t.layer].push_back(t);
+            layerTracks[t.layer].emplace_back(t);
         }
         logger.info("Track info\n");
         for (int i = 0; i < (int) layers.size(); ++i) {
@@ -287,13 +291,13 @@ public:
                     const Point tgt = u.track.rect.midPoint();
                     char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
                     Edge edge(v.id, u.id, edgeDirection, layer.direction);
-                    out.push_back(std::move(edge));
+                    out.emplace_back(std::move(edge));
                 }
                 if (layer.isVertical() && r.width > threshold) {
                     const Point tgt = u.track.rect.midPoint();
                     char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
                     Edge edge(v.id, u.id, edgeDirection, layer.direction);
-                    out.push_back(std::move(edge));
+                    out.emplace_back(std::move(edge));
                 }
             }
         }
@@ -310,7 +314,7 @@ public:
                     const Point tgt = u.track.rect.midPoint();
                     char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
                     Edge edge(v.id, u.id, edgeDirection, 'C');
-                    out.push_back(std::move(edge));
+                    out.emplace_back(std::move(edge));
                 }
             }
         }
