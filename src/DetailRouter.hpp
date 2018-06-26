@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Bus.hpp"
+#include "Edge.hpp"
 #include "GlobalRoutingPath.hpp"
 #include "Layer.hpp"
 #include "Logger.hpp"
@@ -19,7 +20,7 @@ public:
 		std::vector<Bus>& buses,
 		std::vector<Layer>& layers,
 		std::unordered_map<int, Vertex>& vertexMap,
-		std::vector<std::vector<Vertex>>& routingGraph,
+		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
 		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){}
@@ -38,7 +39,7 @@ public:
 	}
 	void detailRoute(){
 		logger.info("Detail Route\n");
-		for(int i=0;i<(int)1;i++){
+		for(int i=0;i<(int)nets.size();i++){
 			logger.info("Bus: %d\n",i);
 			//for A bus
 			for(int j=0; j<(int)nets[i].net.size();j++){
@@ -74,23 +75,23 @@ public:
 							}
 						}
 						if(flag)break;
-						for(Vertex& v : routingGraph[currentVertexId]){	//put all candidate in queue
-							if(prev[v.id]==-1 && v.id!=startVertexId){
-								candidateVertexId.push(v.id);
-								prev[v.id] = currentVertexId;
+						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
+							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
+								candidateVertexId.push(e.getTarget());
+								prev[e.getTarget()] = currentVertexId;
 							}
 						}
 					}
 					// logger.info("End ID: %d\n",currentVertexId);
 					if(flag){
-						// logger.info("Do Detail Back Trace\n");
+						logger.info("Do Detail Back Trace\n");
 						while(currentVertexId!=-1){
 							detailPath.emplace_back(currentVertexId);
 							isVertexUsed.insert(currentVertexId);
 							currentVertexId = prev[currentVertexId];
 						}
 					}else{
-						// logger.error("No path from source to target\n");
+						logger.error("No path from source to target\n");
 					}
 					
 					//TODO: Assign detailPath
@@ -108,7 +109,7 @@ private:
 	std::vector<Bus>& buses;
 	std::vector<Layer>& layers;
 	std::unordered_map<int, Vertex>& vertexMap;
-	std::vector<std::vector<Vertex>>& routingGraph;
+	std::vector<std::vector<Edge>>& routingGraph;
 	std::vector<Net>& nets;
 	Logger& logger;
 	std::priority_queue<int> candidateVertexId;

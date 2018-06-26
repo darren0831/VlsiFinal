@@ -27,8 +27,8 @@ public:
         }
     }
 
-    int getTarget(int v) const {
-        return (v == tgt) ? src : tgt;
+    int getTarget() const {
+        return tgt;
     }
 
     double getHistoricalCost() const {

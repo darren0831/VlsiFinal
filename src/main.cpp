@@ -110,8 +110,8 @@ int main(int argc, char** argv) {
             routingGraph,
             nets,
             logger);
-        // detailRouter.detailRoute();
-        detailRouter.debug();
+        detailRouter.detailRoute();
+        // detailRouter.debug();
     }
     return 0;
 }
