@@ -100,6 +100,8 @@ int main(int argc, char** argv) {
                 ds.pack(edge.src, edge.tgt);
             }
         }
+        // printf("p[12817]:%d\n",ds.find(12817));
+        // printf("p[12818]:%d\n",ds.find(12818));
         printf("#groups = %d\n", ds.numGroups());
     }
 

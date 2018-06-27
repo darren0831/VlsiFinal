@@ -89,6 +89,7 @@ public:
                         std::vector<Edge> newEdges;
                         for (const int touched : touchedVertices) {
                             newEdges.emplace_back(vertexId, touched, ' ', 'S');
+                            routingGraph[touched].emplace_back(touched, vertexId, ' ', 'S');
                         }
                         routingGraph.emplace_back(newEdges);
                         if (routingGraph[vertexId].size() != newEdges.size()) {
@@ -133,6 +134,7 @@ public:
         }
         std::vector<Track> all_tracks;
         for (const auto& t : tracks) {
+            // all_tracks.emplace_back(t);
             std::stack<Track> stack;
             stack.push(t);
             while (!stack.empty()) {
