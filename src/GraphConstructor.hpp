@@ -39,7 +39,6 @@ public:
     }
 
     void preCalculate() {
-
         for (int i = 0; i < (int) layers.size(); i++) {
             int width = std::numeric_limits<int>::max();
             for (int j = 0; j < (int) buses.size(); j++) {
@@ -111,13 +110,11 @@ public:
     }
 
     void writeLog() {
-        int totalEdges = 0;
+        unsigned long totalEdges = 0;
         for (const auto& edges : routingGraph) {
-            totalEdges += (int) edges.size();
+            totalEdges += edges.size();
         }
-        logger.info("After graph construction,\n");
-        logger.info("  %lu vertices generated\n", vertices.size());
-        logger.info("  %d edges generated\n", totalEdges);
+        logger.info("After graph construction: %lu vertices and %lu edges generated\n", vertices.size(), totalEdges);
     }
 
     void splitTracks() {

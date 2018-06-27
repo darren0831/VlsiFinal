@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
     std::vector<std::vector<GlobalRoutingPath>> globalResult;
 
     // Read input file
+    stdoutLogger.info("===== Read Input File =====\n");
     {
         Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
         InputReader inputReader(inputfile, logger);
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
     }
 
     // Preprocess
+    stdoutLogger.info("===== Preprocess =====\n");
     {
         Logger& logger = (printToFile) ? inputLogger : stdoutLogger;
         logger.info("Preprocess\n");
@@ -78,6 +80,7 @@ int main(int argc, char** argv) {
     }
 
     // Construct graph
+    stdoutLogger.info("===== Routing Graph Construction =====\n");
     {
         Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
         GraphConstructor graphConstructor(layers, tracks, buses, obstacles, logger);
@@ -87,25 +90,20 @@ int main(int argc, char** argv) {
         nets = std::move(graphConstructor.nets);
     }
 
-    // check
+    // Graph connection check
     {
+        Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
         DisjointSet ds(vertices.size());
-        printf("$groups = %d\n", ds.numGroups());
         for (const auto& edges : routingGraph) {
             for (const auto edge : edges) {
-                if (edge.src < 0 || edge.src >= (int) vertices.size() ||
-                    edge.tgt < 0 || edge.tgt >= (int) vertices.size()) {
-                    fprintf(stderr, "???\n");
-                }
                 ds.pack(edge.src, edge.tgt);
             }
         }
-        // printf("p[12817]:%d\n",ds.find(12817));
-        // printf("p[12818]:%d\n",ds.find(12818));
-        printf("#groups = %d\n", ds.numGroups());
+        logger.info("Number of connected graphs: %d\n", ds.numGroups());
     }
 
     // Global route
+    stdoutLogger.info("===== Global Route =====\n");
     {
         Logger& logger = (printToFile) ? globalLogger : stdoutLogger;
         GlobalRouter globalRouter(
@@ -118,6 +116,8 @@ int main(int argc, char** argv) {
         globalResult = std::move(globalRouter.globalResult);
     }
 
+    // Detail route
+    stdoutLogger.info("===== Detail Route =====\n");
     {
         Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
         DetailRouter detailRouter(
@@ -130,7 +130,6 @@ int main(int argc, char** argv) {
             nets,
             logger);
         detailRouter.detailRoute();
-        // detailRouter.debug();
     }
     return 0;
 }
