@@ -33,15 +33,13 @@ public:
 			//for A bus
 			int firstBit=-1;
 			for(int j=0; j<(int)nets[i].net.size();j++){
-				for (int g : vertices[nets[i].net[j][0]].gridId){
-					logger.show("%d ",g);
+				for (int g : vertices[nets[i].net[j][1]].gridId){
 					if(g == globalResult[i][0].gridSequence[0]){
 						firstBit=j;
 						break;
 					}
 					if(firstBit!=-1)break;
 				}
-				logger.show("\n");
 			}
 			{
 				logger.info("  - Bit: %d\n",firstBit);
@@ -53,30 +51,18 @@ public:
 					logger.info("    - Net: %d\n",k);
 					//for A pin
 					candidateVertexId = std::priority_queue<DetailNode>();
-
-
-					int startVertexId;
-					if(k==1)
-						startVertexId = nets[i].net[firstBit][0];
-					else
-						startVertexId = nets[i].net[firstBit][k];
+					int startVertexId = nets[i].net[firstBit][k];
 
 					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.terminal[0].x,
                                            vertices[startVertexId].track.terminal[0].y,vertices[startVertexId].id));	//put source to queue
 
 					if(k==1){
-						endVertexId.emplace_back(nets[i].net[firstBit][1]);
+						endVertexId.emplace_back(nets[i].net[firstBit][0]);
 					}else{
 						for(int d: detailPath)
 							endVertexId.emplace_back(d);
 					}
 
-					// logger.show("startVertexId:%d\n",startVertexId);
-					// logger.show("endVertexId:");
-					// for(int end: endVertexId){
-					// 	logger.show("%d ",end);
-					// }
-					// logger.show("\n");
 					bool flag=false;
 					std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 					int currentVertexId=-1;
