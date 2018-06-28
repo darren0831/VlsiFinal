@@ -347,6 +347,7 @@ private:
             int toGridId = coordToGridId(to, layer);
             char vertexDir = getDirection(fromGridId, toGridId);
             if (fromGridId == toGridId) {
+                v.gridId.emplace_back(fromGridId);
                 continue;
             }
             if (layers[layer].isHorizontal()) {
