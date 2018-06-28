@@ -125,28 +125,28 @@ public:
         }
         std::vector<Track> all_tracks;
         for (const auto& t : tracks) {
-            all_tracks.emplace_back(t);
-            // std::stack<Track> stack;
-            // stack.push(t);
-            // while (!stack.empty()) {
-            //     Track topTrack = stack.top();
-            //     stack.pop();
-            //     bool hasOverlap = false;
-            //     for (const auto& o : layerObstacles[topTrack.layer]) {
-            //         if (o.rect.ll.x > topTrack.rect.ur.x) {
-            //             break;
-            //         }
-            //         Rectangle overlap = topTrack.rect.overlap(o.rect, false);
-            //         if (!overlap.isZero()) {
-            //             hasOverlap = true;
-            //             splitTrack(topTrack, overlap, stack);
-            //             break;
-            //         }
-            //     }
-            //     if (!hasOverlap) {
-            //         all_tracks.emplace_back(topTrack);
-            //     }
-            // }
+            // all_tracks.emplace_back(t);
+            std::stack<Track> stack;
+            stack.push(t);
+            while (!stack.empty()) {
+                Track topTrack = stack.top();
+                stack.pop();
+                bool hasOverlap = false;
+                for (const auto& o : layerObstacles[topTrack.layer]) {
+                    if (o.rect.ll.x > topTrack.rect.ur.x) {
+                        break;
+                    }
+                    Rectangle overlap = topTrack.rect.overlap(o.rect, false);
+                    if (!overlap.isZero()) {
+                        hasOverlap = true;
+                        splitTrack(topTrack, overlap, stack);
+                        break;
+                    }
+                }
+                if (!hasOverlap) {
+                    all_tracks.emplace_back(topTrack);
+                }
+            }
         }
         logger.info("Track count(after split): %d\n", all_tracks.size());
         layerTracks = std::vector<std::vector<Track>>(layers.size());

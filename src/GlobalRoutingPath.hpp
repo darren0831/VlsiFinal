@@ -11,10 +11,14 @@ public:
         busId(id), busName(busName), terminal(std::move(terminal)), gridSequence(std::move(gridSequence)), topologySequence(std::move(sequence)) {}
 
     std::string toString() const {
-        return topologySequence;
+        std::string s;
+        for(int i : gridSequence){
+            s+=std::to_string(i)+" ";
+        }
+        return s;
     }
 
-private:
+public:
     int busId;
     std::string busName;
     std::pair<int, int> terminal;
