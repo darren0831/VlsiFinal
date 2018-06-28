@@ -27,34 +27,50 @@ public:
 		}
 	void detailRoute(){
 		logger.info("Detail Route\n");
-		for(int i=0;i<(int)nets.size();i++){
-		// for(int i=0;i<(int)1;i++){
+		// for(int i=0;i<(int)nets.size();i++){
+		for(int i=0;i<(int)1;i++){
 			logger.info("Bus: %d\n",i);
 			//for A bus
+			int firstBit=-1;
 			for(int j=0; j<(int)nets[i].net.size();j++){
-			// for(int j=0; j<(int)1;j++){
-				logger.info("  - Bit: %d\n",j);
-				//for A bit
+				for (int g : vertices[nets[i].net[j][0]].gridId){
+					logger.show("%d ",g);
+					if(g == globalResult[i][0].gridSequence[0]){
+						firstBit=j;
+						break;
+					}
+					if(firstBit!=-1)break;
+				}
+				logger.show("\n");
+			}
+			{
+				logger.info("  - Bit: %d\n",firstBit);
 				std::vector<int> endVertexId;
-				for(int k=0;k<(int)nets[i].net[j].size();k++){
-					if(k==1) continue;
+				std::vector<int>& followedGridId = globalResult[i][0].gridSequence;
+				int curGridindex = 0;
+				for(int k=1;k<(int)nets[i].net[firstBit].size();k++){
+					
 					logger.info("    - Net: %d\n",k);
 					//for A pin
-
 					candidateVertexId = std::priority_queue<DetailNode>();
 
 
-					int startVertexId = nets[i].net[j][k];
+					int startVertexId;
+					if(k==1)
+						startVertexId = nets[i].net[firstBit][0];
+					else
+						startVertexId = nets[i].net[firstBit][k];
 
 					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.terminal[0].x,
                                            vertices[startVertexId].track.terminal[0].y,vertices[startVertexId].id));	//put source to queue
 
-					if(k==0){	//put target to endVertexId
-						endVertexId.emplace_back(nets[i].net[j][k+1]);
+					if(k==1){
+						endVertexId.emplace_back(nets[i].net[firstBit][1]);
 					}else{
 						for(int d: detailPath)
 							endVertexId.emplace_back(d);
 					}
+
 					// logger.show("startVertexId:%d\n",startVertexId);
 					// logger.show("endVertexId:");
 					// for(int end: endVertexId){
@@ -65,16 +81,32 @@ public:
 					std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 					int currentVertexId=-1;
 					while(!candidateVertexId.empty()){
-                        DetailNode curNode = candidateVertexId.top();
-						currentVertexId = curNode.nodeId;
-						candidateVertexId.pop();
-						// logger.show("curId: %d\n",currentVertexId);
+						bool find = false;
+						while(!find && !candidateVertexId.empty()){
+							DetailNode curNode = candidateVertexId.top();
+							currentVertexId = curNode.nodeId;
+							candidateVertexId.pop();
+							for(int g : vertices[currentVertexId].getGridId()){
+								if(followedGridId[curGridindex] == g) {
+									if(curGridindex+1 <= (int)followedGridId.size()-1){
+										if(followedGridId[curGridindex+1] == g){
+											curGridindex++;
+										}
+									}
+									find = true;
+									break;
+								}
+							}
+						}
+
 						for(int end: endVertexId){
 							if(currentVertexId == end){
 								flag = true;
 								break;
 							}
 						}
+						// logger.show("curId: %d\n",currentVertexId);
+						
 						if(flag)break;
 						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
 							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
@@ -131,7 +163,7 @@ public:
 						while(currentVertexId!=-1){
 							// logger.show("%d\n",currentVertexId);
 							detailPath.emplace_back(currentVertexId);
-							// isVertexUsed.insert(currentVertexId);
+							isVertexUsed.insert(currentVertexId);
 							currentVertexId = prev[currentVertexId];
 						}
 					}else{
@@ -140,7 +172,15 @@ public:
 
 					//TODO: Assign detailPath
 				}
+
 			}
+
+
+
+			// for(int j=0; j<(int)nets[i].net.size();j++){
+			// 	logger.info("  - Bit: %d\n",j);
+			// 	//for A bit
+			// }
 
 		}
 

@@ -56,11 +56,7 @@ public:
         return *this;
     }
 
-    void setGridId(const std::vector<int>& id) {
-        gridId = id;
-    }
-
-    std::vector<int> getGridId() const {
+    const std::vector<int>& getGridId() const {
         return gridId;
     }
 
