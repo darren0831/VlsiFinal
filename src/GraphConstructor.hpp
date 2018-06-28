@@ -83,22 +83,17 @@ public:
                         net.addTerminal(i, touchedVertices[0]);
                     } else {
                         ++multiOverlapCount;
-                        vertexMap[vertexId] = Vertex(Track(), vertexId);
-                        vertices.emplace_back(Track(), vertexId);
+                        Vertex newVertex(location, vertexId, layer, layers[layer].direction);
+                        vertexMap[vertexId] = newVertex;
+                        vertices.emplace_back(newVertex);
                         std::vector<Edge> newEdges;
                         for (const int touched : touchedVertices) {
                             newEdges.emplace_back(vertexId, touched, ' ', 'S');
                             routingGraph[touched].emplace_back(touched, vertexId, ' ', 'S');
                         }
                         routingGraph.emplace_back(newEdges);
-                        if (routingGraph[vertexId].size() != newEdges.size()) {
-                            fprintf(stderr, "FUCK!\n");
-                        }
                         net.addTerminal(i, vertexId);
                         ++vertexId;
-                        if ((int) vertices.size() != vertexId) {
-                            fprintf(stderr, "FUCK\n");
-                        }
                     }
                 }
             }
@@ -131,28 +126,28 @@ public:
         }
         std::vector<Track> all_tracks;
         for (const auto& t : tracks) {
-            // all_tracks.emplace_back(t);
-            std::stack<Track> stack;
-            stack.push(t);
-            while (!stack.empty()) {
-                Track topTrack = stack.top();
-                stack.pop();
-                bool hasOverlap = false;
-                for (const auto& o : layerObstacles[topTrack.layer]) {
-                    if (o.rect.ll.x > topTrack.rect.ur.x) {
-                        break;
-                    }
-                    Rectangle overlap = topTrack.rect.overlap(o.rect, false);
-                    if (!overlap.isZero()) {
-                        hasOverlap = true;
-                        splitTrack(topTrack, overlap, stack);
-                        break;
-                    }
-                }
-                if (!hasOverlap) {
-                    all_tracks.emplace_back(topTrack);
-                }
-            }
+            all_tracks.emplace_back(t);
+            // std::stack<Track> stack;
+            // stack.push(t);
+            // while (!stack.empty()) {
+            //     Track topTrack = stack.top();
+            //     stack.pop();
+            //     bool hasOverlap = false;
+            //     for (const auto& o : layerObstacles[topTrack.layer]) {
+            //         if (o.rect.ll.x > topTrack.rect.ur.x) {
+            //             break;
+            //         }
+            //         Rectangle overlap = topTrack.rect.overlap(o.rect, false);
+            //         if (!overlap.isZero()) {
+            //             hasOverlap = true;
+            //             splitTrack(topTrack, overlap, stack);
+            //             break;
+            //         }
+            //     }
+            //     if (!hasOverlap) {
+            //         all_tracks.emplace_back(topTrack);
+            //     }
+            // }
         }
         logger.info("Track count(after split): %d\n", all_tracks.size());
         layerTracks = std::vector<std::vector<Track>>(layers.size());
@@ -191,7 +186,7 @@ public:
     void generateEdges() {
         routingGraph = std::vector<std::vector<Edge>>(vertices.size());
         std::vector<std::thread> threads;
-        int part = (int) vertices.size() / 3;
+        int part = (int) vertices.size() / 4;
         threads.emplace_back(std::thread([=] {
             generateEdges(0, part);
         }));
@@ -199,8 +194,9 @@ public:
             generateEdges(part, part * 2);
         }));
         threads.emplace_back(std::thread([=] {
-            generateEdges(part * 2, (int) vertices.size());
+            generateEdges(part * 2, part * 3);
         }));
+        generateEdges(part * 3, (int) vertices.size());
         for (auto& thread : threads) {
             if (thread.joinable()) {
                 thread.join();

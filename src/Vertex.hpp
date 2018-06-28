@@ -9,6 +9,20 @@ public:
     Vertex() :
         track(Track(-1, -1, -1, -1, -1, -1)), id(-1), gridId(std::vector<int>()) {}
 
+    Vertex(const Rectangle& area, int id, int layer, char direction) :
+        id(id) {
+        gridId = std::vector<int>();
+        if (direction == 'H') {
+            Point s = Point(area.ll.x, (area.ll.y + area.ur.y) / 2);
+            Point t = Point(area.ur.x, (area.ll.y + area.ur.y) / 2);
+            track = Track(s.x, s.y, t.x, t.y, area.ur.y - area.ll.y, layer);
+        } else {
+            Point s = Point((area.ll.x + area.ur.x) / 2, area.ll.y);
+            Point t = Point((area.ll.x + area.ur.x) / 2, area.ur.y);
+            track = Track(s.x, s.y, t.x, t.y, area.ur.x - area.ll.x, layer);
+        }
+    }
+
     Vertex(const Track& track, int id) :
         track(track), id(id), gridId(std::vector<int>()) {}
 
