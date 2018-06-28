@@ -52,7 +52,6 @@ int main(int argc, char** argv) {
 
     // Graph information
     std::vector<Vertex> vertices;
-    std::unordered_map<int, Vertex> vertexMap;
     std::vector<std::vector<Edge>> routingGraph;
     std::vector<Net> nets;
 
@@ -85,7 +84,6 @@ int main(int argc, char** argv) {
         Logger& logger = (printToFile) ? graphLogger : stdoutLogger;
         GraphConstructor graphConstructor(layers, tracks, buses, obstacles, logger);
         vertices = std::move(graphConstructor.vertices);
-        vertexMap = std::move(graphConstructor.vertexMap);
         routingGraph = std::move(graphConstructor.routingGraph);
         nets = std::move(graphConstructor.nets);
     }
@@ -125,7 +123,6 @@ int main(int argc, char** argv) {
             globalResult,
             buses,
             layers,
-            vertexMap,
             routingGraph,
             nets,
             logger);

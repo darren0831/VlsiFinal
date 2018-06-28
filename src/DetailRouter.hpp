@@ -16,15 +16,29 @@
 class DetailRouter{
 public:
 	DetailRouter(
-		std::vector<Vertex>& vertices, 
+		std::vector<Vertex>& vertices,
 		std::vector<std::vector<GlobalRoutingPath>>& globalResult,
 		std::vector<Bus>& buses,
 		std::vector<Layer>& layers,
-		std::unordered_map<int, Vertex>& vertexMap,
 		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
+<<<<<<< HEAD
 		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){
+=======
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){}
+	void debug(){
+		for(int i=0;i<(int)nets.size();i++){
+			logger.show("i:%d\n",i);
+			for(int j=0;j<(int)nets[i].net.size();j++){
+				logger.show("  j:%d\n",j);
+				for(int k=0;k<(int)nets[i].net[j].size();k++){
+					logger.show("    k:%d\n",k);
+				}
+				logger.show("\n");
+			}
+			logger.show("\n");
+>>>>>>> c64a985d24686d0a34f386878096878fd4d4e402
 		}
 	void detailRoute(){
 		logger.info("Detail Route\n");
@@ -42,7 +56,7 @@ public:
 					logger.info("    - Net: %d\n",k);
 					//for A pin
 					candidateVertexId = std::queue<int>();
-					
+
 					int startVertexId = nets[i].net[j][k];
 					candidateVertexId.push(startVertexId);	//put source to queue
 
@@ -90,13 +104,13 @@ public:
 					}else{
 						logger.error("      No path from source to target\n");
 					}
-					
+
 					//TODO: Assign detailPath
 				}
 			}
-			
+
 		}
-		
+
 		return;
 	}
 
@@ -105,14 +119,13 @@ private:
 	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
 	std::vector<Bus>& buses;
 	std::vector<Layer>& layers;
-	std::unordered_map<int, Vertex>& vertexMap;
 	std::vector<std::vector<Edge>>& routingGraph;
 	std::vector<Net>& nets;
 	Logger& logger;
 	std::queue<int> candidateVertexId;
 	std::unordered_set<int> isVertexUsed;
 	std::vector<int> detailPath;
-	
+
 };
 
 #endif //VLSI_FINAL_PROJECT_DETAIL_ROUTER_HPP_
