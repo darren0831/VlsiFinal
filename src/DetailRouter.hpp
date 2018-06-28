@@ -52,13 +52,18 @@ public:
 					
 					logger.info("    - Net: %d\n",k);
 					//for A pin
-					candidateVertexId = std::priority_queue<int>();
+					candidateVertexId = std::priority_queue<DetailNode>();
+
+
 					int startVertexId;
 					if(k==1)
 						startVertexId = nets[i].net[firstBit][0];
 					else
 						startVertexId = nets[i].net[firstBit][k];
-					candidateVertexId.push(startVertexId);	//put source to queue
+
+					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.terminal[0].x,
+                                           vertices[startVertexId].track.terminal[0].y,vertices[startVertexId].id));	//put source to queue
+
 					if(k==1){
 						endVertexId.emplace_back(nets[i].net[firstBit][1]);
 					}else{
@@ -78,7 +83,8 @@ public:
 					while(!candidateVertexId.empty()){
 						bool find = false;
 						while(!find && !candidateVertexId.empty()){
-							currentVertexId = candidateVertexId.top();
+							DetailNode curNode = candidateVertexId.top();
+							currentVertexId = curNode.nodeId;
 							candidateVertexId.pop();
 							for(int g : vertices[currentVertexId].getGridId()){
 								if(followedGridId[curGridindex] == g) {
@@ -92,6 +98,7 @@ public:
 								}
 							}
 						}
+
 						for(int end: endVertexId){
 							if(currentVertexId == end){
 								flag = true;
@@ -103,7 +110,50 @@ public:
 						if(flag)break;
 						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
 							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
-								candidateVertexId.push(e.getTarget());
+
+                                Vertex& nextVertex = vertices[e.getTarget()];
+                                if(e.getDirection()=='L'){//left
+                                    double nextX = std::max(nextVertex.track.terminal[0].x,nextVertex.track.terminal[1].x);
+                                    double nextY = nextVertex.track.terminal[0].y;
+                                    double stepDist = curNode.curX - nextX;
+                                    double nextDistance = curNode.curDistance + stepDist;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
+                                }else if(e.getDirection()=='R'){//right
+                                    double nextX = std::min(nextVertex.track.terminal[0].x,nextVertex.track.terminal[1].x);
+                                    double nextY = nextVertex.track.terminal[0].y;
+                                    double stepDist = nextX - curNode.curX;
+                                    double nextDistance = curNode.curDistance + stepDist;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
+                                }else if(e.getDirection()=='B'){///back
+                                    double nextX = nextVertex.track.terminal[0].x;
+                                    double nextY = std::max(nextVertex.track.terminal[0].y,nextVertex.track.terminal[1].y);
+                                    double stepDist = curNode.curY - nextY;
+                                    double nextDistance = curNode.curDistance + stepDist;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
+                                }else if(e.getDirection()=='F'){///forward
+                                    double nextX = nextVertex.track.terminal[0].x;
+                                    double nextY = std::min(nextVertex.track.terminal[0].y,nextVertex.track.terminal[1].y);
+                                    double stepDist = nextY - curNode.curY;
+                                    double nextDistance = curNode.curDistance + stepDist;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
+                                }else if(e.getDirection()=='U'){///up
+                                    double nextDistance = curNode.curDistance;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
+                                }else if(e.getDirection()=='D'){///down
+                                    double nextDistance = curNode.curDistance;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
+                                }else{
+                                    double nextDistance = curNode.curDistance;
+                                    double nextAssume = 0;
+                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
+                                }
+								//candidateVertexId.push(DetailNode(0,0,0,0,e.getTarget()));
 								prev[e.getTarget()] = currentVertexId;
 							}
 						}
@@ -138,6 +188,26 @@ public:
 	}
 
 private:
+    struct DetailNode{
+        double curDistance;
+        double assumeDistance;
+        double curX, curY;
+        int nodeId;
+
+        DetailNode(double curDist,double assumeDist,double x,double y,int id):
+            curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id){}
+
+        bool operator<(const DetailNode &that) const{
+            double cost = curDistance+assumeDistance;
+            double thatCost = that.curDistance + that.assumeDistance;
+            if (fabs(cost - thatCost) > 1e-6) {
+                return cost < thatCost;
+            }else
+                return false;
+        }
+    };
+
+private:
 	std::vector<Vertex>& vertices;
 	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
 	std::vector<Bus>& buses;
@@ -145,7 +215,7 @@ private:
 	std::vector<std::vector<Edge>>& routingGraph;
 	std::vector<Net>& nets;
 	Logger& logger;
-	std::priority_queue<int> candidateVertexId;
+	std::priority_queue<DetailNode> candidateVertexId;
 	std::unordered_set<int> isVertexUsed;
 	std::vector<int> detailPath;
 
