@@ -80,10 +80,11 @@ public:
 					bool flag=false;
 					std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 					int currentVertexId=-1;
+					DetailNode curNode;
 					while(!candidateVertexId.empty()){
 						bool find = false;
 						while(!find && !candidateVertexId.empty()){
-							DetailNode curNode = candidateVertexId.top();
+							curNode = candidateVertexId.top();
 							currentVertexId = curNode.nodeId;
 							candidateVertexId.pop();
 							for(int g : vertices[currentVertexId].getGridId()){
@@ -196,6 +197,7 @@ private:
 
         DetailNode(double curDist,double assumeDist,double x,double y,int id):
             curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id){}
+        DetailNode(){}
 
         bool operator<(const DetailNode &that) const{
             double cost = curDistance+assumeDistance;
