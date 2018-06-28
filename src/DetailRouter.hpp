@@ -25,6 +25,24 @@ public:
 		Logger& logger):
 		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){
 		}
+
+    double assumDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
+        double maxX = -1, maxY = -1, minX = -1, minY = -1;
+        for(int i=0;i<endVertexId.size();i++){
+            double curX = vertices[endVertexId].track.rect.midPoint().x;
+            double curY = vertices[endVertexId].track.rect.midPoint().y;
+            if(curX>maxX || maxX == -1 ) maxX = curX;
+            if(curY>maxY || maxY == -1 ) maxY = curY;
+            if(curX<minX || minX == -1 ) minX = curX;
+            if(curY<minY || minY == -1 ) minY = curY;
+        }
+        double maxX  = std::max(maxX, curX);
+        double maxY  = std::max(maxY, curY);
+        double minX  = std::min(minX, curX);
+        double minY  = std::min(minY, curY);
+        return (maxX-minX)+(maxY-minY);
+    }
+
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		for(int i=0;i<(int)nets.size();i++){
@@ -46,8 +64,8 @@ public:
 
 					int startVertexId = nets[i].net[j][k];
 
-					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.terminal[0].x,
-                                           vertices[startVertexId].track.terminal[0].y,vertices[startVertexId].id));	//put source to queue
+					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.rect.midPoint().x,
+                                           vertices[startVertexId].track.rect.midPoint().y,vertices[startVertexId].id));	//put source to queue
 
 					if(k==0){	//put target to endVertexId
 						endVertexId.emplace_back(nets[i].net[j][k+1]);
@@ -80,33 +98,27 @@ public:
 							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
 
                                 Vertex& nextVertex = vertices[e.getTarget()];
-                                if(e.getDirection()=='L'){//left
-                                    double nextX = std::max(nextVertex.track.terminal[0].x,nextVertex.track.terminal[1].x);
-                                    double nextY = nextVertex.track.terminal[0].y;
+                                double nextX = nextVertex.track.rect.midPoint().x;
+                                double nextY = nextVertex.track.rect.midPoint().y;
+                                if(e.getDirection()=='L'){///left
                                     double stepDist = curNode.curX - nextX;
                                     double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = 0;
+                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
                                     candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-                                }else if(e.getDirection()=='R'){//right
-                                    double nextX = std::min(nextVertex.track.terminal[0].x,nextVertex.track.terminal[1].x);
-                                    double nextY = nextVertex.track.terminal[0].y;
+                                }else if(e.getDirection()=='R'){///right
                                     double stepDist = nextX - curNode.curX;
                                     double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = 0;
+                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
                                     candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
                                 }else if(e.getDirection()=='B'){///back
-                                    double nextX = nextVertex.track.terminal[0].x;
-                                    double nextY = std::max(nextVertex.track.terminal[0].y,nextVertex.track.terminal[1].y);
                                     double stepDist = curNode.curY - nextY;
                                     double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = 0;
+                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
                                     candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
                                 }else if(e.getDirection()=='F'){///forward
-                                    double nextX = nextVertex.track.terminal[0].x;
-                                    double nextY = std::min(nextVertex.track.terminal[0].y,nextVertex.track.terminal[1].y);
                                     double stepDist = nextY - curNode.curY;
                                     double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = 0;
+                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
                                     candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
                                 }else if(e.getDirection()=='U'){///up
                                     double nextDistance = curNode.curDistance;
