@@ -13,7 +13,7 @@
 #include "Vertex.hpp"
 
 
-class DetailRouter{
+class DetailRouter {
 public:
 	DetailRouter(
 		std::vector<Vertex>& vertices,
@@ -23,22 +23,7 @@ public:
 		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
-<<<<<<< HEAD
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){
-=======
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){}
-	void debug(){
-		for(int i=0;i<(int)nets.size();i++){
-			logger.show("i:%d\n",i);
-			for(int j=0;j<(int)nets[i].net.size();j++){
-				logger.show("  j:%d\n",j);
-				for(int k=0;k<(int)nets[i].net[j].size();k++){
-					logger.show("    k:%d\n",k);
-				}
-				logger.show("\n");
-			}
-			logger.show("\n");
->>>>>>> c64a985d24686d0a34f386878096878fd4d4e402
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){
 		}
 	void detailRoute(){
 		logger.info("Detail Route\n");
