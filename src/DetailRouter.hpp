@@ -24,20 +24,8 @@ public:
 		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){}
-	void debug(){
-		for(int i=0;i<(int)nets.size();i++){
-			logger.show("i:%d\n",i);
-			for(int j=0;j<(int)nets[i].net.size();j++){
-				logger.show("  j:%d\n",j);
-				for(int k=0;k<(int)nets[i].net[j].size();k++){
-					logger.show("    k:%d\n",k);
-				}
-				logger.show("\n");
-			}
-			logger.show("\n");
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){
 		}
-	}
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		for(int i=0;i<(int)nets.size();i++){
