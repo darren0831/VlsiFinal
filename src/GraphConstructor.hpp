@@ -84,7 +84,6 @@ public:
                     } else {
                         ++multiOverlapCount;
                         Vertex newVertex(location, vertexId, layer, layers[layer].direction);
-                        vertexMap[vertexId] = newVertex;
                         vertices.emplace_back(newVertex);
                         std::vector<Edge> newEdges;
                         for (const int touched : touchedVertices) {
@@ -174,7 +173,6 @@ public:
                 });
             }
             for (const Track& t : layerTracks[i]) {
-                vertexMap[vertexId] = Vertex(t, vertexId);
                 vertices.emplace_back(t, vertexId);
                 layerVertices[t.layer].emplace_back(t, vertexId);
                 ++vertexId;
@@ -393,7 +391,6 @@ public:
     std::vector<Net> nets;
 
 public:
-    std::unordered_map<int, Vertex> vertexMap;
     std::vector<std::vector<Edge>> routingGraph;
 
 public:

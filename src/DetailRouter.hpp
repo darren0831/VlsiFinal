@@ -16,15 +16,14 @@
 class DetailRouter{
 public:
 	DetailRouter(
-		std::vector<Vertex>& vertices, 
+		std::vector<Vertex>& vertices,
 		std::vector<std::vector<GlobalRoutingPath>>& globalResult,
 		std::vector<Bus>& buses,
 		std::vector<Layer>& layers,
-		std::unordered_map<int, Vertex>& vertexMap,
 		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){}
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){}
 	void debug(){
 		for(int i=0;i<(int)nets.size();i++){
 			logger.show("i:%d\n",i);
@@ -54,7 +53,7 @@ public:
 					logger.info("    - Net: %d\n",k);
 					//for A pin
 					candidateVertexId = std::queue<int>();
-					
+
 					int startVertexId = nets[i].net[j][k];
 					candidateVertexId.push(startVertexId);	//put source to queue
 
@@ -102,13 +101,13 @@ public:
 					}else{
 						logger.error("      No path from source to target\n");
 					}
-					
+
 					//TODO: Assign detailPath
 				}
 			}
-			
+
 		}
-		
+
 		return;
 	}
 
@@ -117,14 +116,13 @@ private:
 	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
 	std::vector<Bus>& buses;
 	std::vector<Layer>& layers;
-	std::unordered_map<int, Vertex>& vertexMap;
 	std::vector<std::vector<Edge>>& routingGraph;
 	std::vector<Net>& nets;
 	Logger& logger;
 	std::queue<int> candidateVertexId;
 	std::unordered_set<int> isVertexUsed;
 	std::vector<int> detailPath;
-	
+
 };
 
 #endif //VLSI_FINAL_PROJECT_DETAIL_ROUTER_HPP_
