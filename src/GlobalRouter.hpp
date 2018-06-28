@@ -210,10 +210,6 @@ private:
         globalNets = std::vector<std::vector<int>>();
         globalNetWidths = std::vector<std::vector<int>>();
         for (const Bus& bus : buses) {
-            std::vector<int> widths;
-            for (int i : bus.widths) {
-                widths.emplace_back(i);
-            }
             std::vector<int> grids;
             for (int i = 0; i < bus.numPins; ++i) {
                 std::vector<int> pinGrids;
@@ -238,7 +234,7 @@ private:
                 grids.emplace_back(maxid);
             }
             globalNets.emplace_back(std::move(grids));
-            globalNetWidths.emplace_back(std::move(widths));
+            globalNetWidths.emplace_back(bus.widths);
         }
     }
 
@@ -350,6 +346,9 @@ private:
             int fromGridId = coordToGridId(from, layer);
             int toGridId = coordToGridId(to, layer);
             char vertexDir = getDirection(fromGridId, toGridId);
+            if (fromGridId == toGridId) {
+                continue;
+            }
             if (layers[layer].isHorizontal()) {
                 for (int i = fromGridId; i < toGridId; ++i) {
                     for (int j : globalGraph[i]) {
@@ -528,7 +527,7 @@ private:
                 }
             }
         }
-        logger.info("      Path finding finished\n");
+        logger.info("      Path finding finished: %s\n", (found) ? "success" : "fail");
         if (!found || finalVertex == -1) {
             return {std::make_pair(-1, firstEdgeId)};
         }

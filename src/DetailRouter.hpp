@@ -13,31 +13,18 @@
 #include "Vertex.hpp"
 
 
-class DetailRouter{
+class DetailRouter {
 public:
 	DetailRouter(
 		std::vector<Vertex>& vertices,
 		std::vector<std::vector<GlobalRoutingPath>>& globalResult,
 		std::vector<Bus>& buses,
 		std::vector<Layer>& layers,
-		std::unordered_map<int, Vertex>& vertexMap,
 		std::vector<std::vector<Edge>>& routingGraph,
 		std::vector<Net>& nets,
 		Logger& logger):
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), vertexMap(vertexMap), routingGraph(routingGraph), nets(nets), logger(logger){}
-	void debug(){
-		for(int i=0;i<(int)nets.size();i++){
-			logger.show("i:%d\n",i);
-			for(int j=0;j<(int)nets[i].net.size();j++){
-				logger.show("  j:%d\n",j);
-				for(int k=0;k<(int)nets[i].net[j].size();k++){
-					logger.show("    k:%d\n",k);
-				}
-				logger.show("\n");
-			}
-			logger.show("\n");
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){
 		}
-	}
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		for(int i=0;i<(int)nets.size();i++){
@@ -53,7 +40,9 @@ public:
 					if(k==1) continue;
 					logger.info("    - Net: %d\n",k);
 					//for A pin
+
 					candidateVertexId = std::priority_queue<DetailNode>();
+
 
 					int startVertexId = nets[i].net[j][k];
 
@@ -183,14 +172,12 @@ private:
 	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
 	std::vector<Bus>& buses;
 	std::vector<Layer>& layers;
-	std::unordered_map<int, Vertex>& vertexMap;
 	std::vector<std::vector<Edge>>& routingGraph;
 	std::vector<Net>& nets;
 	Logger& logger;
 	std::priority_queue<DetailNode> candidateVertexId;
 	std::unordered_set<int> isVertexUsed;
 	std::vector<int> detailPath;
-
 
 };
 
