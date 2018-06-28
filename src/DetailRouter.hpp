@@ -28,18 +28,18 @@ public:
 
     double assumDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
         double maxX = -1, maxY = -1, minX = -1, minY = -1;
-        for(int i=0;i<endVertexId.size();i++){
-            double curX = vertices[endVertexId].track.rect.midPoint().x;
-            double curY = vertices[endVertexId].track.rect.midPoint().y;
+        for(unsigned int i=0;i<endVertexId.size();i++){
+            double curX = vertices[endVertexId[i]].track.rect.midPoint().x;
+            double curY = vertices[endVertexId[i]].track.rect.midPoint().y;
             if(curX>maxX || maxX == -1 ) maxX = curX;
             if(curY>maxY || maxY == -1 ) maxY = curY;
             if(curX<minX || minX == -1 ) minX = curX;
             if(curY<minY || minY == -1 ) minY = curY;
         }
-        double maxX  = std::max(maxX, curX);
-        double maxY  = std::max(maxY, curY);
-        double minX  = std::min(minX, curX);
-        double minY  = std::min(minY, curY);
+        maxX  = std::max(maxX, curX);
+        maxY  = std::max(maxY, curY);
+        minX  = std::min(minX, curX);
+        minY  = std::min(minY, curY);
         return (maxX-minX)+(maxY-minY);
     }
 
@@ -67,7 +67,7 @@ public:
 				std::vector<int>& followedGridId = globalResult[i][0].gridSequence;
 				int curGridindex = 0;
 				for(int k=1;k<(int)nets[i].net[firstBit].size();k++){
-					
+
 					logger.info("    - Net: %d\n",k);
 					//for A pin
 					candidateVertexId = std::priority_queue<DetailNode>();
@@ -125,7 +125,7 @@ public:
 							}
 						}
 						// logger.show("curId: %d\n",currentVertexId);
-						
+
 						if(flag)break;
 						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
 							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
