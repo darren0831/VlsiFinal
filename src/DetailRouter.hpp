@@ -148,7 +148,6 @@ public:
 								}
 							}
 						}
-
 						for(int end: endVertexId){
 							if(currentVertexId == end){
 								flag = true;

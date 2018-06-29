@@ -13,40 +13,49 @@ public:
 		}
 	void detailRoute(){
 		logger.info("Detail Route\n");
+		int c=0;
 		for(Net& n : nets){
+			c++;
+			// if(c<=3)continue;
 			logger.show("%s:\n",n.netName.c_str());
+			n.detailPath = std::vector<std::vector<std::vector<int>>>(n.net.size());
 			int k=0;
-			for(int j=0;j<(int)2;j++){
+			bool flag = false;
+			for(int j=0;j<(int)n.net.size();j++){
 				std::vector<int>& bit = n.net[j];
 				k++;
 				logger.show("  - Bit %d:\n",k);
-				detailPath.clear();
+				curNet.clear();
 				if(j==0)
-					routeFirstBit(bit,n);
-				else
-					routeOtherBit(j,bit,n);
+					flag = routeFirstBit(bit,n);
+				else{
+					if(flag)
+						routeOtherBit(j,bit,n);
+				}
 			}
 		}
 	}
 
-	void routeFirstBit(std::vector<int>& bit, Net& net){
-		std::vector<int> endVertexId;
-		direction.clear();
+	bool routeFirstBit(std::vector<int>& bit, Net& net){
+		direction = std::vector<std::vector<char>>((int)bit.size()-1);
 		for(int i=1;i<(int)bit.size();i++){
+			std::vector<int> endVertexId;
 			logger.show("    - Pin %d:\n",i);
 			int startVertexId = bit[i];
 			candidateVertexId = std::queue<DetailNode>();
 			if(i==1)
 				endVertexId.emplace_back(bit[0]);
 			else{
-				for(int d : detailPath)
+				for(int d : curNet){
 					endVertexId.emplace_back(d);
+				}
 			}
 
-			logger.show("      startVertexId: %d\n",startVertexId);
-			for(int end : endVertexId){
-				logger.show("      endVertexId: %d\n",end);
-			}
+			// logger.show("      startVertexId: %d\n",startVertexId);
+			// for(int end : endVertexId){
+			// 	logger.show("      endVertexId: %d\n",end);
+			// }
+			detailPath.clear();
 			DetailNode start(startVertexId,-1);
 			candidateVertexId.push(start);
 			bool flag = false;
@@ -72,32 +81,39 @@ public:
 				}
 			}
 			if(flag){
-				logger.info("      Do Detail Back Trace\n");
+				logger.show("      Do Detail Back Trace\n");
 				while(currentVertexId!=-1){
 					// logger.show("%d\n",currentVertexId);
 					detailPath.emplace_back(currentVertexId);
+					curNet.insert(currentVertexId);
 					isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
-				for(int i=0;i<(int)detailPath.size()-1;i++){
-					for(int e: routingGraph[detailPath[i]]){
-						if(routingEdges[e].getTarget(i)==detailPath[i+1]){
-							direction.emplace_back(routingEdges[e].getDirection(detailPath[i],detailPath[i+1]));
-							break;
+				for(int j=0;j<(int)detailPath.size()-1;j++){
+					for(int e: routingGraph[detailPath[j]]){
+						if(routingEdges[e].getTarget(detailPath[j])==detailPath[j+1]){
+							if(routingEdges[e].getDirection(detailPath[j],detailPath[j+1])!=' '){
+								direction[i-1].emplace_back(routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
+								// logger.show("%d, %c\n",detailPath[j],routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
+								break;
+							}
 						}
 					}	
 				}
-				net.detailPath[0][i] = detailPath;
+				
+				net.detailPath[0].emplace_back(detailPath);
 			}else{
-				logger.error("      No path from source to target\n");
+				logger.show("      No path from source to target\n");
+				return false;
 			}
 
 		}
+		return true;
 	}
 	void routeOtherBit(int bitNumber,std::vector<int>& bit, Net& net){
-		std::vector<int> endVertexId;
 		for(int i=1;i<(int)bit.size();i++){
+			std::vector<int> endVertexId;
 			logger.show("    - Pin %d:\n",i);
 			int startVertexId = bit[i];
 			int curFollowId = 0;
@@ -105,14 +121,16 @@ public:
 			if(i==1)
 				endVertexId.emplace_back(bit[0]);
 			else{
-				for(int d : detailPath)
+				for(int d : curNet){
 					endVertexId.emplace_back(d);
+				}
 			}
 
-			logger.show("      startVertexId: %d\n",startVertexId);
-			for(int end : endVertexId){
-				logger.show("      endVertexId: %d\n",end);
-			}
+			// logger.show("      startVertexId: %d\n",startVertexId);
+			// for(int end : endVertexId){
+			// 	logger.show("      endVertexId: %d\n",end);
+			// }
+			detailPath.clear();
 			DetailNode start(startVertexId,0);
 			candidateVertexId.push(start);
 			bool flag = false;
@@ -133,25 +151,27 @@ public:
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						if(direction[curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)){
+						if((direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' ') && curFollowId < (int)direction[i-1].size()){
 							candidateVertexId.push(DetailNode(tgtId,curFollowId+1));
 							prev[tgtId] = currentVertexId;
 						}
 					}
 				}
 			}
+			
 			if(flag){
-				logger.info("      Do Detail Back Trace\n");
+				logger.show("      Do Detail Back Trace\n");
 				while(currentVertexId!=-1){
 					// logger.show("%d\n",currentVertexId);
 					detailPath.emplace_back(currentVertexId);
+					curNet.insert(currentVertexId);
 					isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
-				net.detailPath[bitNumber][i] = detailPath;
+				net.detailPath[bitNumber].emplace_back(detailPath);
 			}else{
-				logger.error("      No path from source to target\n");
+				logger.show("      No path from source to target\n");
 			}
 
 		}
@@ -176,6 +196,7 @@ public:
 	std::vector<int> detailPath;
 	std::queue<DetailNode> candidateVertexId;
 	std::unordered_set<int> isVertexUsed;
-	std::vector<char> direction; 
+	std::vector<std::vector<char>> direction;
+	std::unordered_set<int> curNet; 
 };
 #endif
