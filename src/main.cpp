@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
             buses,
             layers,
             routingGraph,
+            routingEdges,
             nets,
             logger);
         detailRouter.detailRoute();

@@ -20,10 +20,11 @@ public:
 		std::vector<std::vector<GlobalRoutingPath>>& globalResult,
 		std::vector<Bus>& buses,
 		std::vector<Layer>& layers,
-		std::vector<std::vector<Edge>>& routingGraph,
+		std::vector<std::vector<int>>& routingGraph,
+		std::vector<Edge>& routingEdges,
 		std::vector<Net>& nets,
 		Logger& logger):
-		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), nets(nets), logger(logger){
+		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), routingEdges(routingEdges), nets(nets), logger(logger){
 		}
 
     double assumDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
@@ -113,16 +114,16 @@ public:
 						// logger.show("curId: %d\n",currentVertexId);
 
 						if(flag)break;
-						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
-							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
-                                Vertex& nextVertex = vertices[e.getTarget()];
+						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
+							if(prev[routingEdges[eid].getTarget(currentVertexId)]==-1 && prev[routingEdges[eid].getTarget(currentVertexId)]!=startVertexId){
+                                Vertex& nextVertex = vertices[routingEdges[eid].getTarget(currentVertexId)];
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
                                 double stepDist = curNode.curX - nextX;
                                 double nextDistance = curNode.curDistance + stepDist;
                                 double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-								prev[e.getTarget()] = currentVertexId;
+                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,routingEdges[eid].getTarget(currentVertexId)));
+								prev[routingEdges[eid].getTarget(currentVertexId)] = currentVertexId;
 							}
 						}
 					}
@@ -181,7 +182,8 @@ private:
 	std::vector<std::vector<GlobalRoutingPath>>& globalResult;
 	std::vector<Bus>& buses;
 	std::vector<Layer>& layers;
-	std::vector<std::vector<Edge>>& routingGraph;
+    std::vector<std::vector<int>>& routingGraph;
+    std::vector<Edge>& routingEdges;
 	std::vector<Net>& nets;
 	Logger& logger;
 	std::priority_queue<DetailNode> candidateVertexId;
