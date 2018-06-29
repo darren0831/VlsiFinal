@@ -80,10 +80,10 @@ public:
                     }
                     if (touchedVertices.empty()) {
                         logger.error("A pin of bus %s doesn't touch any vertices\n", bus.name.c_str());
-                    } else if (touchedVertices.size() == 1lu) {
-                        net.addTerminal(i, touchedVertices[0]);
-                    } else {
-                        ++multiOverlapCount;
+                    }else {
+                        if (touchedVertices.size() > 1) {
+                            ++multiOverlapCount;
+                        }
                         Vertex newVertex(location, vertexId, layer, layers[layer].direction);
                         vertices.emplace_back(newVertex);
                         std::vector<int> newEdges;

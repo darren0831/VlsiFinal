@@ -1,9 +1,11 @@
 #include <cstdlib>
 #include <string>
 #include <sys/stat.h>
+#include "DetailRouter.hpp"
 #include "DisjointSet.hpp"
 #include "GraphConstructor.hpp"
 #include "GlobalRouter.hpp"
+#include "OutputGenerator.hpp"
 #include "Preprocess.hpp"
 #include "DetailRouter.hpp"
 #include "NaiveDetailRouter.hpp"
@@ -11,16 +13,24 @@
 int main(int argc, char** argv) {
     setbuf(stdout, nullptr);
 
-    if (argc != 2 && argc != 3) {
-        fprintf(stderr, "usage: %s [-d] <input file>\n", argv[0]);
+    if (argc != 4 && argc != 5) {
+        fprintf(stderr, "usage: %s [-d] <input file> -o <output file>\n", argv[0]);
         return 1;
     }
 
     bool printToFile = false;
     std::string inputfile;
+    std::string outputfile;
     for (int i = 1; i < argc; ++i) {
         if (std::string(argv[i]) == "-d") {
             printToFile = true;
+        } else if (std::string(argv[i]) == "-o") {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "Invalid command line argument: -o <output file>\n");
+                return 1;
+            }
+            outputfile = argv[i + 1];
+            ++i;
         } else {
             inputfile = argv[i];
         }
@@ -59,6 +69,10 @@ int main(int argc, char** argv) {
 
     // Global Result
     std::vector<std::vector<GlobalRoutingPath>> globalResult;
+
+    // General information
+    stdoutLogger.info("Input File: %s\n", inputfile.c_str());
+    stdoutLogger.info("Output File: %s\n", outputfile.c_str());
 
     // Read input file
     stdoutLogger.info("===== Read Input File =====\n");
@@ -131,6 +145,19 @@ int main(int argc, char** argv) {
             nets,
             logger);
         naiveDetailRouter.detailRoute();
+    }
+
+    // Output Generate
+    stdoutLogger.info("===== Output Generate =====\n");
+    {
+        Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
+        OutputGenerator outputGenerator(
+            vertices,
+            buses,
+            layers,
+            nets,
+            logger);
+        outputGenerator.generateOutput(outputfile);
     }
     return 0;
 }
