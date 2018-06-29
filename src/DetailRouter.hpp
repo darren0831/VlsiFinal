@@ -115,10 +115,10 @@ public:
 
 						if(flag)break;
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
-                            int tgtId = routingEdges[eid].getTarget(currentVertexId,currentVertexId);
+                            int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
                                 Vertex& nextVertex = vertices[tgtId];
-                                char edgeDir = routingEdges[eid].getDirection(tgtId);
+                                char edgeDir = routingEdges[eid].getDirection(currentVertexId,tgtId);
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
                                 double nextDistance, nextAssume;
@@ -136,7 +136,7 @@ public:
                                     nextAssume = 0;
                                 }
                                 candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,tgtId));
-								prev[routingEdges[eid].getTarget(currentVertexId)] = currentVertexId;
+								prev[tgtId] = currentVertexId;
 							}
 						}
 					}
