@@ -44,6 +44,28 @@ public:
         return (maxX-minX)+(maxY-minY);
     }
 
+    std::pair<double, double> calDistanceCost(const int& eid, const int& tgtId, const DetailNode& curNode){
+        char edgeDir = routingEdges[eid].getDirection(currentVertexId,tgtId);
+        Vertex& nextVertex = vertices[tgtId];
+        double nextX = nextVertex.track.rect.midPoint().x;
+        double nextY = nextVertex.track.rect.midPoint().y;
+        double nextDistance, nextAssume;
+        if(edgeDir== 'L' || edgeDir== 'R'){
+            nextDistance = curNode.curDistance + fabs(curNode.curX - nextX);
+            nextAssume = assumeDistance(nextX,nextY,endVertexId);
+        }else if(edgeDir== 'F' || edgeDir== 'B'){
+            nextDistance = curNode.curDistance + fabs(curNode.curY - nextY);
+            nextAssume = assumeDistance(nextX,nextY,endVertexId);
+        }else if(edgeDir== 'U' || edgeDir== 'D'){
+            nextDistance = curNode.curDistance;
+            nextAssume = curNode.assumeDistance;
+        }else{
+            nextDistance = 0;
+            nextAssume = 0;
+        }
+        return std::make_pair(nextDistance,nextAssume);
+    }
+
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		for(int i=2;i<(int)3;i++){
@@ -117,25 +139,9 @@ public:
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
                             int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
-                                Vertex& nextVertex = vertices[tgtId];
-                                char edgeDir = routingEdges[eid].getDirection(currentVertexId,tgtId);
-                                double nextX = nextVertex.track.rect.midPoint().x;
-                                double nextY = nextVertex.track.rect.midPoint().y;
-                                double nextDistance, nextAssume;
-                                if(edgeDir== 'L' || edgeDir== 'R'){
-                                    nextDistance = curNode.curDistance + fabs(curNode.curX - nextX);
-                                    nextAssume = assumeDistance(nextX,nextY,endVertexId);
-                                }else if(edgeDir== 'F' || edgeDir== 'B'){
-                                    nextDistance = curNode.curDistance + fabs(curNode.curY - nextY);
-                                    nextAssume = assumeDistance(nextX,nextY,endVertexId);
-                                }else if(edgeDir== 'U' || edgeDir== 'D'){
-                                    nextDistance = curNode.curDistance;
-                                    nextAssume = curNode.assumeDistance;
-                                }else{
-                                    nextDistance = 0;
-                                    nextAssume = 0;
-                                }
-                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,tgtId));
+                                std::pair distanceCost = calDistanceCost( eid, tdtId, curNode);
+
+                                candidateVertexId.push(DetailNode(distanceCost.first,distanceCost.second,nextX,nextY,tgtId));
 								prev[tgtId] = currentVertexId;
 							}
 						}
