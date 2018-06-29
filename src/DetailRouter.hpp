@@ -163,6 +163,7 @@ public:
                             int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
                                 Vertex& nextVertex = vertices[tgtId];
+                                // char edgeDir = routingEdges[eid].getDirection(currentVertexId,tgtId);
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
                                 std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, curNode, endVertexId);

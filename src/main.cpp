@@ -7,6 +7,8 @@
 #include "GlobalRouter.hpp"
 #include "OutputGenerator.hpp"
 #include "Preprocess.hpp"
+#include "DetailRouter.hpp"
+#include "NaiveDetailRouter.hpp"
 
 int main(int argc, char** argv) {
     setbuf(stdout, nullptr);
@@ -134,16 +136,15 @@ int main(int argc, char** argv) {
     stdoutLogger.info("===== Detail Route =====\n");
     {
         Logger& logger = (printToFile) ? detailLogger : stdoutLogger;
-        DetailRouter detailRouter(
+        NaiveDetailRouter naiveDetailRouter(
             vertices,
-            globalResult,
             buses,
             layers,
             routingGraph,
             routingEdges,
             nets,
             logger);
-        detailRouter.detailRoute();
+        naiveDetailRouter.detailRoute();
     }
 
     // Output Generate
