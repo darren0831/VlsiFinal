@@ -50,7 +50,7 @@ public:
 			logger.info("Bus: %s\n",nets[i].netName.c_str());
 			//for A bus
 			int firstBit=-1;
-			logger.show("globalSequence %s: %d\n",globalResult[i][0].busName.c_str(),globalResult[i][0].gridSequence[0]);
+			// logger.show("globalSequence %s: %d\n",globalResult[i][0].busName.c_str(),globalResult[i][0].gridSequence[0]);
 			for(int j=0; j<(int)nets[i].net.size();j++){
 				for (int g : vertices[nets[i].net[j][1]].gridId){
 					if(g == globalResult[i][0].gridSequence[0]){
@@ -64,6 +64,7 @@ public:
 				logger.info("  - Bit: %d\n",firstBit);
 				std::vector<int> endVertexId;
 				std::vector<int>& followedGridId = globalResult[i][0].gridSequence;
+				std::string followedTopology = globalResult[i][0].topologySequence;
 				int curGridindex = 0;
 				for(int k=1;k<(int)nets[i].net[firstBit].size();k++){
 
@@ -73,7 +74,7 @@ public:
 					int startVertexId = nets[i].net[firstBit][k];
 
 					candidateVertexId.push(DetailNode(0,0,vertices[startVertexId].track.rect.midPoint().x,
-                                           vertices[startVertexId].track.rect.midPoint().y,vertices[startVertexId].id));	//put source to queue
+                                           vertices[startVertexId].track.rect.midPoint().y,vertices[startVertexId].id,followedGridId[0]));	//put source to queue
 
 					if(k==1){
 						endVertexId.emplace_back(nets[i].net[firstBit][0]);
@@ -85,25 +86,30 @@ public:
 					bool flag=false;
 					std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 					int currentVertexId=-1;
+					int curGridId = -1;
 					DetailNode curNode;
 					while(!candidateVertexId.empty()){
 						bool find = false;
-						while(!find && !candidateVertexId.empty()){
+						while(!find){
 							curNode = candidateVertexId.top();
 							currentVertexId = curNode.nodeId;
+							curGridId = curNode.gridId;
 							candidateVertexId.pop();
-							for(int g : vertices[currentVertexId].getGridId()){
-								if(followedGridId[curGridindex] == g) {
-									if(curGridindex+1 <= (int)followedGridId.size()-1){
-										if(followedGridId[curGridindex+1] == g){
-											curGridindex++;
-										}
-									}
-									find = true;
+							for(int l=0;l<(int)followedGridId.size();i++){
+								if(curGridId == followedGridId[l]){
+									curGridindex = l;
 									break;
 								}
 							}
+							for (int gridId : vertices[currentVertexId].gridId){
+								if(gridId == followedGridId[curGridindex]){
+									find = true;
+									curGridindex++;
+								}else break;
+							}
 						}
+						
+						
 
 						for(int end: endVertexId){
 							if(currentVertexId == end){
@@ -115,10 +121,10 @@ public:
 
 						if(flag)break;
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
-                            int tgtId = routingEdges[eid].getTarget(currentVertexId,currentVertexId);
+                            int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
                                 Vertex& nextVertex = vertices[tgtId];
-                                char edgeDir = routingEdges[eid].getDirection(tgtId);
+                                char edgeDir = routingEdges[eid].getDirection(currentVertexId, tgtId);
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
                                 double nextDistance, nextAssume;
@@ -135,7 +141,9 @@ public:
                                     nextDistance = 0;
                                     nextAssume = 0;
                                 }
-                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,tgtId));
+                                if(followedTopology[curGridindex] == edgeDir){
+                                	candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,tgtId,followedGridId[curGridindex]));
+                                }                            
 								prev[routingEdges[eid].getTarget(currentVertexId)] = currentVertexId;
 							}
 						}
@@ -175,9 +183,10 @@ private:
         double assumeDistance;
         double curX, curY;
         int nodeId;
+        int gridId;
 
-        DetailNode(double curDist,double assumeDist,double x,double y,int id):
-            curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id){}
+        DetailNode(double curDist,double assumeDist,double x,double y,int id,int gridId):
+            curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id),gridId(gridId){}
         DetailNode(){}
 
         bool operator<(const DetailNode &that) const{

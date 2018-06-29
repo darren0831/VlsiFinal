@@ -57,7 +57,7 @@ public:
     std::vector<std::vector<int>> net;
     std::vector<int> widths;
     int numBits;
-    std::vector<int> detailPath;
+    std::vector<std::vector<int>> detailPath;
     std::string netName;
 };
 
