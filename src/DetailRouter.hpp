@@ -115,7 +115,7 @@ public:
 
 						if(flag)break;
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
-                            int tgtId = routingEdges[eid].getTarget(currentVertexId);
+                            int tgtId = routingEdges[eid].getTarget(currentVertexId,currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
                                 Vertex& nextVertex = vertices[tgtId];
                                 char edgeDir = routingEdges[eid].getDirection(tgtId);
