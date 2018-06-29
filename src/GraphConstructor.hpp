@@ -88,7 +88,7 @@ public:
                         vertices.emplace_back(newVertex);
                         std::vector<int> newEdges;
                         for (const int touched : touchedVertices) {
-                            Edge newEdge(vertexId, touched, ' ', 'S');
+                            Edge newEdge(vertexId, touched, ' ', ' ', 'S');
                             int newEdgeId = insertNewEdge(newEdge);
                             newEdges.emplace_back(newEdgeId);
                             routingGraph[touched].emplace_back(newEdgeId);
@@ -311,15 +311,17 @@ public:
                 Rectangle r = v.overlap(u, true);
                 if (layer.isHorizontal() && r.height > threshold) {
                     const Point tgt = u.track.rect.midPoint();
-                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
-                    Edge edge(v.id, u.id, edgeDirection, layer.direction);
+                    char edgeDirectionSrcTgt = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, layer.direction);
                     int newEdgeId = insertNewEdge(edge);
                     out.emplace_back(newEdgeId);
                 }
                 if (layer.isVertical() && r.width > threshold) {
                     const Point tgt = u.track.rect.midPoint();
-                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
-                    Edge edge(v.id, u.id, edgeDirection, layer.direction);
+                    char edgeDirectionSrcTgt = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, layer.direction);
                     int newEdgeId = insertNewEdge(edge);
                     out.emplace_back(newEdgeId);
                 }
@@ -336,8 +338,9 @@ public:
                 Rectangle r = v.overlap(u, true);
                 if (map.insert(r) && isValidEdge(r, beginLayer, endLayer)) {
                     const Point tgt = u.track.rect.midPoint();
-                    char edgeDirection = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
-                    Edge edge(v.id, u.id, edgeDirection, 'C');
+                    char edgeDirectionSrcTgt = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
+                    char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, v.track.layer, u.track.layer);
+                    Edge edge(v.id, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
                     int newEdgeId = insertNewEdge(edge);
                     out.emplace_back(newEdgeId);
                 }

@@ -3,8 +3,8 @@
 
 class Edge {
 public:
-    Edge(int src, int tgt, char direction, char layerDirection) :
-        src(src), tgt(tgt), direction(direction) {
+    Edge(int src, int tgt, char srcToTgtDir, char tgtToSrcDir, char layerDirection) :
+        src(src), tgt(tgt), srcToTgtDir(srcToTgtDir), tgtToSrcDir(tgtToSrcDir) {
         historicalCost = 0;
         if (layerDirection == 'H') {        // horizontal
             horizontal = true;
@@ -63,14 +63,23 @@ public:
         return via;
     }
 
-    char getDirection() const {
-        return direction;
+    bool withoutTopology() const {
+        return !horizontal && !vertical && !via;
+    }
+
+    char getDirection(int source, int target) const {
+        if (source == src && target == tgt) {
+            return srcToTgtDir;
+        } else {
+            return tgtToSrcDir;
+        }
     }
 
 public:
     int src;
     int tgt;
-    char direction;
+    char srcToTgtDir;
+    char tgtToSrcDir;
     double historicalCost;
 
 private:
