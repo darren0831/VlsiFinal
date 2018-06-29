@@ -27,7 +27,7 @@ public:
 		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), routingEdges(routingEdges), nets(nets), logger(logger){
 		}
 
-    double assumDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
+    double assumeDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
         double maxX = -1, maxY = -1, minX = -1, minY = -1;
         for(unsigned int i=0;i<endVertexId.size();i++){
             double curX = vertices[endVertexId[i]].track.rect.midPoint().x;
@@ -115,14 +115,27 @@ public:
 
 						if(flag)break;
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
-							if(prev[routingEdges[eid].getTarget(currentVertexId)]==-1 && prev[routingEdges[eid].getTarget(currentVertexId)]!=startVertexId){
-                                Vertex& nextVertex = vertices[routingEdges[eid].getTarget(currentVertexId)];
+                            int tgtId = routingEdges[eid].getTarget(currentVertexId);
+							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
+                                Vertex& nextVertex = vertices[tgtId];
+                                char edgeDir = routingEdges[eid].getDirection(tgtId);
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
-                                double stepDist = curNode.curX - nextX;
-                                double nextDistance = curNode.curDistance + stepDist;
-                                double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,routingEdges[eid].getTarget(currentVertexId)));
+                                double nextDistance, nextAssume;
+                                if(edgeDir== 'L' || edgeDir== 'R'){
+                                    nextDistance = curNode.curDistance + fabs(curNode.curX - nextX);
+                                    nextAssume = assumeDistance(nextX,nextY,endVertexId);
+                                }else if(edgeDir== 'F' || edgeDir== 'B'){
+                                    nextDistance = curNode.curDistance + fabs(curNode.curY - nextY);
+                                    nextAssume = assumeDistance(nextX,nextY,endVertexId);
+                                }else if(edgeDir== 'U' || edgeDir== 'D'){
+                                    nextDistance = curNode.curDistance;
+                                    nextAssume = curNode.assumeDistance;
+                                }else{
+                                    nextDistance = 0;
+                                    nextAssume = 0;
+                                }
+                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,tgtId));
 								prev[routingEdges[eid].getTarget(currentVertexId)] = currentVertexId;
 							}
 						}
