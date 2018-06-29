@@ -19,9 +19,8 @@ VERBIN := verifier
 .PHONY: all debug release verifier clean
 
 
-all: main.cpp verifier.cpp
+all: main.cpp
 	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEBUGFLAGS) -o $(BIN) $<
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $(RELEASEFLAGS) -o $(VERBIN) $<
 
 debug: main.cpp
 	$(CC) $(CXXFLAGS) $(LDFLAGS) $(DEBUGFLAGS) -o $(BIN) $<
