@@ -100,6 +100,7 @@ public:
                 }
             }
             net.widths = bus.widths;
+            net.netName = bus.name;
             nets.emplace_back(net);
         }
         logger.warning("%d / %d pins of buses overlap with more than one vertex\n", multiOverlapCount, totalTerminals);
