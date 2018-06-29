@@ -52,7 +52,8 @@ int main(int argc, char** argv) {
 
     // Graph information
     std::vector<Vertex> vertices;
-    std::vector<std::vector<Edge>> routingGraph;
+    std::vector<std::vector<int>> routingGraph;
+    std::vector<Edge> routingEdges;
     std::vector<Net> nets;
 
     // Global Result
@@ -85,6 +86,7 @@ int main(int argc, char** argv) {
         GraphConstructor graphConstructor(layers, tracks, buses, obstacles, logger);
         vertices = std::move(graphConstructor.vertices);
         routingGraph = std::move(graphConstructor.routingGraph);
+        routingEdges = std::move(graphConstructor.routingEdges);
         nets = std::move(graphConstructor.nets);
     }
 
@@ -94,7 +96,8 @@ int main(int argc, char** argv) {
         DisjointSet ds(vertices.size());
         for (const auto& edges : routingGraph) {
             for (const auto edge : edges) {
-                ds.pack(edge.src, edge.tgt);
+                const Edge& e = routingEdges[edge];
+                ds.pack(e.src, e.tgt);
             }
         }
         logger.info("Number of connected graphs: %d\n", ds.numGroups());

@@ -56,7 +56,7 @@ public:
         return ll.midPoint(ur);
     }
 
-    Rectangle overlap(const Rectangle& that, bool const lineOverlap = false) const {
+    Rectangle overlap(const Rectangle& that, bool const lineOverlap) const {
         Point lowerLeft = Point(0, 0), upperRight = Point(0, 0);
 
         if (lineOverlap) {
@@ -96,7 +96,7 @@ public:
         return {lowerLeft.x, lowerLeft.y, upperRight.x, upperRight.y};
     }
 
-    bool hasOverlap(const Rectangle& that, bool lineOverlap = false) const {
+    bool hasOverlap(const Rectangle& that, bool lineOverlap) const {
         return !overlap(that, lineOverlap).isZero();
     }
 

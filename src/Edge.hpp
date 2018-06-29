@@ -6,19 +6,19 @@ public:
     Edge(int src, int tgt, char direction, char layerDirection) :
         src(src), tgt(tgt), direction(direction) {
         historicalCost = 0;
-        if (layerDirection == 'H') {
+        if (layerDirection == 'H') {        // horizontal
             horizontal = true;
             vertical = false;
             via = false;
-        } else if (layerDirection == 'V') {
+        } else if (layerDirection == 'V') { // vertical
             horizontal = false;
             vertical = true;
             via = false;
-        } else if (layerDirection == 'C') {
+        } else if (layerDirection == 'C') { // via
             horizontal = false;
             vertical = false;
             via = true;
-        } else if (layerDirection == 'S') {
+        } else if (layerDirection == 'S') { // special (only from 'source', no topology)
             horizontal = false;
             vertical = false;
             via = false;
@@ -27,8 +27,8 @@ public:
         }
     }
 
-    int getTarget() const {
-        return tgt;
+    int getTarget(int source) const {
+        return (source == tgt) ? src : tgt;
     }
 
     double getHistoricalCost() const {
