@@ -139,7 +139,7 @@ public:
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
                             int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
-                                std::pair distanceCost = calDistanceCost( eid, tdtId, curNode);
+                                std::pair<double,double> distanceCost = calDistanceCost( eid, tdtId, curNode);
 
                                 candidateVertexId.push(DetailNode(distanceCost.first,distanceCost.second,nextX,nextY,tgtId));
 								prev[tgtId] = currentVertexId;
