@@ -27,6 +27,28 @@ public:
 		vertices(vertices), globalResult(globalResult), buses(buses), layers(layers), routingGraph(routingGraph), routingEdges(routingEdges), nets(nets), logger(logger){
 		}
 
+private:
+    struct DetailNode{
+        double curDistance;
+        double assumeDistance;
+        double curX, curY;
+        int nodeId;
+
+        DetailNode(double curDist,double assumeDist,double x,double y,int id):
+            curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id){}
+        DetailNode(){}
+
+        bool operator<(const DetailNode &that) const{
+            double cost = curDistance+assumeDistance;
+            double thatCost = that.curDistance + that.assumeDistance;
+            if (fabs(cost - thatCost) > 1e-6) {
+                return cost < thatCost;
+            }else
+                return false;
+        }
+    };
+
+public:
     double assumeDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
         double maxX = -1, maxY = -1, minX = -1, minY = -1;
         for(unsigned int i=0;i<endVertexId.size();i++){
@@ -44,7 +66,7 @@ public:
         return (maxX-minX)+(maxY-minY);
     }
 
-    std::pair<double, double> calDistanceCost(const int& eid, const int& tgtId, const DetailNode& curNode){
+    std::pair<double, double> calDistanceCost(const int& eid, const int& tgtId,const int& currentVertexId, const DetailNode& curNode, const std::vector<int>& endVertexId){
         char edgeDir = routingEdges[eid].getDirection(currentVertexId,tgtId);
         Vertex& nextVertex = vertices[tgtId];
         double nextX = nextVertex.track.rect.midPoint().x;
@@ -139,7 +161,10 @@ public:
 						for(int eid : routingGraph[currentVertexId]){	//put all candidate in queue
                             int tgtId = routingEdges[eid].getTarget(currentVertexId);
 							if(prev[tgtId]==-1 && prev[tgtId]!=startVertexId){
-                                std::pair<double,double> distanceCost = calDistanceCost( eid, tdtId, curNode);
+                                Vertex& nextVertex = vertices[tgtId];
+                                double nextX = nextVertex.track.rect.midPoint().x;
+                                double nextY = nextVertex.track.rect.midPoint().y;
+                                std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, curNode, endVertexId);
 
                                 candidateVertexId.push(DetailNode(distanceCost.first,distanceCost.second,nextX,nextY,tgtId));
 								prev[tgtId] = currentVertexId;
@@ -175,26 +200,6 @@ public:
 		return;
 	}
 
-private:
-    struct DetailNode{
-        double curDistance;
-        double assumeDistance;
-        double curX, curY;
-        int nodeId;
-
-        DetailNode(double curDist,double assumeDist,double x,double y,int id):
-            curDistance(curDist),assumeDistance(assumeDist),curX(x),curY(y),nodeId(id){}
-        DetailNode(){}
-
-        bool operator<(const DetailNode &that) const{
-            double cost = curDistance+assumeDistance;
-            double thatCost = that.curDistance + that.assumeDistance;
-            if (fabs(cost - thatCost) > 1e-6) {
-                return cost < thatCost;
-            }else
-                return false;
-        }
-    };
 
 private:
 	std::vector<Vertex>& vertices;
