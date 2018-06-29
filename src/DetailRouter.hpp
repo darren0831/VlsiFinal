@@ -45,11 +45,11 @@ public:
 
 	void detailRoute(){
 		logger.info("Detail Route\n");
-		// for(int i=0;i<(int)nets.size();i++){
-		for(int i=0;i<(int)1;i++){
-			logger.info("Bus: %d\n",i);
+		for(int i=2;i<(int)3;i++){
+			logger.info("Bus: %s\n",nets[i].netName.c_str());
 			//for A bus
 			int firstBit=-1;
+			logger.show("globalSequence %s: %d\n",globalResult[i][0].busName.c_str(),globalResult[i][0].gridSequence[0]);
 			for(int j=0; j<(int)nets[i].net.size();j++){
 				for (int g : vertices[nets[i].net[j][1]].gridId){
 					if(g == globalResult[i][0].gridSequence[0]){
@@ -115,44 +115,13 @@ public:
 						if(flag)break;
 						for(const Edge& e : routingGraph[currentVertexId]){	//put all candidate in queue
 							if(prev[e.getTarget()]==-1 && e.getTarget()!=startVertexId){
-
                                 Vertex& nextVertex = vertices[e.getTarget()];
                                 double nextX = nextVertex.track.rect.midPoint().x;
                                 double nextY = nextVertex.track.rect.midPoint().y;
-                                if(e.getDirection()=='L'){///left
-                                    double stepDist = curNode.curX - nextX;
-                                    double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-                                }else if(e.getDirection()=='R'){///right
-                                    double stepDist = nextX - curNode.curX;
-                                    double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-                                }else if(e.getDirection()=='B'){///back
-                                    double stepDist = curNode.curY - nextY;
-                                    double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-                                }else if(e.getDirection()=='F'){///forward
-                                    double stepDist = nextY - curNode.curY;
-                                    double nextDistance = curNode.curDistance + stepDist;
-                                    double nextAssume = assumDistance(nextX,nextY,endVertexId);
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
-                                }else if(e.getDirection()=='U'){///up
-                                    double nextDistance = curNode.curDistance;
-                                    double nextAssume = 0;
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
-                                }else if(e.getDirection()=='D'){///down
-                                    double nextDistance = curNode.curDistance;
-                                    double nextAssume = 0;
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
-                                }else{
-                                    double nextDistance = curNode.curDistance;
-                                    double nextAssume = 0;
-                                    candidateVertexId.push(DetailNode(nextDistance,nextAssume,curNode.curX,curNode.curY,e.getTarget()));
-                                }
-								//candidateVertexId.push(DetailNode(0,0,0,0,e.getTarget()));
+                                double stepDist = curNode.curX - nextX;
+                                double nextDistance = curNode.curDistance + stepDist;
+                                double nextAssume = assumDistance(nextX,nextY,endVertexId);
+                                candidateVertexId.push(DetailNode(nextDistance,nextAssume,nextX,nextY,e.getTarget()));
 								prev[e.getTarget()] = currentVertexId;
 							}
 						}

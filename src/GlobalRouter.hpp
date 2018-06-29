@@ -230,6 +230,7 @@ private:
                     const Pin& pin = bus.bits[j].pins[i];
                     Point midPoint = pin.rect.midPoint();
                     int gridId = coordToGridId(midPoint, pin.layer);
+                    // logger.show("bus.bits[%d].pins[%d]: %d\n",j,i,gridId);
                     pinGrids.emplace_back(gridId);
                 }
                 std::unordered_map<int, int> countMap;
@@ -415,13 +416,15 @@ private:
                 for (const auto& v : result) {
                     tgt.emplace_back(v.first);
                 }
-                char direction[result.size()];
-                std::vector<int> gridSeq(result.size() - 1);
+                char direction[result.size() + 1];
+                std::vector<int> gridSeq(result.size());
+                gridSeq[0] = result[0].first;
+                direction[0] = ' ';
                 for (unsigned int j = 0; j < result.size() - 1; j++) {
-                    direction[j] = getDirection(result[j].first, result[j + 1].first);
-                    gridSeq[j] = result[j + 1].first;
+                    direction[j + 1] = getDirection(result[j].first, result[j + 1].first);
+                    gridSeq[j + 1] = result[j + 1].first;
                 }
-                direction[result.size() - 1] = '\0';
+                direction[result.size()] = '\0';
 #ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
                 if (gridSeq.size() != strlen(direction)) {
                     fprintf(stderr, "[ERROR] Direction and grid sequence size not matched\n");
