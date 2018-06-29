@@ -60,8 +60,8 @@ public:
         Point lowerLeft = Point(0, 0), upperRight = Point(0, 0);
 
         if (lineOverlap) {
-            if (ll.x <= that.ur.x && ur.x >= that.ll.x) {
-                if (ll.y <= that.ur.y && ur.y >= that.ll.y) {
+            if ((ll.x < that.ur.x || fabs(ll.x - that.ur.x) < 1e-6) && (ur.x > that.ll.x||fabs(ll.x - that.ur.x) < 1e-6)) {
+                if ((ll.y <= that.ur.y || fabs(ll.y - that.ur.y) < 1e-6) && (ur.y >= that.ll.y||fabs(ll.y - that.ur.y) < 1e-6)) {
                     if (ll.x > that.ll.x) { lowerLeft.x = ll.x; }
                     else { lowerLeft.x = that.ll.x; }
 
