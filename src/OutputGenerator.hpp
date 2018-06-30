@@ -50,8 +50,8 @@ public:
     void writeSingleNet(Net& net, int netId) {
         for (int i = 0; i < (int) net.net.size(); ++i) {
             fprintf(fout, "BIT %d\n", i);
-            fprintf(fout, "PATH %d\n", getPathCount(net.detailPath));
-            writeSingleBit(net.detailPath, buses[netId].bits[i], buses[netId].widths);
+            fprintf(fout, "PATH %d\n", getPathCount(net.detailPath[i]));
+            writeSingleBit(net.detailPath[i], buses[netId].bits[i], buses[netId].widths);
             fprintf(fout, "ENDPATH\n");
             fprintf(fout, "ENDBIT\n");
         }
