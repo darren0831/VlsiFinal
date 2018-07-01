@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include "Track.hpp"
 #include "Vertex.hpp"
 
 class VertexUsage {
@@ -71,8 +72,8 @@ public:
     }
 
     std::pair<int, int> getSegment(const Vertex& source, const Vertex& current, const Vertex& target) const {
-        Rectangle r1 = current.track.overlap(source.track);
-        Rectangle r2 = current.track.overlap(target.track);
+        Rectangle r1 = current.track.overlap(source.track, false);
+        Rectangle r2 = current.track.overlap(target.track, false);
         if (current.track.isHorizontal()) {
             int start = (int) (floor(std::min(r1.ll.x, r2.ll.x)));
             int end = (int) (ceil(std::max(r1.ur.x, r2.ur.x)));
