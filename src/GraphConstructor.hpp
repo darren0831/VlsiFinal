@@ -64,9 +64,8 @@ public:
         logger.info("Initialize nets\n");
         int multiOverlapCount = 0;
         int totalTerminals = 0;
-        int vertexId = (int) vertices.size();
         for (const auto& bus : buses) {
-            Net net(bus.numBits);
+            Net net(bus.numBits, bus.numPins);
             totalTerminals += bus.numBits * bus.numPins;
             for (int i = 0; i < bus.numBits; ++i) {
                 for (const Pin& pin : bus.bits[i].pins) {
@@ -84,18 +83,18 @@ public:
                         if (touchedVertices.size() > 1) {
                             ++multiOverlapCount;
                         }
-                        Vertex newVertex(location, vertexId, layer, layers[layer].direction);
+                        Vertex newVertex(location, vertexIdCounter, layer, layers[layer].direction);
                         vertices.emplace_back(newVertex);
                         std::vector<int> newEdges;
                         for (const int touched : touchedVertices) {
-                            Edge newEdge(vertexId, touched, ' ', ' ', 'S');
+                            Edge newEdge(vertexIdCounter, touched, ' ', ' ', 'S');
                             int newEdgeId = insertNewEdge(newEdge);
                             newEdges.emplace_back(newEdgeId);
                             routingGraph[touched].emplace_back(newEdgeId);
                         }
                         routingGraph.emplace_back(newEdges);
-                        net.addTerminal(i, vertexId);
-                        ++vertexId;
+                        net.addTerminal(i, vertexIdCounter);
+                        ++vertexIdCounter;
                     }
                 }
             }
@@ -165,7 +164,7 @@ public:
 
     void generateVertices() {
         layerVertices = std::vector<std::vector<Vertex>>(layers.size());
-        int vertexId = 0;
+        vertexIdCounter = 0;
         for (int i = 0; i < (int) layerTracks.size(); ++i) {
             if (layers[i].isHorizontal()) {
                 std::sort(layerTracks[i].begin(), layerTracks[i].end(), [](Track a, Track b) {
@@ -177,12 +176,12 @@ public:
                 });
             }
             for (const Track& t : layerTracks[i]) {
-                vertices.emplace_back(t, vertexId);
-                layerVertices[t.layer].emplace_back(t, vertexId);
-                ++vertexId;
+                vertices.emplace_back(t, vertexIdCounter);
+                layerVertices[t.layer].emplace_back(t, vertexIdCounter);
+                ++vertexIdCounter;
             }
         }
-        logger.info("%d vertices generated\n", vertexId);
+        logger.info("%d vertices generated\n", vertexIdCounter);
     }
 
     void generateEdges() {
@@ -425,6 +424,7 @@ public:
     std::vector<Edge> routingEdges;
     std::vector<Vertex> vertices;
     std::vector<Net> nets;
+    int vertexIdCounter;
     int edgeIdCounter;
 
 public:

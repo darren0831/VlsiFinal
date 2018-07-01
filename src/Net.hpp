@@ -6,8 +6,8 @@
 
 class Net {
 public:
-    explicit Net(int numBits) :
-        numBits(numBits) {
+    explicit Net(int numBits, int numPins) :
+        numBits(numBits), numPins(numPins) {
         net = std::vector<std::vector<int>>((unsigned long) numBits);
     }
 
@@ -56,9 +56,12 @@ public:
 public:
     std::vector<std::vector<int>> net;
     std::vector<int> widths;
-    int numBits;
-    std::vector<std::vector<std::vector<int>>> detailPath;
     std::string netName;
+    int numBits;
+    int numPins;
+
+public:
+    std::vector<std::vector<std::vector<int>>> detailPath;
 };
 
 #endif // VLSI_FINAL_PROJECT_NET_HPP_
