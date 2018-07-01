@@ -100,6 +100,8 @@ public:
 
     void writeSingleTwoPinNet(const std::vector<int>& path, const Bit& bit, const std::vector<int>& widths) {
         Rectangle nowLocation = getOverlapRect(path.at(0), bit);
+        int layerMid = -1;
+        int lastLayer = -1;
         for (int pathIdx = 1; pathIdx < (int) path.size(); ++pathIdx) {
             const Track& nextTrack = vertices.at(path.at(pathIdx)).track;
             const Track& currentTrack = vertices.at(path.at(pathIdx - 1)).track;
@@ -112,7 +114,7 @@ public:
             }
             const int width = widths[currentTrack.layer];
             Rectangle area;
-            std::pair<Point, Point> coords = getPathCoordinate(nowLocation, nextLocation, currentTrack, width, area);
+            std::pair<Point, Point> coords = getPathCoordinate(nowLocation, nextLocation, currentTrack, width, area, layerMid, lastLayer);
             int stx = (int) coords.first.x;
             int sty = (int) coords.first.y;
             int edx = (int) coords.second.x;
@@ -134,7 +136,7 @@ public:
             const Track& currentTrack = vertices.at(path.at(path.size() - 1)).track;
             const int width = widths[currentTrack.layer];
             Rectangle area;
-            std::pair<Point, Point> coords = getPathCoordinate(nowLocation, finalLocation, currentTrack, width, area);
+            std::pair<Point, Point> coords = getPathCoordinate(nowLocation, finalLocation, currentTrack, width, area, layerMid, lastLayer);
             int stx = (int) coords.first.x;
             int sty = (int) coords.first.y;
             int edx = (int) coords.second.x;
@@ -162,34 +164,56 @@ public:
         return Rectangle();
     }
 
-    std::pair<Point, Point> getPathCoordinate(const Rectangle& from, const Rectangle& to, const Track& t, const int width, Rectangle& area) const {
+    std::pair<Point, Point> getPathCoordinate(const Rectangle& from, const Rectangle& to, const Track& t, const int width, Rectangle& area, int& layerMid, int& lastLayer) const {
         const char direction = layers[t.layer].direction;
         if (direction == 'H') {
             int startx = std::max(std::min(from.ll.x, to.ll.x), t.rect.ll.x);
             int endx = std::min(std::max(from.ur.x, to.ur.x), t.rect.ur.x);
-            int ly = (int) t.rect.ll.y;
-            while (ly + width <= t.rect.ur.y) {
-                Rectangle r(startx, ly, endx, ly + width);
-                if (r.hasOverlap(from, false) && r.hasOverlap(to, false)) {
-                    area = r;
-                    Point pta = Point(startx, ly + width / 2);
-                    Point ptb = Point(endx, ly + width / 2);
-                    return std::make_pair(pta, ptb);
+            if (lastLayer == -1 || lastLayer != t.layer) {
+                int ly = (int) (t.rect.ll.y);
+                while (ly + width <= t.rect.ur.y) {
+                    Rectangle r(startx, ly, endx, ly + width);
+                    if (r.hasOverlap(from, false) && r.hasOverlap(to, false)) {
+                        area = r;
+                        Point pta = Point(startx, ly + width / 2);
+                        Point ptb = Point(endx, ly + width / 2);
+                        lastLayer = t.layer;
+                        layerMid = ly;
+                        return std::make_pair(pta, ptb);
+                    }
                 }
+            } else {
+                int ly = layerMid;
+                Rectangle r(startx, ly, endx, ly + width);
+                area = r;
+                Point pta = Point(startx, ly + width / 2);
+                Point ptb = Point(endx, ly + width / 2);
+                return std::make_pair(pta, ptb);
             }
             logger.error("Cannot find a horizontal path inside the vertex(track)\n");
         } else {
             int starty = std::max(std::min(from.ll.y, to.ll.y), t.rect.ll.y);
             int endy = std::min(std::max(from.ur.y, to.ur.y), t.rect.ur.y);
-            int lx = (int) t.rect.ll.x;
-            while (lx + width <= t.rect.ur.x) {
-                Rectangle r(lx, starty, lx + width, endy);
-                if (r.hasOverlap(from, false) && r.hasOverlap(to, false)) {
-                    area = r;
-                    Point pta = Point(lx + width / 2, starty);
-                    Point ptb = Point(lx + width / 2, endy);
-                    return std::make_pair(pta, ptb);
+            if (lastLayer == -1 || lastLayer != t.layer) {
+                int lx = (int) (t.rect.ll.x);
+                while (lx + width <= t.rect.ur.x) {
+                    Rectangle r(lx, starty, lx + width, endy);
+                    if (r.hasOverlap(from, false) && r.hasOverlap(to, false)) {
+                        area = r;
+                        Point pta = Point(lx + width / 2, starty);
+                        Point ptb = Point(lx + width / 2, endy);
+                        lastLayer = t.layer;
+                        layerMid = lx;
+                        return std::make_pair(pta, ptb);
+                    }
                 }
+            } else {
+                int lx = layerMid;
+                Rectangle r(lx, starty, lx + width, endy);
+                area = r;
+                Point pta = Point(lx + width / 2, starty);
+                Point ptb = Point(lx + width / 2, endy);
+                return std::make_pair(pta, ptb);
             }
             logger.error("Cannot find a vertical path inside the vertex(track)\n");
         }
