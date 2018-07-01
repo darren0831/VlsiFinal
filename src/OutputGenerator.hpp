@@ -107,7 +107,7 @@ public:
             Rectangle current = currentTrack.rect;
             Rectangle nextLocation = next.overlap(current, false);
             if (nextLocation.isZero()) {
-                logger.error("Adjacent vertices don\'t have overlap area\n");
+                logger.error("Adjacent vertices don't have overlap area\n");
                 return;
             }
             const int width = widths[currentTrack.layer];
@@ -158,7 +158,7 @@ public:
                 return v.track.rect.overlap(p.rect, false);
             }
         }
-        logger.error("The first vertex in path don\'t overlap with any pin in a bit of a bus\n");
+        logger.error("The first vertex in path doesn't overlap with any pin of a bit of a bus\n");
         return Rectangle();
     }
 
@@ -177,7 +177,7 @@ public:
                     return std::make_pair(pta, ptb);
                 }
             }
-            logger.error("Cannot find a horizontal path inside the vertex\n");
+            logger.error("Cannot find a horizontal path inside the vertex(track)\n");
         } else {
             int starty = std::max(std::min(from.ll.y, to.ll.y), t.rect.ll.y);
             int endy = std::min(std::max(from.ur.y, to.ur.y), t.rect.ur.y);
@@ -191,7 +191,7 @@ public:
                     return std::make_pair(pta, ptb);
                 }
             }
-            logger.error("Cannot find a vertical path inside the vertex\n");
+            logger.error("Cannot find a vertical path inside the vertex(track)\n");
         }
         return std::make_pair(Point(), Point());
     }
