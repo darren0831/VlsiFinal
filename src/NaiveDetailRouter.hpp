@@ -96,7 +96,7 @@ public:
 				while(currentVertexId!=-1){
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					// isVertexUsed.insert(currentVertexId);
+					isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
@@ -186,7 +186,7 @@ public:
 				while(currentVertexId!=-1){
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					// isVertexUsed.insert(currentVertexId);
+					isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
