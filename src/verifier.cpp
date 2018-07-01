@@ -67,6 +67,7 @@ char LayerDir(std::string name,std::vector<Layer> layers){
            return layers[i].direction;
         }
     }
+    return ' ';
 }
 
 std::vector<OutBus> readOutput(std::string filename,std::vector<Bus>& buses,std::vector<Layer> layers){
@@ -185,7 +186,7 @@ bool TrackToAllBuses(std::vector<OutBus>& outBuses,Track& curTrack,int curBus, i
     for(unsigned int i=0;i<outBuses.size();i++){
         OutBus& curOutBus = outBuses[i];
         for(unsigned int j=0;j<curOutBus.bitName.size();j++){
-            if(i==curBus&&j==curBit){
+            if((int)i==curBus&&(int)j==curBit){
                 continue;
             }
             printf("curBus: %d, curBit: %d\n",i,j);
@@ -336,7 +337,6 @@ double calCsi(std::vector<OutBus>& outBuses, double beta){
     double cost = 0;
     for(unsigned int i=0;i<outBuses.size();i++){
         OutBus& curOutBus = outBuses[i];
-        double Csi = 0;
         int totalSeg = 0;
         for(unsigned int j=0;j<curOutBus.bitName.size();j++){
             std::string& bitName =curOutBus.bitName[j];
@@ -373,8 +373,6 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
     double cost = 0;
     for(unsigned int i=0;i<outBuses.size();i++){
         OutBus& curOutBus = outBuses[i];
-        double Cci = 0;
-        int segCount = 0;
         std::vector<std::vector<Track>> curSeqs;
         for(unsigned int j=0;j<curOutBus.bitName.size();j++){
             std::string& bitName =curOutBus.bitName[j];
@@ -439,7 +437,7 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
             double minimumCost = SeqWidth+seqSapcing;
             cost = cost + (maxC-minC)/minimumCost;
         }
-        cost = cost/(double) curSeqs[0].size();
+        cost = gamma * (cost/(double) curSeqs[0].size());
 
     }
     return cost;
@@ -460,8 +458,7 @@ int main(int argc,char **argv){
 
 
     /// Input information
-    Logger stdoutLogger;
-    Logger inputLogger("Log/input.log");
+    Logger stdoutLogger(nullptr);
     std::vector<Layer> layers;
     std::vector<Track> tracks;
     std::vector<Bus> buses;
@@ -495,6 +492,6 @@ int main(int argc,char **argv){
     //checkPinConnect(outBuses,buses);
     checkPathConnect(outBuses);
     //checkPathOverlap(outBuses);
-    std::cout<<"cost ["<<cal_cost(outBuses,layers,alpha,beta,gamma)<<"]";
+    std::cout<<"cost ["<<cal_cost(outBuses,layers,alpha,beta,gamma)<<"]"<<std::endl;
 
 }
