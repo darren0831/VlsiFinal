@@ -1,5 +1,6 @@
 #ifndef VLSI_FINAL_PROJECT_NAIVE_DETAIL_ROUTER_PATH_HPP_
 #define VLSI_FINAL_PROJECT_NAIVE_DETAIL_ROUTER_PATH_HPP_
+#include "VertexUsage.hpp"
 class NaiveDetailRouter {
 private:
 	int VIA_COST=0;
@@ -16,6 +17,7 @@ public:
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		int c=0;
+		isVertexCovered = std::vector<VertexUsage>(vertices.size());
 		for(Net& n : nets){
 			c++;
 			// if(c<=3)continue;
@@ -33,7 +35,6 @@ public:
 				else{
 					if(flag)
 						routeOtherBit(j,n.net[j],n);
-
 				}
 			}
 		}
@@ -68,6 +69,7 @@ public:
 			std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 			std::vector<int> preveid = std::vector<int>(vertices.size(),-1);
 			int currentVertexId=-1;
+			aStarVertexCovered = isVertexCovered;
 			while(!candidateVertexId.empty()){
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
@@ -81,15 +83,29 @@ public:
 				if(flag)break;
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
-					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
-							double nextX = vertices[tgtId].track.rect.midPoint().x;
-	                        double nextY = vertices[tgtId].track.rect.midPoint().y;
-	                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-							candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, -1));
-							prev[tgtId] = currentVertexId;
-							preveid[tgtId] = eid;
-						}	
+
+					if(prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId){
+						bool valid = false;
+						if(prev[currentVertexId]==-1){
+							valid = aStarVertexCovered[currentVertexId].query(Vertex(),vertices[currentVertexId],vertices[tgtId]);
+							if(valid)
+								aStarVertexCovered[currentVertexId].set(Vertex(),vertices[currentVertexId],vertices[tgtId]);
+						}else{
+							valid = aStarVertexCovered[currentVertexId].query(vertices[prev[currentVertexId]],vertices[currentVertexId],vertices[tgtId]);
+							if(valid)
+								aStarVertexCovered[currentVertexId].set(vertices[prev[currentVertexId]],vertices[currentVertexId],vertices[tgtId]);
+						}
+						if(valid){
+							if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
+								double nextX = vertices[tgtId].track.rect.midPoint().x;
+		                        double nextY = vertices[tgtId].track.rect.midPoint().y;
+		                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
+								candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, -1));
+								prev[tgtId] = currentVertexId;
+								preveid[tgtId] = eid;
+							}	
+						}
+						
 					}
 				}
 			}
@@ -98,12 +114,16 @@ public:
 				while(currentVertexId!=-1){
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					isVertexUsed.insert(currentVertexId);
+
+					// isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
-				for(int j=0;j<(int)detailPath.size()-1;j++){
-					for(int e: routingGraph[detailPath[j]]){
+				for(int j=1;j+1<=(int)detailPath.size()-1;j++){
+					isVertexCovered[detailPath[j]].set(vertices[detailPath[j-1]],vertices[detailPath[j]],vertices[detailPath[j+1]]);
+				}
+				for(int j=0;j<(int)detailPath.size()-1;j++) {
+					for(int e: routingGraph[detailPath[j]]) {
 						if(routingEdges[e].getTarget(detailPath[j])==detailPath[j+1]){
 							if(routingEdges[e].getDirection(detailPath[j],detailPath[j+1])!=' '){
 								direction[i-1].emplace_back(routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
@@ -152,6 +172,7 @@ public:
 			std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 			std::vector<int> preveid = std::vector<int>(vertices.size(),-1);
 			int currentVertexId=-1;
+			aStarVertexCovered = isVertexCovered;
 			while(!candidateVertexId.empty()){
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
@@ -167,31 +188,44 @@ public:
 				if(flag)break;
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
-					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						if(direction[i-1].size()==0){
-							if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
-								double nextX = vertices[tgtId].track.rect.midPoint().x;
-		                        double nextY = vertices[tgtId].track.rect.midPoint().y;
-		                        std::pair<double,double> distanceCost = calDistanceCost(eid, tgtId, currentVertexId, currentNode, endVertexId);
-								candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
-								prev[tgtId] = currentVertexId;
-								preveid[tgtId] = eid;
-							}
+					if(prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId){
+						bool valid = false;
+						if(prev[currentVertexId]==-1){
+							valid = aStarVertexCovered[currentVertexId].query(Vertex(),vertices[currentVertexId],vertices[tgtId]);
+							if(valid)
+								aStarVertexCovered[currentVertexId].set(Vertex(),vertices[currentVertexId],vertices[tgtId]);
 						}else{
-							if(direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' '){
+							valid = aStarVertexCovered[currentVertexId].query(vertices[prev[currentVertexId]],vertices[currentVertexId],vertices[tgtId]);
+							if(valid)
+								aStarVertexCovered[currentVertexId].set(vertices[prev[currentVertexId]],vertices[currentVertexId],vertices[tgtId]);
+						}
+						if(valid){
+							if(direction[i-1].size()==0){
 								if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
 									double nextX = vertices[tgtId].track.rect.midPoint().x;
 			                        double nextY = vertices[tgtId].track.rect.midPoint().y;
-			                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-			                        if(routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')
-			                    		candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
-									else
-										candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
+			                        std::pair<double,double> distanceCost = calDistanceCost(eid, tgtId, currentVertexId, currentNode, endVertexId);
+									candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
 									prev[tgtId] = currentVertexId;
 									preveid[tgtId] = eid;
 								}
+							}else{
+								if(direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' '){
+									if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
+										double nextX = vertices[tgtId].track.rect.midPoint().x;
+				                        double nextY = vertices[tgtId].track.rect.midPoint().y;
+				                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
+				                        if(routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')
+				                    		candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
+										else
+											candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
+										prev[tgtId] = currentVertexId;
+										preveid[tgtId] = eid;
+									}
+								}
 							}
 						}
+						
 					}
 				}
 			}
@@ -201,10 +235,13 @@ public:
 				while(currentVertexId!=-1){
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					isVertexUsed.insert(currentVertexId);
+					// isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
+				for(int j=1;j+1<=(int)detailPath.size()-1;j++){
+					isVertexCovered[detailPath[j]].set(vertices[detailPath[j-1]],vertices[detailPath[j]],vertices[detailPath[j+1]]);
+				}
 				net.detailPath[bitNumber].emplace_back(detailPath);
 			}else{
 				logger.show("      No path from source to target\n");
@@ -282,8 +319,9 @@ public:
 	Logger& logger;
 	std::vector<int> detailPath;
 	std::priority_queue<DetailNode> candidateVertexId;
-	std::unordered_set<int> isVertexUsed;
 	std::vector<std::vector<char>> direction;
 	std::unordered_set<int> curNet; 
+	std::vector<VertexUsage> isVertexCovered;
+	std::vector<VertexUsage> aStarVertexCovered;
 };
 #endif
