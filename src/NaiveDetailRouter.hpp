@@ -82,12 +82,14 @@ public:
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						double nextX = vertices[tgtId].track.rect.midPoint().x;
-                        double nextY = vertices[tgtId].track.rect.midPoint().y;
-                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-						candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, -1));
-						prev[tgtId] = currentVertexId;
-						preveid[tgtId] = eid;
+						if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
+							double nextX = vertices[tgtId].track.rect.midPoint().x;
+	                        double nextY = vertices[tgtId].track.rect.midPoint().y;
+	                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
+							candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, -1));
+							prev[tgtId] = currentVertexId;
+							preveid[tgtId] = eid;
+						}	
 					}
 				}
 			}
@@ -105,7 +107,6 @@ public:
 						if(routingEdges[e].getTarget(detailPath[j])==detailPath[j+1]){
 							if(routingEdges[e].getDirection(detailPath[j],detailPath[j+1])!=' '){
 								direction[i-1].emplace_back(routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
-								// logger.show("direction:%c",routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
 								// logger.show("%d, %c\n",detailPath[j],routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
 								break;
 							}
@@ -155,6 +156,7 @@ public:
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
 				curFollowId = currentNode.followId;
+				// logger.show("%d\n",currentVertexId);
 				candidateVertexId.pop();
 				for(int end: endVertexId){
 					if(currentVertexId == end){
@@ -166,16 +168,29 @@ public:
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						if((direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')){
-							double nextX = vertices[tgtId].track.rect.midPoint().x;
-	                        double nextY = vertices[tgtId].track.rect.midPoint().y;
-	                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-	                        if(routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')
-                        		candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
-							else
-								candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
-							prev[tgtId] = currentVertexId;
-							preveid[tgtId] = eid;
+						if(direction[i-1].size()==0){
+							if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
+								double nextX = vertices[tgtId].track.rect.midPoint().x;
+		                        double nextY = vertices[tgtId].track.rect.midPoint().y;
+		                        std::pair<double,double> distanceCost = calDistanceCost(eid, tgtId, currentVertexId, currentNode, endVertexId);
+								candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
+								prev[tgtId] = currentVertexId;
+								preveid[tgtId] = eid;
+							}
+						}else{
+							if(direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' '){
+								if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
+									double nextX = vertices[tgtId].track.rect.midPoint().x;
+			                        double nextY = vertices[tgtId].track.rect.midPoint().y;
+			                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
+			                        if(routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')
+			                    		candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
+									else
+										candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
+									prev[tgtId] = currentVertexId;
+									preveid[tgtId] = eid;
+								}
+							}
 						}
 					}
 				}
