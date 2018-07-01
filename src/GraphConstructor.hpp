@@ -114,7 +114,7 @@ public:
                 const Vertex& src = vertices[e.src];
                 const Vertex& tgt = vertices[e.tgt];
                 if (abs(src.track.layer - tgt.track.layer) != 1) {
-                    fprintf(stderr, "Via between two vertices not in adajacent layers\n");
+                    fprintf(stderr, "Via between two vertices not in adajacent layers: %d and %d\n", src.track.layer, tgt.track.layer);
                 }
             }
         }
@@ -362,6 +362,7 @@ public:
                         Edge edge(now, newVertexId, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
                         int newEdgeId = insertNewEdge(edge);
                         routingGraph[now].emplace_back(newEdgeId);
+                        now = newVertexId;
                     }
                     Edge e(now, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
                     int eId = insertNewEdge(e);
