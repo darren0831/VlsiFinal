@@ -17,7 +17,9 @@ public:
 	void detailRoute(){
 		logger.info("Detail Route\n");
 		int c=0;
-		isVertexCovered = std::vector<VertexUsage>(vertices.size());
+		for(int i=0;i<(int)vertices.size();i++){
+			isVertexCovered.emplace_back(vertices[i].track.length());
+		}
 		for(Net& n : nets){
 			c++;
 			// if(c<=3)continue;
