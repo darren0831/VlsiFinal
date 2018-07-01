@@ -14,13 +14,13 @@ public:
 
     VertexUsage(int width) :
         width(width) {
-        record = std::vector<int>(width + 8);
+        record = std::vector<bool>(width + 8, false);
         initialize();
     }
 
     void initialize() {
         for (int i = 0; i < (int) record.size(); ++i) {
-            record[i] = 0;
+            record[i] = false;
         }
     }
 
@@ -31,7 +31,7 @@ public:
         if (source == Vertex()) {
             for (int i = 0; i < (int) record.size(); ++i) {
                 if (record[i]) {
-                    return 0;
+                    return false;
                 }
             }
             return true;
@@ -42,7 +42,7 @@ public:
         }
         for (int i = segment.first; i <= segment.second; ++i) {
             if (record[i]) {
-                return 0;
+                return false;
             }
         }
         return true;
@@ -54,14 +54,14 @@ public:
         }
         if (source == Vertex()) {
             for (int i = 0; i < (int) record.size(); ++i) {
-                record[i] = 1;
+                record[i] = true;
             }
             return;
         }
         auto segment = getSegment(source, current, target);
         checkBound(segment.first, segment.second);
         for (int i = segment.first; i <= segment.second; ++i) {
-            record[i] = 1;
+            record[i] = true;
         }
     }
 
@@ -71,14 +71,14 @@ public:
         }
         if (source == Vertex()) {
             for (int i = 0; i < (int) record.size(); ++i) {
-                record[i] = 0;
+                record[i] = false;
             }
             return;
         }
         auto segment = getSegment(source, current, target);
         checkBound(segment.first, segment.second);
         for (int i = segment.first; i <= segment.second; ++i) {
-            record[i] = 0;
+            record[i] = false;
         }
     }
 
@@ -116,7 +116,7 @@ public:
 
 private:
     int width;
-    std::vector<int> record;
+    std::vector<bool> record;
 };
 
 #endif // VLSI_FINAL_PROJECT_VERTEX_USAGE_HPP_

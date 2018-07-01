@@ -46,6 +46,7 @@ public:
 		direction = std::vector<std::vector<char>>((int)bit.size()-1);
 		std::vector<int> backTracePath;
 		for(int i=1;i<(int)bit.size();i++){
+            std::vector<int> visited(vertices.size(), 0);
 			std::vector<int> endVertexId;
 			logger.show("    - Pin %d:\n",i);
 			int startVertexId = bit[i];
@@ -69,7 +70,7 @@ public:
 			start.prev = -1;
 			candidateVertexId.push(start);
 			bool flag = false;
-			
+
 			int currentVertexId=-1;
 			aStarVertexCovered = isVertexCovered;
 			while(!candidateVertexId.empty()){
@@ -86,6 +87,10 @@ public:
 					}
 				}
 				if(flag)break;
+                if (visited[currentVertexId] >= (int) vertices.size() / 2) {
+                    continue;
+                }
+                ++visited[currentVertexId];
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 					bool valid = false;
@@ -109,8 +114,8 @@ public:
 							dn.prev = currentVertexId;
 							candidateVertexId.push(dn);
 							// logger.show("pushed: %d\n",tgtId);
-						}	
-					}	
+						}
+					}
 				}
 			}
 			if(flag){
@@ -134,9 +139,9 @@ public:
 							}
 						}
 					}
-					// logger.show("\n");	
+					// logger.show("\n");
 				}
-				
+
 				net.detailPath[0].emplace_back(detailPath);
 			}else{
 				logger.show("      No path from source to target\n");
@@ -148,6 +153,7 @@ public:
 	void routeOtherBit(int bitNumber,std::vector<int>& bit, Net& net){
 		std::vector<int> backTracePath;
 		for(int i=1;i<(int)bit.size();i++){
+            std::vector<int> visited(vertices.size(), 0);
 			std::vector<int> endVertexId;
 			logger.show("    - Pin %d:\n",i);
 			int startVertexId = bit[i];
@@ -191,6 +197,10 @@ public:
 					}
 				}
 				if(flag)break;
+                if (visited[currentVertexId] >= (int) vertices.size() / 2) {
+                    continue;
+                }
+                ++visited[currentVertexId];
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 						bool valid = false;
@@ -204,7 +214,7 @@ public:
 								aStarVertexCovered[currentVertexId].set(vertices[currentNode.prev],vertices[currentVertexId],vertices[tgtId]);
 						}
 						if(valid){
-							
+
 							if(direction[i-1].size()==0){
 								if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
 									double nextX = vertices[tgtId].track.rect.midPoint().x;
@@ -241,7 +251,7 @@ public:
 						}
 				}
 			}
-			
+
 			if(flag){
 				logger.show("      Do Detail Back Trace\n");
 				for(int v: backTracePath){
@@ -289,7 +299,7 @@ private:
             }else
                 return false;
         }
-    
+
 	};
 public:
 	double assumeDistance(const double curX,const double curY, const std::vector<int>& endVertexId){
@@ -341,7 +351,7 @@ public:
 	std::vector<int> detailPath;
 	std::priority_queue<DetailNode> candidateVertexId;
 	std::vector<std::vector<char>> direction;
-	std::unordered_set<int> curNet; 
+	std::unordered_set<int> curNet;
 	std::vector<VertexUsage> isVertexCovered;
 	std::vector<VertexUsage> aStarVertexCovered;
 };
