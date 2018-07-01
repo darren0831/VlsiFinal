@@ -105,13 +105,10 @@ std::vector<OutBus> readOutput(std::string filename,std::vector<Bus>& buses,std:
                             int layer;
                             std::string layerName = line;
                             //std::cout<<"layer "<<line<<" ";
-                            for(unsigned int j=0;j<line.size();j++){
-                                if(isdigit(line[j])){
-                                    layer = std::stoi(line.substr(j));
-                                    break;
-                                }
+                            for(unsigned int k=0;k<layers.size();k++){
+                                if(layers[k].name.compare(layerName)==0) layer = k;
                             }
-                            double width = curBus.widths[layer-1];
+                            double width = curBus.widths[layer];
                             //std::cout<<"layer "<<layer<<" width "<<width<<"\n";
                             Point ll = Point(0,0);
                             outfile>>line;
@@ -380,6 +377,10 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
             }
             curSeqs.emplace_back(seq);
         }
+        for(unsigned int j=0;j<curSeqs.size();j++){
+            std::cout<<"seq size "<<curSeqs[j].size()<<"\n";
+        }
+
         for(unsigned int j=0;j<curSeqs[0].size();j++){
             double maxC, minC;
             bool maxI = false, minI = false;
@@ -421,7 +422,7 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
 }
 
 double cal_cost(std::vector<OutBus>& outBuses,std::vector<Layer>& layers,double alpha, double beta,double gamma){
-    return calCwi(outBuses,alpha)+calCsi(outBuses,beta);//+calCci(outBuses,gamma,layers);
+    //return calCwi(outBuses,alpha)+calCsi(outBuses,beta)+calCci(outBuses,gamma,layers);
 }
 
 int main(int argc,char **argv){
@@ -468,7 +469,7 @@ int main(int argc,char **argv){
 
 
     //checkPinConnect(outBuses,buses);
-    //checkPathConnect(outBuses);
+    checkPathConnect(outBuses);
     //checkPathOverlap(outBuses);
     std::cout<<"cost ["<<cal_cost(outBuses,layers,alpha,beta,gamma)<<"]";
 
