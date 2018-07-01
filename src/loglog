@@ -56,7 +56,7 @@ B1:
       Do Detail Back Trace
   - Bit 2:
     - Pin 1:
-      Do Detail Back Trace
+      No path from source to target
   - Bit 3:
     - Pin 1:
       Do Detail Back Trace
@@ -455,30 +455,36 @@ B1:
       Do Detail Back Trace
 [INFO] ===== Output Generate =====
 [INFO] Writing path of bus B1
+Check output file: output/CASE1.route
 Bit 0 is connected
-Bit 1 is connected
+Bit 1 is not connected
 Bit 2 is connected
-cost [39.4094]
+Check output file: output/CASE2-1.route
 Bit 0 is connected
 Bit 1 is connected
 cost [18.7687]
+Check output file: output/CASE2-2.route
 Bit 0 is connected
 Bit 1 is connected
 cost [19.2859]
+Check output file: output/CASE2-3.route
 Bit 0 is connected
 Bit 1 is connected
 cost [18.5026]
+Check output file: output/CASE3.route
 Bit 0 is connected
 Bit 1 is connected
 Bit 2 is connected
 Bit 0 is connected
 Bit 1 is connected
 cost [34.7551]
+Check output file: output/CASE4.route
 Bit 0 is connected
 Bit 1 is connected
 Bit 2 is connected
 Bit 0 is connected
 Bit 1 is not connected
+Check output file: output/example_1.route
 Bit 0 is connected
 Bit 1 is connected
 Bit 2 is connected
