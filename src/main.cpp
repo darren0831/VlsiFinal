@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
             buses,
             boundary,
             logger);
-        // globalRouter.globalRoute();
-        // globalResult = std::move(globalRouter.globalResult);
+        globalRouter.globalRoute();
+        globalResult = std::move(globalRouter.globalResult);
     }
 
     // Detail route
