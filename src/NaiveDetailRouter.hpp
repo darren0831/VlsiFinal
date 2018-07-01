@@ -129,6 +129,7 @@ public:
 			int startVertexId = bit[i];
 			int curFollowId = 0;
 			candidateVertexId = std::priority_queue<DetailNode>();
+
 			if(i==1)
 				endVertexId.emplace_back(bit[0]);
 			else{
@@ -150,7 +151,6 @@ public:
 			std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 			std::vector<int> preveid = std::vector<int>(vertices.size(),-1);
 			int currentVertexId=-1;
-
 			while(!candidateVertexId.empty()){
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;

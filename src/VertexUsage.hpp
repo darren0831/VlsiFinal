@@ -20,38 +20,19 @@ public:
         }
     }
 
-    bool query(int from, int to) {
-        if (from == -1 && to == -1) {
-            return true;
-        }
-        int a = std::min(from, to);
-        int b = std::max(from, to);
-        for (int i = a; i <= b; ++i) {
-            if (record[i]) {
-                return false;
-            }
-        }
-        return true;
+    bool query(const Vertex& src, const Vertex& current, const Vertex& tgt) {
+        
     }
 
-    void set(int from, int to) {
-        if (from == -1 && to == -1) {
-            return;
-        }
-        int a = std::min(from, to);
-        int b = std::max(from, to);
-        for (int i = a; i <= b; ++i) {
-            record[i] = true;
-        }
+    void set(const Vertex& src, const Vertex& current, const Vertex& tgt) {
+        
     }
 
-    void unset(int from, int to) {
-        int a = std::min(from, to);
-        int b = std::max(from, to);
-        for (int i = a; i <= b; ++i) {
-            record[i] = false;
-        }
+    void unset(const Vertex& src, const Vertex& current, const Vertex& tgt) {
+
     }
+
+
 
 private:
     int width;
