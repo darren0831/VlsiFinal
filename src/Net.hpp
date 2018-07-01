@@ -15,6 +15,7 @@ public:
         net = that.net;
         widths = that.widths;
         numBits = that.numBits;
+        numPins = that.numPins;
         detailPath = that.detailPath;
         netName = that.netName;
     }
@@ -23,6 +24,7 @@ public:
         net = std::move(that.net);
         widths = std::move(that.widths);
         numBits = that.numBits;
+        numPins = that.numPins;
         detailPath = std::move(that.detailPath);
         netName = std::move(that.netName);
     }
@@ -32,6 +34,7 @@ public:
             net = that.net;
             widths = that.widths;
             numBits = that.numBits;
+            numPins = that.numPins;
             detailPath = that.detailPath;
             netName = that.netName;
         }
@@ -43,6 +46,7 @@ public:
             net = std::move(that.net);
             widths = std::move(that.widths);
             numBits = that.numBits;
+            numPins = that.numPins;
             detailPath = std::move(that.detailPath);
             netName = std::move(that.netName);
         }

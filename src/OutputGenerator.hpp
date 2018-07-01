@@ -24,6 +24,40 @@
 #include "Vertex.hpp"
 
 class OutputGenerator {
+    class OutputBuffer {
+    public:
+        void printBuffer(const char* fmt, ...) {
+            char buffer[4096];
+            va_list args;
+            va_start(args, fmt);
+            vsprintf(buffer, fmt, args);
+            va_end(args);
+            if (buffer[strlen(buffer) - 1] == '\n') {
+                buffer[strlen(buffer) - 1] = '\0';
+            }
+            std::string line = buffer;
+            lineBuffer.emplace_back(line);
+        }
+
+        void dump(FILE* fout) {
+            for (const auto& s : lineBuffer) {
+                fprintf(fout, "%s\n", s.c_str());
+            }
+            lineBuffer.clear();
+        }
+
+        void clear() {
+            lineBuffer.clear();
+        }
+
+        int size() {
+            return (int) lineBuffer.size();
+        }
+
+    private:
+        std::vector<std::string> lineBuffer;
+    };
+
 public:
     OutputGenerator(std::vector<Vertex>& vertices,
                     std::vector<Bus>& buses,
@@ -50,20 +84,21 @@ public:
     void writeSingleNet(Net& net, int netId) {
         for (int i = 0; i < (int) net.net.size(); ++i) {
             fprintf(fout, "BIT %d\n", i);
-            fprintf(fout, "PATH %d\n", getPathCount(net.detailPath[i]));
             writeSingleBit(net.detailPath[i], buses[netId].bits[i], buses[netId].widths);
+            fprintf(fout, "PATH %d\n", outputBuffer.size());
+            outputBuffer.dump(fout);
             fprintf(fout, "ENDPATH\n");
             fprintf(fout, "ENDBIT\n");
         }
     }
 
-    void writeSingleBit(const std::vector<std::vector<int>>& path, const Bit& bit, const std::vector<int>& widths) const {
+    void writeSingleBit(const std::vector<std::vector<int>>& path, const Bit& bit, const std::vector<int>& widths) {
         for (const auto& v : path) {
             writeSingleTwoPinNet(v, bit, widths);
         }
     }
 
-    void writeSingleTwoPinNet(const std::vector<int>& path, const Bit& bit, const std::vector<int>& widths) const {
+    void writeSingleTwoPinNet(const std::vector<int>& path, const Bit& bit, const std::vector<int>& widths) {
         Rectangle nowLocation = getOverlapRect(path.at(0), bit);
         for (int pathIdx = 1; pathIdx < (int) path.size(); ++pathIdx) {
             const Track& nextTrack = vertices.at(path.at(pathIdx)).track;
@@ -82,17 +117,29 @@ public:
             int sty = (int) coords.first.y;
             int edx = (int) coords.second.x;
             int edy = (int) coords.second.y;
-            fprintf(fout, "%s (%d %d) (%d %d)\n", layers[currentTrack.layer].name.c_str(), stx, sty, edx, edy);
+            outputBuffer.printBuffer("%s (%d %d) (%d %d)\n", layers[currentTrack.layer].name.c_str(), stx, sty, edx, edy);
             if (currentTrack.layer != nextTrack.layer) {
                 int start = std::min(currentTrack.layer, nextTrack.layer);
                 int end = std::max(currentTrack.layer, nextTrack.layer);
                 Rectangle targetArea = area.overlap(nextLocation, false);
                 Point midpoint = targetArea.midPoint();
                 for (int layer = start; layer < end; ++layer) {
-                    fprintf(fout, "%s (%d %d)\n", layers[layer].name.c_str(), (int) midpoint.x, (int) midpoint.y);
+                    outputBuffer.printBuffer("%s (%d %d)\n", layers[layer].name.c_str(), (int) midpoint.x, (int) midpoint.y);
                 }
             }
             nowLocation = nextLocation;
+        }
+        {
+            Rectangle finalLocation = getOverlapRect(path.at(path.size() - 1), bit);
+            const Track& currentTrack = vertices.at(path.at(path.size() - 1)).track;
+            const int width = widths[currentTrack.layer];
+            Rectangle area;
+            std::pair<Point, Point> coords = getPathCoordinate(nowLocation, finalLocation, currentTrack, width, area);
+            int stx = (int) coords.first.x;
+            int sty = (int) coords.first.y;
+            int edx = (int) coords.second.x;
+            int edy = (int) coords.second.y;
+            outputBuffer.printBuffer("%s (%d %d) (%d %d)\n", layers[currentTrack.layer].name.c_str(), stx, sty, edx, edy);
         }
     }
 
@@ -161,6 +208,7 @@ private:
 
 private:
     FILE* fout;
+    OutputBuffer outputBuffer;
 
 private:
     Logger& logger;

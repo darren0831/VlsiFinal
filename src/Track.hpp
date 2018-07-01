@@ -74,6 +74,14 @@ public:
         return rect.hasOverlap(that.rect, lineOverlap);
     }
 
+    int length() const {
+        if (fabs(terminal[1].x - terminal[0].x) < 1e-6) {
+            return fabs(terminal[1].y - terminal[0].y);
+        } else {
+            return fabs(terminal[1].x - terminal[0].x);
+        }
+    }
+
     std::string toString() const {
         std::string s;
         s = rect.toString() + " , " + std::to_string(width) + " , " + std::to_string(layer);
