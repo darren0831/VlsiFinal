@@ -91,10 +91,14 @@ public:
         if (current.track.isHorizontal()) {
             int start = (int) (floor(std::min(r1.ll.x, r2.ll.x)));
             int end = (int) (ceil(std::max(r1.ur.x, r2.ur.x)));
+            start -= current.track.getStartCoordinate();
+            end -= current.track.getStartCoordinate();
             return std::make_pair(start, end);
         } else {
             int start = (int) (floor(std::min(r1.ll.y, r2.ll.y)));
             int end = (int) (ceil(std::max(r1.ur.y, r2.ur.y)));
+            start -= current.track.getStartCoordinate();
+            end -= current.track.getStartCoordinate();
             return std::make_pair(start, end);
         }
     }

@@ -90,6 +90,14 @@ public:
         return fabs(terminal[1].x - terminal[0].x) < 1e-6;
     }
 
+    int getStartCoordinate() const {
+        if (isHorizontal()) {
+            return (int) (floor(terminal[0].x));
+        } else {
+            return (int) (floor(terminal[0].y));
+        }
+    }
+
     std::string toString() const {
         std::string s;
         s = rect.toString() + " , " + std::to_string(width) + " , " + std::to_string(layer);
