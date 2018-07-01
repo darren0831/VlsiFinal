@@ -37,9 +37,9 @@ public:
             return true;
         }
         auto segment = getSegment(source, current, target);
-        if (!checkBound(segment.first, segment.second)) {
-            printf("%s\n%s\n%s\n", source.toString().c_str(), current.toString().c_str(), target.toString().c_str());
-        }
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+        checkBound(segment.first, segment.second);
+#endif
         for (int i = segment.first; i <= segment.second; ++i) {
             if (record[i]) {
                 return false;
@@ -59,7 +59,9 @@ public:
             return;
         }
         auto segment = getSegment(source, current, target);
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
         checkBound(segment.first, segment.second);
+#endif
         for (int i = segment.first; i <= segment.second; ++i) {
             record[i] = true;
         }
@@ -76,7 +78,9 @@ public:
             return;
         }
         auto segment = getSegment(source, current, target);
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
         checkBound(segment.first, segment.second);
+#endif
         for (int i = segment.first; i <= segment.second; ++i) {
             record[i] = false;
         }
@@ -103,16 +107,16 @@ public:
         }
     }
 
-    bool checkBound(int start, int end) {
 #ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+    bool checkBound(int start, int end) {
         if (start < 0 || start > width || end < 0 || end > width) {
             fprintf(stderr, "[Fatal Error] Segment [%d, %d] can not be covered by [%d, %d]\n",
                 start, end, 0, width);
             return false;
         }
-#endif
         return true;
     }
+#endif
 
 private:
     int width;
