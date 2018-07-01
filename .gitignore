@@ -5,6 +5,7 @@
 # Executable files
 route
 run
+verifier
 
 # vscode
 *.json
