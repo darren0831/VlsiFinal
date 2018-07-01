@@ -18,7 +18,7 @@ public:
 		logger.info("Detail Route\n");
 		int c=0;
 		for(int i=0;i<(int)vertices.size();i++){
-			isVertexCovered.emplace_back(vertices[i].track.length());
+			isVertexCovered.emplace_back(VertexUsage(vertices[i].track.length()));
 		}
 		for(Net& n : nets){
 			c++;
@@ -76,6 +76,7 @@ public:
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
 				candidateVertexId.pop();
+				// logger.show("prev:%d, %d\n",currentNode.prev,currentVertexId);
 				for(int end: endVertexId){
 					if(currentVertexId == end){
 						currentNode.predecessors.emplace_back(currentVertexId);
@@ -107,6 +108,7 @@ public:
 							dn.predecessors.emplace_back(currentVertexId);
 							dn.prev = currentVertexId;
 							candidateVertexId.push(dn);
+							// logger.show("pushed: %d\n",tgtId);
 						}	
 					}	
 				}
@@ -120,6 +122,7 @@ public:
 				std::reverse(detailPath.begin(),detailPath.end());
 				for(int j=1;j+1<=(int)detailPath.size()-1;j++){
 					isVertexCovered[detailPath[j]].set(vertices[detailPath[j-1]],vertices[detailPath[j]],vertices[detailPath[j+1]]);
+					// logger.show("[%d,%d] in %d\n",detailPath[j-1],detailPath[j+1],detailPath[j]);
 				}
 				for(int j=0;j<(int)detailPath.size()-1;j++) {
 					for(int e: routingGraph[detailPath[j]]) {
@@ -172,11 +175,12 @@ public:
 			bool flag = false;
 			int currentVertexId=-1;
 			aStarVertexCovered = isVertexCovered;
+
 			while(!candidateVertexId.empty()){
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
 				curFollowId = currentNode.followId;
-				// logger.show("%d\n",currentVertexId);
+				// logger.show("prev:%d, %d  size:%u\n",currentNode.prev,currentVertexId,candidateVertexId.size());
 				candidateVertexId.pop();
 				for(int end: endVertexId){
 					if(currentVertexId == end){
@@ -200,6 +204,7 @@ public:
 								aStarVertexCovered[currentVertexId].set(vertices[currentNode.prev],vertices[currentVertexId],vertices[tgtId]);
 						}
 						if(valid){
+							
 							if(direction[i-1].size()==0){
 								if(vertices[tgtId].track.width>=net.widths[vertices[tgtId].track.layer]){
 									double nextX = vertices[tgtId].track.rect.midPoint().x;
@@ -210,6 +215,7 @@ public:
 									dn.predecessors.emplace_back(currentVertexId);
 									dn.prev = currentVertexId;
 									candidateVertexId.push(dn);
+									// logger.show("pushed: %d\n",tgtId);
 								}
 							}else{
 								if(direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' '){
@@ -222,12 +228,13 @@ public:
 				                    		dn = DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId);
 				                        }
 										else{
-											dn = DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId);
+											dn = DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1);
 										}
 										dn.prev = currentVertexId;
 										dn.predecessors = currentNode.predecessors;
 										dn.predecessors.emplace_back(currentVertexId);
 										candidateVertexId.push(dn);
+										// logger.show("pushed: %d\n",tgtId);
 									}
 								}
 							}
