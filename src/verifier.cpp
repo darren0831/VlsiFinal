@@ -11,6 +11,7 @@
 #include "Point.hpp"
 #include "Bit.hpp"
 #include "Pin.hpp"
+#include "DisjointSet.hpp"
 
 class OutBus{
 public:
@@ -20,6 +21,7 @@ public:
         bitsToPath.clear();
     }
     std::string name;
+    std::vector<int> widths;
     std::vector<std::string> bitName;
     std::map<std::string,std::vector<Track>> bitsToPath;
 };
@@ -30,30 +32,34 @@ bool doubleEqual(const double& a,const double& b){
     return (fabs(a-b)<1e-6) ? true : false;
 }
 
+bool isLessEqual(const double& a,const double& b){
+    if(a<b||doubleEqual(a,b)) return true;
+    else return false;
+}
+
 bool pointOverlap(Track& a,Track& b){
-    if((a.rect.width<1e-6&&a.rect.height<1e-6)&&(b.rect.width<1e-6&&b.rect.height<1e-6)){
+    if(doubleEqual(a.rect.width,0)&&doubleEqual(a.rect.height,0) &&
+       doubleEqual(b.rect.width,0)&&doubleEqual(b.rect.height,0)){
         /// a b are via
         if(doubleEqual(a.terminal[0].x,b.terminal[0].x)&&doubleEqual(a.terminal[0].y,b.terminal[0].y))
             return true;
-    }else if(a.rect.width<1e-6&&a.rect.height<1e-6){
+    }else if(doubleEqual(a.rect.width,0)&&doubleEqual(a.rect.height,0)){
         ///a is a via
-        if((b.rect.ur.x>a.rect.ll.x||doubleEqual(b.rect.ur.x,a.rect.ll.x))&&(b.rect.ur.y>a.rect.ll.y||doubleEqual(b.rect.ur.y,a.rect.ll.y))){
-            if((b.rect.ll.x<a.rect.ll.x||doubleEqual(b.rect.ll.x,a.rect.ll.x))&&(b.rect.ll.y<a.rect.ll.y||doubleEqual(b.rect.ll.y,a.rect.ll.y))){
+        if(isLessEqual(a.rect.ll.x,b.rect.ur.x)&&isLessEqual(a.rect.ll.y,b.rect.ur.y)){
+            if(isLessEqual(b.rect.ll.x,a.rect.ll.x)&&isLessEqual(b.rect.ll.y,a.rect.ll.y)){
                 return true;
             }
         }
     }else if(b.rect.width<1e-6&&b.rect.height<1e-6){
         ///b is a via
-        if((a.rect.ur.x>b.rect.ll.x||doubleEqual(a.rect.ur.x,b.rect.ll.x))&&((a.rect.ur.y>b.rect.ll.y)||doubleEqual(a.rect.ur.y,b.rect.ll.y))){
-            if((a.rect.ll.x<b.rect.ll.x||doubleEqual(a.rect.ll.x,b.rect.ll.x))&&(a.rect.ll.y<b.rect.ll.y||doubleEqual(a.rect.ll.y,b.rect.ll.y))){
+        if(isLessEqual(b.rect.ll.x,a.rect.ur.x)&&isLessEqual(b.rect.ll.y,a.rect.ur.y)){
+            if(isLessEqual(a.rect.ll.x,b.rect.ll.x)&&isLessEqual(a.rect.ll.y,b.rect.ll.y)){
                 return true;
             }
         }
     }
     return false;
 }
-
-
 
 char LayerDir(std::string name,std::vector<Layer> layers){
     for(unsigned int i=0;i<layers.size();i++){
@@ -79,6 +85,7 @@ std::vector<OutBus> readOutput(std::string filename,std::vector<Bus>& buses,std:
                     if(outBus.name.compare(buses[i].name)==0) curBusId = i;
                 }
                 Bus& curBus = buses[curBusId];
+                outBus.widths = curBus.widths;
                 while(true){
                     outfile>>line;
                     if(line.compare("BIT")==0){
@@ -105,7 +112,7 @@ std::vector<OutBus> readOutput(std::string filename,std::vector<Bus>& buses,std:
                                 }
                             }
                             double width = curBus.widths[layer-1];
-                            std::cout<<"layer "<<layer<<" width "<<width<<"\n";
+                            //std::cout<<"layer "<<layer<<" width "<<width<<"\n";
                             Point ll = Point(0,0);
                             outfile>>line;
                             ll.x = std::stod(line.substr(1));
@@ -176,7 +183,49 @@ void outputRead(std::vector<OutBus>& outBuses){
 
 }
 
-bool checkOverlap(std::vector<std::vector<Track>>& paths){
+bool TrackToAllBuses(std::vector<OutBus>& outBuses,Track& curTrack,int curBus, int curBit,int curTck){
+    printf("\ncheckingBus: %d, checkingBit: %d checkingTrack:%d\n",curBus,curBit,curTck);
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            if(i==curBus&&j==curBit){
+                continue;
+            }
+            printf("curBus: %d, curBit: %d\n",i,j);
+            std::string& bitName = curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            for(unsigned int k =0;k<curPath.size();k++){
+                if(curTrack.hasOverlap(curPath[k],true)&&curTrack.layer==curPath[k].layer){
+                    printf("Overlap : curBus: %d, curBit: %d, curTrack: %d\n",i,j,k);
+                    return true;
+                }else if(pointOverlap(curTrack,curPath[k])&&abs(curTrack.layer-curPath[k].layer)<=1){
+                    printf("Overlap : curBus: %d, curBit: %d, curTrack: %d\n",i,j,k);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+bool checkPathOverlap(std::vector<OutBus>& outBuses){
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            std::string& bitName =curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            for(unsigned int k =0;k<curPath.size();k++){
+                Track& curTrack = curPath[k];
+                bool isOverlap = TrackToAllBuses(outBuses,curTrack,i,j,k);
+                if(isOverlap==true){
+                    printf("Some track is Overlap with different bit's track\n");
+                    return false;
+                }
+            }
+        }
+    }
+    printf("No track is Overlap with different bit's track\n");
     return true;
 }
 
@@ -186,8 +235,7 @@ bool checkPathConnect(std::vector<OutBus>& outBuses){
         for(unsigned int j=0;j<curOutBus.bitName.size();j++){
             std::string& bitName =curOutBus.bitName[j];
             std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
-            bool isTouched[curPath.size()-1];
-            for(unsigned int k=0;k<curPath.size();k++) isTouched[k] = false;
+            DisjointSet DisSet(curPath.size());
 
             for(unsigned int n =0;n<curPath.size();n++){
                 Track & curTrack = curPath[n];
@@ -195,25 +243,20 @@ bool checkPathConnect(std::vector<OutBus>& outBuses){
                     if(m==n){
                         continue;
                     }
-                    if(curTrack.hasOverlap(curPath[m],true)){
-                        isTouched[n] = true;
-                        break;
-                    }else if(pointOverlap(curTrack,curPath[m])){
-                        isTouched[n] = true;
-                        break;
+                    if(curTrack.hasOverlap(curPath[m],true)&&curTrack.layer==curPath[m].layer){
+                        DisSet.pack(m,n);
+                    }else if(pointOverlap(curTrack,curPath[m])&&abs(curTrack.layer-curPath[m].layer)<=1){
+                        DisSet.pack(m,n);
                     }
                 }
             }
 
-            for(unsigned int k=0;k<curPath.size();k++){
-                if(isTouched[k]==false){
-                    printf("Path is not connected\n");
-                    return false;
-                }
-            }
+            if(DisSet.numGroups()==1) printf("Bit %d is connected\n",j);
+            else printf("Bit %d is not connected\n",j);
+
         }
     }
-    printf("Path is connected\n");
+
     return true;
 }
 
@@ -251,6 +294,136 @@ bool checkPinConnect(std::vector<OutBus>& outBuses,std::vector<Bus>& buses){
     return true;
 }
 
+double calHPWL(std::vector<Track>& path){
+    double maxX = path[0].rect.ur.x, maxY = path[0].rect.ur.y,
+           minX = path[0].rect.ll.x, minY = path[0].rect.ll.x;
+
+    for(unsigned int i=1;i<path.size();i++){
+        if(path[i].rect.ur.x>maxX) maxX = path[i].rect.ur.x;
+        if(path[i].rect.ur.y>maxY) maxY = path[i].rect.ur.y;
+        if(path[i].rect.ll.x<minX) minX = path[i].rect.ll.x;
+        if(path[i].rect.ll.y<minY) minY = path[i].rect.ll.y;
+    }
+    return maxX-minX+maxY-minY;
+}
+
+double calCwi(std::vector<OutBus>& outBuses,double alpha){
+    double cost = 0;
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        double Cwi = 0;
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            std::string& bitName =curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            double wl = 0;
+            for(unsigned int n =0;n<curPath.size();n++){
+                double pathLength = fabs(curPath[n].terminal[0].x-curPath[n].terminal[0].y) +
+                                    fabs(curPath[n].terminal[0].y-curPath[n].terminal[0].y) ;
+                wl = wl + pathLength;
+            }
+            double HPWL = calHPWL(curPath);
+            Cwi = Cwi + wl/HPWL;
+        }
+        cost = cost + alpha*(Cwi/(double) curOutBus.bitName.size());
+    }
+    return cost;
+}
+
+double calCsi(std::vector<OutBus>& outBuses, double beta){
+    double cost = 0;
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        double Csi = 0;
+        int segCount = 0;
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            std::string& bitName =curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            segCount = segCount + curPath.size();
+
+        }
+        cost = cost + beta*segCount;
+    }
+    return cost;
+}
+
+char trackDir(Track& track){
+    if(track.rect.isZero()) return 'X';
+    if(doubleEqual(track.terminal[0].x,track.terminal[1].x)) return 'H';
+    return 'V';
+}
+
+double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> layers){
+    double cost = 0;
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        double Cci = 0;
+        int segCount = 0;
+        std::vector<std::vector<Track>> curSeqs;
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            std::string& bitName =curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            char prevDir = '\0';
+            std::vector<Track> seq;
+            for(unsigned int k=0;j<curPath.size();k++){
+                char dir = trackDir(curPath[k]);
+                if(dir=='X'){
+                    /// via no cost needed
+                }else if(prevDir=='\0'){
+                    seq.emplace_back(curPath[k]);
+                    prevDir = dir;
+                }else if(prevDir == dir){
+                    ///same direction no cost needed
+                }else if(prevDir != dir){
+                    seq.emplace_back(curPath[k]);
+                    prevDir = dir;
+                }
+            }
+            curSeqs.emplace_back(seq);
+        }
+        for(unsigned int j=0;j<curSeqs[0].size();j++){
+            double maxC, minC;
+            bool maxI = false, minI = false;
+            for(unsigned int k=0;k<curSeqs.size();k++){
+                std::vector<Track> &seq = curSeqs[k];
+                if(trackDir(seq[j])=='H'){
+                    /// y same
+                    if(maxC<seq[j].terminal[0].y || maxI == false){
+                        maxC = seq[j].terminal[0].y;
+                        maxI = true;
+                    }
+                    if(minC>seq[j].terminal[0].y || minI == false){
+                        minC = seq[j].terminal[0].y;
+                        minI = true;
+                    }
+                }
+                if(trackDir(seq[j])=='V'){
+                    /// x same
+                    if(maxC<seq[j].terminal[0].x || maxI == false){
+                        maxC = seq[j].terminal[0].x;
+                        maxI = true;
+                    }
+                    if(minC>seq[j].terminal[0].x || minI == false){
+                        minC = seq[j].terminal[0].x;
+                        minI = true;
+                    }
+                }
+            }
+            double SeqWidth = curOutBus.widths[curSeqs[0][j].layer];
+            double seqSapcing = layers[curSeqs[0][j].layer].spacing;
+            SeqWidth = SeqWidth * curOutBus.bitName.size()-1;
+            double minimumCost = SeqWidth+seqSapcing;
+            cost = cost + (maxC-minC)/minimumCost;
+        }
+        cost = cost/(double) curSeqs[0].size();
+
+    }
+    return cost;
+}
+
+double cal_cost(std::vector<OutBus>& outBuses,std::vector<Layer>& layers,double alpha, double beta,double gamma){
+    return calCwi(outBuses,alpha)+calCsi(outBuses,beta);//+calCci(outBuses,gamma,layers);
+}
+
 int main(int argc,char **argv){
 
     if (argc != 3) {
@@ -269,6 +442,8 @@ int main(int argc,char **argv){
     std::vector<Bus> buses;
     std::vector<Obstacle> obstacles;
     Rectangle boundary;
+    int alpha, beta, gamma;
+
 
     /// Read input file
     stdoutLogger.info("===== Read Input File =====\n");
@@ -280,6 +455,9 @@ int main(int argc,char **argv){
         buses = std::move(inputReader.buses);
         obstacles = std::move(inputReader.obstacles);
         boundary = std::move(inputReader.boundary);
+        alpha = inputReader.alpha;
+        beta = inputReader.beta;
+        gamma = inputReader.gamma;
     }
 
     ///read output file
@@ -288,7 +466,10 @@ int main(int argc,char **argv){
     outputRead(outBuses);
 
 
+
     //checkPinConnect(outBuses,buses);
-    checkPathConnect(outBuses);
+    //checkPathConnect(outBuses);
+    //checkPathOverlap(outBuses);
+    std::cout<<"cost ["<<cal_cost(outBuses,layers,alpha,beta,gamma)<<"]";
 
 }
