@@ -465,6 +465,7 @@ int main(int argc,char **argv){
     std::string inputfile(argv[1]);
     std::string outputFile(argv[2]);
 
+    std::cout<<"Check output file: "<<outputFile<<std::endl;
 
     /// Input information
     Logger stdoutLogger(nullptr);
