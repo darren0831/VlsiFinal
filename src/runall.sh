@@ -15,3 +15,4 @@ time ./run ../example/example_1.input -o output/example_1.route
 ./verifier ../example/CASE2-3.input output/CASE2-3.route
 ./verifier ../example/CASE3.input output/CASE3.route
 ./verifier ../example/CASE4.input output/CASE4.route
+./verifier ../example/example_1.input output/example_1.route
