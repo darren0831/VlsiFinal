@@ -36,15 +36,15 @@ public:
             
             o.rect = cur;
         }
-        double bx = boundary.ur.x;
-        double by = boundary.ur.y;
-        for(int i=0;i<(int)layers.size();i++){
-            double spacing = layers[i].spacing;
-            obstacles.emplace_back(Obstacle(i,0,0,spacing/2,by));
-            obstacles.emplace_back(Obstacle(i,0,by-spacing/2,bx,by));
-            obstacles.emplace_back(Obstacle(i,0,0,bx,spacing/2));
-            obstacles.emplace_back(Obstacle(i,bx-spacing/2,0,bx,by));
-        }
+        // double bx = boundary.ur.x;
+        // double by = boundary.ur.y;
+        // for(int i=0;i<(int)layers.size();i++){
+        //     double spacing = layers[i].spacing;
+        //     obstacles.emplace_back(Obstacle(i,0,0,spacing/2,by));
+        //     obstacles.emplace_back(Obstacle(i,0,by-spacing/2,bx,by));
+        //     obstacles.emplace_back(Obstacle(i,0,0,bx,spacing/2));
+        //     obstacles.emplace_back(Obstacle(i,bx-spacing/2,0,bx,by));
+        // }
         
     }
 

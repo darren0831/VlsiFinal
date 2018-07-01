@@ -353,7 +353,7 @@ public:
                 if (map.insert(r) && isValidEdge(r, beginLayer, endLayer)) {
                     const Point tgt = u.track.rect.midPoint();
                     char edgeDirectionSrcTgt = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
-                    char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, v.track.layer, u.track.layer);
+                    char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, u.track.layer, v.track.layer);
                     int now = v.id;
                     for (int layer = beginLayer + 1; layer < endLayer; ++layer) {
                         int newVertexId = obtainNewVertexId();

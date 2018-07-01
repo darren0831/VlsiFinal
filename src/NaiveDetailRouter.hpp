@@ -24,15 +24,15 @@ public:
 			int k=0;
 			bool flag = false;
 			for(int j=0;j<(int)n.net.size();j++){
-				std::vector<int>& bit = n.net[j];
 				k++;
 				logger.show("  - Bit %d:\n",k);
 				curNet.clear();
-				if(j==0)
-					flag = routeFirstBit(bit,n);
+				if(j==0){
+					flag = routeFirstBit(n.net[j],n);
+				}
 				else{
 					if(flag)
-						routeOtherBit(j,bit,n);
+						routeOtherBit(j,n.net[j],n);
 
 				}
 			}
@@ -41,6 +41,7 @@ public:
 
 	bool routeFirstBit(std::vector<int>& bit, Net& net){
 		direction = std::vector<std::vector<char>>((int)bit.size()-1);
+
 		for(int i=1;i<(int)bit.size();i++){
 			std::vector<int> endVertexId;
 			logger.show("    - Pin %d:\n",i);
@@ -84,7 +85,6 @@ public:
 						double nextX = vertices[tgtId].track.rect.midPoint().x;
                         double nextY = vertices[tgtId].track.rect.midPoint().y;
                         std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-
 						candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, -1));
 						prev[tgtId] = currentVertexId;
 						preveid[tgtId] = eid;
@@ -94,10 +94,9 @@ public:
 			if(flag){
 				logger.show("      Do Detail Back Trace\n");
 				while(currentVertexId!=-1){
-					logger.show("%d, layer: %d\n",currentVertexId, vertices[currentVertexId].track.layer);
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					isVertexUsed.insert(currentVertexId);
+					// isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
@@ -106,11 +105,13 @@ public:
 						if(routingEdges[e].getTarget(detailPath[j])==detailPath[j+1]){
 							if(routingEdges[e].getDirection(detailPath[j],detailPath[j+1])!=' '){
 								direction[i-1].emplace_back(routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
+								// logger.show("direction:%c",routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
 								// logger.show("%d, %c\n",detailPath[j],routingEdges[e].getDirection(detailPath[j],detailPath[j+1]));
 								break;
 							}
 						}
-					}	
+					}
+					// logger.show("\n");	
 				}
 				
 				net.detailPath[0].emplace_back(detailPath);
@@ -118,7 +119,6 @@ public:
 				logger.show("      No path from source to target\n");
 				return false;
 			}
-
 		}
 		return true;
 	}
@@ -144,12 +144,13 @@ public:
 			detailPath.clear();
 			double x = vertices[startVertexId].track.rect.midPoint().x;
 			double y = vertices[startVertexId].track.rect.midPoint().y;
-			DetailNode start(x,y,0,0,startVertexId,-1);
+			DetailNode start(x,y,0,0,startVertexId,0);
 			candidateVertexId.push(start);
 			bool flag = false;
 			std::vector<int> prev = std::vector<int>(vertices.size(),-1);
 			std::vector<int> preveid = std::vector<int>(vertices.size(),-1);
 			int currentVertexId=-1;
+
 			while(!candidateVertexId.empty()){
 				DetailNode currentNode = candidateVertexId.top();
 				currentVertexId = currentNode.vertexId;
@@ -165,12 +166,14 @@ public:
 				for(int eid : routingGraph[currentVertexId]){
 					int tgtId = routingEdges[eid].getTarget(currentVertexId);
 					if(prev[tgtId] == -1 && prev[currentVertexId]!=tgtId && prev[tgtId]!=startVertexId && isVertexUsed.find(tgtId)==isVertexUsed.end()){
-						if((direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' ') && curFollowId < (int)direction[i-1].size()){
+						if((direction[i-1][curFollowId]==routingEdges[eid].getDirection(currentVertexId,tgtId)||routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')){
 							double nextX = vertices[tgtId].track.rect.midPoint().x;
 	                        double nextY = vertices[tgtId].track.rect.midPoint().y;
 	                        std::pair<double,double> distanceCost = calDistanceCost( eid, tgtId, currentVertexId, currentNode, endVertexId);
-
-							candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
+	                        if(routingEdges[eid].getDirection(currentVertexId,tgtId)==' ')
+                        		candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId));
+							else
+								candidateVertexId.push(DetailNode(nextX, nextY, distanceCost.first, distanceCost.second, tgtId, curFollowId+1));
 							prev[tgtId] = currentVertexId;
 							preveid[tgtId] = eid;
 						}
@@ -181,10 +184,9 @@ public:
 			if(flag){
 				logger.show("      Do Detail Back Trace\n");
 				while(currentVertexId!=-1){
-					logger.show("%d, layer: %d\n",currentVertexId, vertices[currentVertexId].track.layer);
 					detailPath.emplace_back(currentVertexId);
 					curNet.insert(currentVertexId);
-					isVertexUsed.insert(currentVertexId);
+					// isVertexUsed.insert(currentVertexId);
 					currentVertexId = prev[currentVertexId];
 				}
 				std::reverse(detailPath.begin(),detailPath.end());
