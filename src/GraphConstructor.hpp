@@ -83,18 +83,18 @@ public:
                         if (touchedVertices.size() > 1) {
                             ++multiOverlapCount;
                         }
-                        Vertex newVertex(location, vertexIdCounter, layer, layers[layer].direction);
-                        vertices.emplace_back(newVertex);
+                        int newVertexId = obtainNewVertexId();
+                        Vertex newVertex(location, newVertexId, layer, layers[layer].direction);
+                        vertices[newVertexId] = newVertex;
                         std::vector<int> newEdges;
                         for (const int touched : touchedVertices) {
-                            Edge newEdge(vertexIdCounter, touched, ' ', ' ', 'S');
+                            Edge newEdge(newVertexId, touched, ' ', ' ', 'S');
                             int newEdgeId = insertNewEdge(newEdge);
                             newEdges.emplace_back(newEdgeId);
                             routingGraph[touched].emplace_back(newEdgeId);
                         }
                         routingGraph.emplace_back(newEdges);
-                        net.addTerminal(i, vertexIdCounter);
-                        ++vertexIdCounter;
+                        net.addTerminal(i, newVertexId);
                     }
                 }
             }
@@ -176,12 +176,12 @@ public:
                 });
             }
             for (const Track& t : layerTracks[i]) {
-                vertices.emplace_back(t, vertexIdCounter);
-                layerVertices[t.layer].emplace_back(t, vertexIdCounter);
-                ++vertexIdCounter;
+                int newVertexId = obtainNewVertexId();
+                vertices[newVertexId] = Vertex(t, newVertexId);
+                layerVertices[t.layer].emplace_back(t, newVertexId);
             }
         }
-        logger.info("%d vertices generated\n", vertexIdCounter);
+        logger.info("%lu vertices generated\n", vertices.size());
     }
 
     void generateEdges() {
@@ -219,11 +219,10 @@ public:
         for (int i = start; i < end; ++i) {
             const Vertex& v = vertices[i];
             int layer = v.track.layer;
-            std::vector<int>& outVertices = routingGraph[v.id];
             SegmentMap map = SegmentMap(v.track.rect);
-            scanOutVertices(v, layer, outVertices);
+            scanOutVertices(v, layer);
             for (int l = layer + 1; l < (int) layers.size(); ++l) {
-                scanOutVertices(v, l, map, outVertices);
+                scanOutVertices(v, l, map);
             }
         }
     }
@@ -301,10 +300,11 @@ public:
         }
     }
 
-    void scanOutVertices(const Vertex& v, int targetLayer, std::vector<int>& out) {
+    void scanOutVertices(const Vertex& v, int targetLayer) {
         const Layer& layer = layers[targetLayer];
         const double threshold = minBusWidth[targetLayer];
         const Point src = v.track.rect.midPoint();
+        std::vector<int>& out = routingGraph[v.id];
         for (const Vertex& u : layerVertices[targetLayer]) {
             if (v.id < u.id && v.hasOverlap(u, true)) {
                 Rectangle r = v.overlap(u, true);
@@ -328,7 +328,7 @@ public:
         }
     }
 
-    void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map, std::vector<int>& out) {
+    void scanOutVertices(const Vertex& v, int targetLayer, SegmentMap& map) {
         int beginLayer = std::min(v.track.layer, targetLayer);
         int endLayer = std::max(v.track.layer, targetLayer);
         const Point src = v.track.rect.midPoint();
@@ -339,9 +339,18 @@ public:
                     const Point tgt = u.track.rect.midPoint();
                     char edgeDirectionSrcTgt = getEdgeDirection(src, tgt, v.track.layer, u.track.layer);
                     char edgeDirectionTgtSrc = getEdgeDirection(tgt, src, v.track.layer, u.track.layer);
-                    Edge edge(v.id, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
-                    int newEdgeId = insertNewEdge(edge);
-                    out.emplace_back(newEdgeId);
+                    int now = v.id;
+                    for (int layer = beginLayer + 1; layer < endLayer; ++layer) {
+                        int newVertexId = obtainNewVertexId();
+                        Vertex newVertex(r, newVertexId, layer, layers[layer].direction);
+                        vertices[newVertexId] = newVertex;
+                        Edge edge(now, newVertexId, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
+                        int newEdgeId = insertNewEdge(edge);
+                        routingGraph[now].emplace_back(newEdgeId);
+                    }
+                    Edge e(now, u.id, edgeDirectionSrcTgt, edgeDirectionTgtSrc, 'C');
+                    int eId = insertNewEdge(e);
+                    routingGraph[now].emplace_back(eId);
                 }
             }
         }
@@ -383,10 +392,27 @@ public:
         return true;
     }
 
+    int obtainNewVertexId() {
+        std::lock_guard<std::mutex> lock(vertexIdCounterLock);
+        int newVertexId = vertexIdCounter++;
+        vertices.emplace_back(Vertex());
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+        if (vertexIdCounter != (int) vertices.size()) {
+            fprintf(stderr, "[Fatal Error] vertexIdCounter != vertices.size()\n");
+        }
+#endif
+        return newVertexId;
+    }
+
     int insertNewEdge(Edge& newEdge) {
         std::lock_guard<std::mutex> lock(edgeIdCounterLock);
         int newEdgeId = edgeIdCounter++;
         routingEdges.emplace_back(newEdge);
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+        if (edgeIdCounter != (int) routingEdges.size()) {
+            fprintf(stderr, "[Fatal Error] edgeIdCounter != routingEdges.size()\n");
+        }
+#endif
         return newEdgeId;
     }
 
@@ -435,6 +461,7 @@ private:
 
 private:
     std::mutex edgeIdCounterLock;
+    std::mutex vertexIdCounterLock;
 };
 
 #endif // VLSI_FINAL_PROJECT_GRAPH_CONSTRUCTOR_HPP_
