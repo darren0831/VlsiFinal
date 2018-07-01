@@ -4,6 +4,7 @@
 #include <iostream>
 #include <queue>
 #include <sys/stat.h>
+#include <fstream>
 #include "Rectangle.hpp"
 #include "Logger.hpp"
 #include "InputReader.hpp"
