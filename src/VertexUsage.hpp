@@ -25,6 +25,11 @@ public:
 
     bool query(const Vertex& source, const Vertex& current, const Vertex& target) {
         if (source == Vertex()) {
+            for (int i = 0; i < (int) record.size(); ++i) {
+                if (record[i]) {
+                    return false;
+                }
+            }
             return true;
         }
         auto segment = getSegment(source, current, target);
@@ -39,6 +44,9 @@ public:
 
     void set(const Vertex& source, const Vertex& current, const Vertex& target) {
         if (source == Vertex()) {
+            for (int i = 0; i < (int) record.size(); ++i) {
+                record[i] = true;
+            }
             return;
         }
         auto segment = getSegment(source, current, target);
@@ -50,6 +58,9 @@ public:
 
     void unset(const Vertex& source, const Vertex& current, const Vertex& target) {
         if (source == Vertex()) {
+            for (int i = 0; i < (int) record.size(); ++i) {
+                record[i] = false;
+            }
             return;
         }
         auto segment = getSegment(source, current, target);
