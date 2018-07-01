@@ -36,6 +36,7 @@ public:
         initialize();
         initializeNets();
         writeLog();
+        edgesSelfCheck();
         printRoutingGraph();
     }
 
@@ -104,6 +105,20 @@ public:
         }
         logger.warning("%d / %d pins of buses overlap with more than one vertex\n", multiOverlapCount, totalTerminals);
         logger.info("%d nets generated\n", (int) nets.size());
+    }
+
+    void edgesSelfCheck() {
+#ifdef VLSI_FINAL_PROJECT_DEBUG_FLAG
+        for (const Edge& e : routingEdges) {
+            if (e.isVia()) {
+                const Vertex& src = vertices[e.src];
+                const Vertex& tgt = vertices[e.tgt];
+                if (abs(src.track.layer - tgt.track.layer) != 1) {
+                    fprintf(stderr, "Via between two vertices not in adajacent layers\n");
+                }
+            }
+        }
+#endif
     }
 
     void writeLog() {
