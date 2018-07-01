@@ -252,9 +252,9 @@ bool checkPathConnect(std::vector<OutBus>& outBuses){
 
             if(DisSet.numGroups()==1) {
                 printf("Bit %d is connected\n",j);
-                overall = false;
             } else {
                 printf("Bit %d is not connected\n",j);
+                overall = false;
             }
         }
     }
