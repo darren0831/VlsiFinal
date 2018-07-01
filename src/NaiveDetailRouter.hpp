@@ -3,7 +3,7 @@
 #include "VertexUsage.hpp"
 class NaiveDetailRouter {
 private:
-    constexpr static int VIA_COST = 0;
+    constexpr static int VIA_COST = 1000;
 
 public:
     NaiveDetailRouter(std::vector<Vertex>& vertices,
@@ -301,7 +301,7 @@ private:
             double cost = curDistance + assumeDistance;
             double thatCost = that.curDistance + that.assumeDistance;
             if (fabs(cost - thatCost) > 1e-6) {
-                return cost < thatCost;
+                return cost > thatCost;
             } else
                 return false;
         }

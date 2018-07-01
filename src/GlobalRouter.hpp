@@ -137,13 +137,13 @@ private:
 
         bool operator<(const VisitNode& that) const {
             if (fabs(cost - that.cost) > 1e-6) {
-                return cost < that.cost;
+                return cost > that.cost;
             } else if (nodeId != that.nodeId) {
-                return nodeId < that.nodeId;
+                return nodeId > that.nodeId;
             } else if (fromNode != that.fromNode) {
-                return fromNode < that.fromNode;
+                return fromNode > that.fromNode;
             } else {
-                return fromEdge < that.fromEdge;
+                return fromEdge > that.fromEdge;
             }
         }
     };
