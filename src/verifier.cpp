@@ -228,6 +228,7 @@ bool checkPathOverlap(std::vector<OutBus>& outBuses){
 }
 
 bool checkPathConnect(std::vector<OutBus>& outBuses){
+    bool overall = true;
     for(unsigned int i=0;i<outBuses.size();i++){
         OutBus& curOutBus = outBuses[i];
         for(unsigned int j=0;j<curOutBus.bitName.size();j++){
@@ -249,13 +250,15 @@ bool checkPathConnect(std::vector<OutBus>& outBuses){
                 }
             }
 
-            if(DisSet.numGroups()==1) printf("Bit %d is connected\n",j);
-            else printf("Bit %d is not connected\n",j);
-
+            if(DisSet.numGroups()==1) {
+                printf("Bit %d is connected\n",j);
+                overall = false;
+            } else {
+                printf("Bit %d is not connected\n",j);
+            }
         }
     }
-
-    return true;
+    return overall;
 }
 
 bool checkPinConnect(std::vector<OutBus>& outBuses,std::vector<Bus>& buses){
@@ -490,8 +493,11 @@ int main(int argc,char **argv){
 
 
     //checkPinConnect(outBuses,buses);
-    checkPathConnect(outBuses);
+    bool connectivity = checkPathConnect(outBuses);
+    if (!connectivity) {
+        return 0;
+    }
     //checkPathOverlap(outBuses);
     std::cout<<"cost ["<<cal_cost(outBuses,layers,alpha,beta,gamma)<<"]"<<std::endl;
-
+    return 0;
 }

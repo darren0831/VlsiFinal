@@ -1,0 +1,476 @@
+[INFO] Input File: ../example/CASE1.input
+[INFO] Output File: output/CASE1.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE1.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 100.000000 , 100.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 11 tracks read
+[INFO] Get bus information
+[INFO] 1 buses read
+[INFO] Get obstacle information
+[INFO] 0 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 11
+[INFO] Track info
+[INFO] Layer 0: 6 tracks
+[INFO] Layer 1: 5 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 11 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 60 edges generated, average 5.454545 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 6 pins of buses overlap with more than one vertex
+[INFO] 1 nets generated
+[INFO] After graph construction: 17 vertices and 72 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 2.000000
+[INFO] Grid: 50 * 50
+[INFO] Global Graph vertex size 5000
+[INFO] Global Graph edge size 7400
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: fail
+[WARN]     > Failed! Do rip-up re-route
+[WARN]     > What a Significantly Terrible Fail
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 3:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Input File: ../example/CASE2-1.input
+[INFO] Output File: output/CASE2-1.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE2-1.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 100.000000 , 100.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 6 tracks read
+[INFO] Get bus information
+[INFO] 1 buses read
+[INFO] Get obstacle information
+[INFO] 0 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 6
+[INFO] Track info
+[INFO] Layer 0: 2 tracks
+[INFO] Layer 1: 4 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 6 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 16 edges generated, average 2.666667 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 4 pins of buses overlap with more than one vertex
+[INFO] 1 nets generated
+[INFO] After graph construction: 10 vertices and 24 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 10 * 10
+[INFO] Global Graph vertex size 200
+[INFO] Global Graph edge size 280
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Input File: ../example/CASE2-2.input
+[INFO] Output File: output/CASE2-2.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE2-2.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 100.000000 , 100.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 7 tracks read
+[INFO] Get bus information
+[INFO] 1 buses read
+[INFO] Get obstacle information
+[INFO] 0 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 7
+[INFO] Track info
+[INFO] Layer 0: 3 tracks
+[INFO] Layer 1: 4 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 7 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 24 edges generated, average 3.428571 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 4 pins of buses overlap with more than one vertex
+[INFO] 1 nets generated
+[INFO] After graph construction: 11 vertices and 32 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 10 * 10
+[INFO] Global Graph vertex size 200
+[INFO] Global Graph edge size 280
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Input File: ../example/CASE2-3.input
+[INFO] Output File: output/CASE2-3.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE2-3.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 100.000000 , 100.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 7 tracks read
+[INFO] Get bus information
+[INFO] 1 buses read
+[INFO] Get obstacle information
+[INFO] 1 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 6
+[INFO] Track info
+[INFO] Layer 0: 2 tracks
+[INFO] Layer 1: 4 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 6 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 16 edges generated, average 2.666667 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 4 pins of buses overlap with more than one vertex
+[INFO] 1 nets generated
+[INFO] After graph construction: 10 vertices and 24 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 10 * 10
+[INFO] Global Graph vertex size 200
+[INFO] Global Graph edge size 280
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Input File: ../example/CASE3.input
+[INFO] Output File: output/CASE3.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE3.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 500.000000 , 500.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 20 tracks read
+[INFO] Get bus information
+[INFO] 2 buses read
+[INFO] Get obstacle information
+[INFO] 18 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 25
+[INFO] Track info
+[INFO] Layer 0: 16 tracks
+[INFO] Layer 1: 9 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 25 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 170 edges generated, average 6.800000 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 10 pins of buses overlap with more than one vertex
+[INFO] 2 nets generated
+[INFO] After graph construction: 35 vertices and 190 edges generated
+[INFO] Number of connected graphs: 4
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 50 * 50
+[INFO] Global Graph vertex size 5000
+[INFO] Global Graph edge size 7400
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] Routing bus B2
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 3:
+    - Pin 1:
+      Do Detail Back Trace
+B2:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Writing path of bus B2
+[INFO] Input File: ../example/CASE4.input
+[INFO] Output File: output/CASE4.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/CASE4.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 500.000000 , 500.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 16 tracks read
+[INFO] Get bus information
+[INFO] 2 buses read
+[INFO] Get obstacle information
+[INFO] 1 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 17
+[INFO] Track info
+[INFO] Layer 0: 8 tracks
+[INFO] Layer 1: 9 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 17 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 128 edges generated, average 7.529412 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 10 pins of buses overlap with more than one vertex
+[INFO] 2 nets generated
+[INFO] After graph construction: 27 vertices and 148 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 50 * 50
+[INFO] Global Graph vertex size 5000
+[INFO] Global Graph edge size 7400
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] Routing bus B2
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 3:
+    - Pin 1:
+      Do Detail Back Trace
+B2:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      No path from source to target
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+[INFO] Writing path of bus B2
+[INFO] Input File: ../example/example_1.input
+[INFO] Output File: output/example_1.route
+[INFO] ===== Read Input File =====
+[INFO] Start reading input file ../example/example_1.input
+[INFO] Get general information
+[INFO] Runtime: 1 minutes
+[INFO] Design Boundary: ( 0.000000 , 0.000000 ) ( 1000.000000 , 1000.000000 )
+[INFO] Get layer information
+[INFO] 2 layers read
+[INFO] Get track information
+[INFO] 34 tracks read
+[INFO] Get bus information
+[INFO] 1 buses read
+[INFO] Get obstacle information
+[INFO] 17 obstacles read
+[INFO] ===== Preprocess =====
+[INFO] Preprocess
+[INFO] ===== Routing Graph Construction =====
+[INFO] Graph constructor initialize
+[INFO] Split track
+[INFO] Track count(after split): 58
+[INFO] Track info
+[INFO] Layer 0: 29 tracks
+[INFO] Layer 1: 29 tracks
+[INFO] Generate vertices and edges
+[INFO] Generate vertices based on tracks split
+[INFO] 58 vertices generated
+[INFO] Generate edges based on routing region
+[INFO] 422 edges generated, average 7.275862 edge for each vertex
+[INFO] Initialize nets
+[WARN] 0 / 6 pins of buses overlap with more than one vertex
+[INFO] 1 nets generated
+[INFO] After graph construction: 64 vertices and 434 edges generated
+[INFO] Number of connected graphs: 1
+[INFO] ===== Global Route =====
+[INFO] Initialize
+[INFO] Calculate Max Vertex Width
+[INFO] Construct global edges
+[INFO] gridWidth: 10.000000
+[INFO] Grid: 100 * 100
+[INFO] Global Graph vertex size 20000
+[INFO] Global Graph edge size 29800
+[INFO] Bind vertex to edges
+[INFO] Prepare nets
+[INFO] Do global route
+[INFO] Routing bus B1
+[INFO]   - Routing pins 1 / 1
+[INFO]       Path finding finished: success
+[INFO]       Back trace finished
+[INFO] ===== Detail Route =====
+[INFO] Detail Route
+B1:
+  - Bit 1:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 2:
+    - Pin 1:
+      Do Detail Back Trace
+  - Bit 3:
+    - Pin 1:
+      Do Detail Back Trace
+[INFO] ===== Output Generate =====
+[INFO] Writing path of bus B1
+Bit 0 is connected
+Bit 1 is connected
+Bit 2 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 2 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 0 is connected
+Bit 1 is connected
+Bit 2 is connected
+Bit 0 is connected
+Bit 1 is not connected
