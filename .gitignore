@@ -21,6 +21,5 @@ log
 cmake-build-debug/
 
 # output files
-*.route
 *.report
 *.output
