@@ -24,6 +24,9 @@ public:
     }
 
     bool query(const Vertex& source, const Vertex& current, const Vertex& target) {
+        if (source == Vertex()) {
+            return true;
+        }
         auto segment = getSegment(source, current, target);
         checkBound(segment.first, segment.second);
         for (int i = segment.first; i <= segment.second; ++i) {
@@ -35,6 +38,9 @@ public:
     }
 
     void set(const Vertex& source, const Vertex& current, const Vertex& target) {
+        if (source == Vertex()) {
+            return;
+        }
         auto segment = getSegment(source, current, target);
         checkBound(segment.first, segment.second);
         for (int i = segment.first; i <= segment.second; ++i) {
@@ -43,6 +49,9 @@ public:
     }
 
     void unset(const Vertex& source, const Vertex& current, const Vertex& target) {
+        if (source == Vertex()) {
+            return;
+        }
         auto segment = getSegment(source, current, target);
         checkBound(segment.first, segment.second);
         for (int i = segment.first; i <= segment.second; ++i) {

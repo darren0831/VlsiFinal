@@ -83,7 +83,7 @@ public:
 
     void writeSingleNet(Net& net, int netId) {
         for (int i = 0; i < (int) net.net.size(); ++i) {
-            fprintf(fout, "BIT %d\n", i);
+            fprintf(fout, "BIT %d\n", i + 1);
             writeSingleBit(net.detailPath[i], buses[netId].bits[i], buses[netId].widths);
             fprintf(fout, "PATH %d\n", outputBuffer.size());
             outputBuffer.dump(fout);

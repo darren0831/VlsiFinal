@@ -18,9 +18,9 @@ public:
         terminal[0] = Point(llx, lly);
         terminal[1] = Point(urx, ury);
 
-        if (llx == urx) {
+        if (fabs(llx - urx) < 1e-6) {
             rect = Rectangle(llx - w / 2, lly, urx + w / 2, ury);
-        } else if (lly == ury) {
+        } else if (fabs(lly - ury) < 1e-6) {
             rect = Rectangle(llx, lly - w / 2, urx, ury + w / 2);
         }
 
@@ -80,6 +80,14 @@ public:
         } else {
             return fabs(terminal[1].x - terminal[0].x);
         }
+    }
+
+    bool isHorizontal() const {
+        return fabs(terminal[1].y - terminal[0].y) < 1e-6;
+    }
+
+    bool isVertical() const {
+        return fabs(terminal[1].x - terminal[0].x) < 1e-6;
     }
 
     std::string toString() const {
