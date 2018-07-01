@@ -326,30 +326,50 @@ double calCwi(std::vector<OutBus>& outBuses,double alpha){
     return cost;
 }
 
-double calCsi(std::vector<OutBus>& outBuses, double beta){
-    double cost = 0;
-    for(unsigned int i=0;i<outBuses.size();i++){
-        OutBus& curOutBus = outBuses[i];
-        double Csi = 0;
-        int segCount = 0;
-        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
-            std::string& bitName =curOutBus.bitName[j];
-            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
-            segCount = segCount + curPath.size();
-
-        }
-        cost = cost + beta*segCount;
-    }
-    return cost;
-}
-
 char trackDir(Track& track){
     if(track.rect.isZero()) return 'X';
     if(doubleEqual(track.terminal[0].x,track.terminal[1].x)) return 'H';
     return 'V';
 }
 
+double calCsi(std::vector<OutBus>& outBuses, double beta){
+    double cost = 0;
+    for(unsigned int i=0;i<outBuses.size();i++){
+        OutBus& curOutBus = outBuses[i];
+        double Csi = 0;
+        int totalSeg = 0;
+        for(unsigned int j=0;j<curOutBus.bitName.size();j++){
+            std::string& bitName =curOutBus.bitName[j];
+            std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
+            int seqCount = 0;
+            char prevDir = '\0';
+            for(unsigned int k=0;k<curPath.size();k++){
+                char dir = trackDir(curPath[k]);
+                if(dir==' '){
+
+                }
+                else if(dir=='X'){
+                    /// via no cost needed
+                }else if(prevDir=='\0'){
+                    seqCount = seqCount + 1;
+                    prevDir = dir;
+                }else if(prevDir == dir){
+                    ///same direction no cost needed
+                }else if(prevDir != dir){
+                    seqCount = seqCount + 1;
+                    prevDir = dir;
+                }
+            }
+            totalSeg = totalSeg + seqCount;
+
+        }
+        cost = cost + beta*totalSeg;
+    }
+    return cost;
+}
+
 double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> layers){
+
     double cost = 0;
     for(unsigned int i=0;i<outBuses.size();i++){
         OutBus& curOutBus = outBuses[i];
@@ -361,9 +381,14 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
             std::vector<Track>& curPath = curOutBus.bitsToPath[bitName];
             char prevDir = '\0';
             std::vector<Track> seq;
-            for(unsigned int k=0;j<curPath.size();k++){
+            //std::cout<<curPath.size()<<std::endl;
+            for(unsigned int k=0;k<curPath.size();k++){
                 char dir = trackDir(curPath[k]);
-                if(dir=='X'){
+                //std::cout<<k<<"<"<<curPath.size()<<" "<<dir<<" ";
+                if(dir==' '){
+
+                }
+                else if(dir=='X'){
                     /// via no cost needed
                 }else if(prevDir=='\0'){
                     seq.emplace_back(curPath[k]);
@@ -375,11 +400,10 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
                     prevDir = dir;
                 }
             }
+            //std::cout<<"***********"<<std::endl;
             curSeqs.emplace_back(seq);
         }
-        for(unsigned int j=0;j<curSeqs.size();j++){
-            std::cout<<"seq size "<<curSeqs[j].size()<<"\n";
-        }
+
 
         for(unsigned int j=0;j<curSeqs[0].size();j++){
             double maxC, minC;
@@ -422,7 +446,7 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
 }
 
 double cal_cost(std::vector<OutBus>& outBuses,std::vector<Layer>& layers,double alpha, double beta,double gamma){
-    //return calCwi(outBuses,alpha)+calCsi(outBuses,beta)+calCci(outBuses,gamma,layers);
+    return calCwi(outBuses,alpha)+calCsi(outBuses,beta)+calCci(outBuses,gamma,layers);
 }
 
 int main(int argc,char **argv){
@@ -464,7 +488,7 @@ int main(int argc,char **argv){
     ///read output file
     std::vector<OutBus> outBuses;
     outBuses = readOutput(outputFile,buses,layers);
-    outputRead(outBuses);
+    //outputRead(outBuses);
 
 
 
