@@ -405,6 +405,12 @@ double calCci(std::vector<OutBus>& outBuses,double gamma,std::vector<Layer> laye
             curSeqs.emplace_back(seq);
         }
 
+        for (int i = 0; i < (int) curSeqs.size() - 1; ++i) {
+            if (curSeqs[i].size() != curSeqs[i + 1].size()) {
+                fprintf(stderr, "Topology not satisfied\n");
+                exit(0);
+            }
+        }
 
         for(unsigned int j=0;j<curSeqs[0].size();j++){
             double maxC, minC;
