@@ -192,7 +192,7 @@ public:
                 // logger.show("prev:%d, %d  size:%u\n",currentNode.prev,currentVertexId,candidateVertexId.size());
                 candidateVertexId.pop();
                 for (int end : endVertexId) {
-                    if (currentVertexId == end) {
+                    if (currentVertexId == end && curFollowId == (int)direction[i - 1].size()) {
                         currentNode.predecessors.emplace_back(currentVertexId);
                         backTracePath = currentNode.predecessors;
                         flag = true;
